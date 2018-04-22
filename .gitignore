@@ -1,1 +1,4 @@
-*/RECORD
+*.pyc
+__pycache__/
+.vimrc
+api-env/

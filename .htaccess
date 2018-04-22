@@ -1,0 +1,23 @@
+# Enable rewriting URLS
+RewriteEngine On
+
+# Don't interfere with static files
+RewriteCond %{REQUEST_FILENAME} !-f
+
+# Tell the Apache Server to run .fgci scripts
+# when it encounters them, and allow the Server
+# to execute them.
+Options +ExecCGI
+AddHandler fcgid-script .fcgi
+
+# Rewrite all files that are not the api.fcgi script
+#
+#    e.g.
+#         www.culturemesh.com/api-dev/v1/ is re-written to
+#           => www.culturemesh.com/api-dev/v1/api.fcgi/
+#	
+#    	  www.culturemesh.com/api-dev/v1/some-stuff is re-written to
+#           => www.culturemesh.com/api-dev/v1/api/fcgi/some-stuff
+#
+RewriteCond %{REQUEST_FILENAME} !=/home1/culturp7/public_html/api-dev/v1/api.fcgi
+RewriteRule ^(.*)$ api.fcgi/$1 [QSA,L]

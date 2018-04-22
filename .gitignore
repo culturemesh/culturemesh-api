@@ -2,3 +2,6 @@
 __pycache__/
 .*
 api-env/
+
+# Do not remove: secrets stored here
+credentials.py

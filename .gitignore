@@ -1,0 +1,7 @@
+*.pyc
+__pycache__/
+.*
+api-env/
+
+# Do not remove: secrets stored here
+api/credentials.py

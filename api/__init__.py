@@ -1,7 +1,10 @@
 from flask import Flask
 from .decorators import require_apikey
+from flaskext.mysql import MySQL
 
 api = Flask(__name__)
+mysql = MySQL()
+mysql.init_app(api)
 
 # Register API submodules (aka blueprints)
 
@@ -12,6 +15,8 @@ from api.blueprints.events.controllers import events
 from api.blueprints.locations.controllers import locations
 from api.blueprints.languages.controllers import languages
 from api.blueprints.accounts.controllers import accounts
+
+
 
 api.register_blueprint(users, url_prefix='/user')
 api.register_blueprint(networks, url_prefix='/network')

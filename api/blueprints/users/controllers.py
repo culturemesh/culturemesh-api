@@ -7,3 +7,14 @@ users = Blueprint('user', __name__)
 @require_apikey
 def test():
     return "pong"
+
+
+"""
+Queries users according to filter.
+"""
+
+
+@users.route("/users")
+@require_apikey
+def users():
+    return ""

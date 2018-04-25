@@ -1,6 +1,7 @@
 from flask import Blueprint, current_app
 from api import require_apikey
 from api.extensions import mysql
+from flask import jsonify
 
 users = Blueprint('user', __name__)
 
@@ -20,5 +21,5 @@ Queries users according to filter.
 @require_apikey
 def users_query():
     cursor = mysql.get_db().cursor()
-    cursor.execute("SELECT id FROM users WHERE email=djgregny@gmail.com")
-    return cursor.fetchone()
+    cursor.execute("SELECT email FROM users WHERE id=2")
+    return jsonify( cursor.fetchone())

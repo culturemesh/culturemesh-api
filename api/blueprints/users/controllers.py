@@ -1,7 +1,7 @@
-from flask import Blueprint, jsonify, request, json
+from flask import Blueprint, jsonify, request, json, make_response
 from api import require_apikey
 from api.extensions import mysql
-
+from json.decoder import JSONDecodeError
 users = Blueprint('user', __name__)
 
 
@@ -21,7 +21,11 @@ Queries users according to filter.
 def users_query():
     # Allegedly, we need to run get_data() first
     request.get_data()
-    request_filter = json.loads(request.data)
+    try:
+        request_filter = json.loads(request.data)
+    except JSONDecodeError:
+        return make_response("Error: malformed request body", 400)
+
     connection = mysql.get_db()
     network_ids = []
     for near_loc in request_filter['near_location']:

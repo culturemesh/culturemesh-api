@@ -81,7 +81,7 @@ def get_user_networks(user_id):
     count = request_count if request_count is not None else 100
     reg_cursor = connection.cursor()
     reg_cursor.execute("SELECT id_network FROM network_registration WHERE id_user=%s %s",
-                       (user_id, generate_max_id_sql(request.args["max_id"])))
+                       (user_id, generate_max_id_sql(request.args["max_id"], column="id_network")))
     network_ids = reg_cursor.fetchall()
     reg_cursor.close()
     # SQL doesn't like empty tuples in IN
@@ -127,15 +127,16 @@ def get_user_events(user_id):
     return make_response(jsonify(events), 200)
 
 
-def generate_max_id_sql(max_id):
+def generate_max_id_sql(max_id, id_name="id"):
     """
     Generates SQL condition so that you only get objects with id less than or equal to max id.
     :param max_id: id to pass in condition
+    :param id_name: Optional parameter to specify id name
     :return: sql condition to be appended to SQL statement with "AND", if max_id is defined.
     """
     if max_id is None or len(str(max_id)) < 1:
         return ""
-    return " AND id<=" + str(max_id)
+    return " AND " + str(id_name) + "<=" + str(max_id)
 
 
 def convert_objects(tuple_arr, description):

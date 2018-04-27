@@ -24,7 +24,7 @@ def users_query():
     try:
         request_filter = json.loads(request.data)
     except JSONDecodeError:
-        return make_response("Error: malformed request body", 4050)
+        return make_response("Error: malformed request body", 405)
 
     connection = mysql.get_db()
     network_ids = []
@@ -60,7 +60,7 @@ def users_query():
     return jsonify(users_res)
 
 
-@users.route("<user_id>")
+@users.route("/<user_id>")
 @require_apikey
 def get_user_id(user_id):
     connection = mysql.get_db()
@@ -72,7 +72,7 @@ def get_user_id(user_id):
     return make_response(jsonify(user), 405 if user is None else 200)
 
 
-@users.route("<user_id>/networks")
+@users.route("/<user_id>/networks")
 @require_apikey
 def get_user_networks(user_id):
     connection = mysql.get_db()
@@ -91,7 +91,7 @@ def get_user_networks(user_id):
     return make_response(jsonify(network_objs), 200)
 
 
-@users.route("<user_id>/posts")
+@users.route("/<user_id>/posts")
 @require_apikey
 def get_user_posts(user_id):
     connection = mysql.get_db()
@@ -104,7 +104,7 @@ def get_user_posts(user_id):
     return make_response(jsonify(posts), 200)
 
 
-@users.route("<user_id>/events")
+@users.route("/<user_id>/events")
 @require_apikey
 def get_user_events(user_id):
     connection = mysql.get_db()

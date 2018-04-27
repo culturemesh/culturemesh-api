@@ -133,9 +133,9 @@ def generate_max_id_sql(max_id):
     :param max_id: id to pass in condition
     :return: sql condition to be appended to SQL statement with "AND", if max_id is defined.
     """
-    if max_id is None or len(max_id) < 1:
+    if max_id is None or len(str(max_id)) < 1:
         return ""
-    return " AND id<=" + max_id
+    return " AND id<=" + str(max_id)
 
 
 def convert_objects(tuple_arr, description):

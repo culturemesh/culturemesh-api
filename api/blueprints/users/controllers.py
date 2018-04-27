@@ -24,7 +24,7 @@ def users_query():
     try:
         request_filter = json.loads(request.data)
     except JSONDecodeError:
-        return make_response("Error: malformed request body", 400)
+        return make_response("Error: malformed request body", 4050)
 
     connection = mysql.get_db()
     network_ids = []
@@ -58,3 +58,31 @@ def users_query():
     users_res = users_cursor.fetchall()
     connection.close()
     return jsonify(users_res)
+
+
+@users.route("/user/<user_id>")
+@require_apikey
+def get_user_id(user_id):
+    connection = mysql.get_db()
+    user_cursor = connection.cursor()
+    user_cursor.execute("SELECT * FROM users WHERE id=%d", user_id)
+    user = user_cursor.fetchone()
+    user_cursor.close()
+    connection.close()
+    return make_response(jsonify(user), 405 if user is None else 200)
+
+
+@users.route("/user/<user_id>/networks")
+@require_apikey
+def get_user_networks(user_id):
+    connection = mysql.get_db()
+    reg_cursor = connection.cursor()
+    reg_cursor.execute("SELECT id_user FROM network_registrations WHERE id_network=%d ", user_id)
+    user_ids = reg_cursor.fetchall()
+    reg_cursor.close()
+    user_cursor = connection.cursor()
+    user_cursor.execute("SELECT * FROM users WHERE id IN %s",(tuple(user_ids,)))
+    user_objs = user_cursor.fetchall()
+    user_cursor.close()
+    connection.close()
+    return make_response(jsonify(user_objs), 200)

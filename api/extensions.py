@@ -9,7 +9,7 @@ mysql = MySQL()
 
 
 #TODO: See if we should make this.
-def executeSQLQuery(query) :
+def executeSQLQuery(query):
     print("Try this!")
     conn = mysql.get_db()
     cursor = conn.cursor()

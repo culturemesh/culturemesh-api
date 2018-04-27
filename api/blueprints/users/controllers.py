@@ -92,7 +92,7 @@ def get_user_networks(user_id):
     # Now, we need to convert these tuples into objects
     network_obj = []
     columns = network_cursor.description
-    for net in network_obj:
+    for net in network_arr:
         network_obj.append({columns[index][0]: column for index, column in enumerate(value) for value in net})
     network_cursor.close()
     return make_response(jsonify(network_obj), 200)

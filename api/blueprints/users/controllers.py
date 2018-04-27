@@ -83,8 +83,8 @@ def get_user_networks(user_id):
     network_ids = reg_cursor.fetchall()
     reg_cursor.close()
     network_cursor = connection.cursor()
-    network_cursor.execute("SELECT * FROM networks WHERE id IN %s%s", (tuple(network_ids),),
-                           generate_max_id_sql(request.args["max_id"]))
+    network_cursor.execute("SELECT * FROM networks WHERE id IN %s%s", (tuple(network_ids),
+                           generate_max_id_sql(request.args["max_id"])))
     network_objs = network_cursor.fetchmany(count)
     network_cursor.close()
     connection.close()

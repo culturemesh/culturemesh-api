@@ -82,6 +82,9 @@ def get_user_networks(user_id):
     reg_cursor.execute("SELECT id_network FROM network_registration WHERE id_user=%s " % user_id)
     network_ids = reg_cursor.fetchall()
     reg_cursor.close()
+    # SQL doesn't like empty tuples in IN
+    if len(network_ids) == 0:
+        return make_response(jsonify([]), 200)
     network_cursor = connection.cursor()
     print(('SELECT * FROM networks WHERE id IN %s' % (network_ids,)) .replace(",)", ")"))
     network_cursor.execute(('SELECT * FROM networks WHERE id IN %s' % (network_ids,)) .replace(",)", ")"))

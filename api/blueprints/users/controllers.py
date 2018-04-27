@@ -150,5 +150,5 @@ def convert_objects(tuple_arr, description):
     :return: An array of objects with attribute names according to key-value paris"""
     obj_arr = []
     for tuple_obj in tuple_arr:
-        obj_arr.append({description[index][0]: column for index, column in enumerate(tuple_obj})
+        obj_arr.append({description[index][0]: column for index, column in enumerate(tuple_obj)})
     return obj_arr

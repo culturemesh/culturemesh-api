@@ -77,8 +77,7 @@ def get_user(user_id):
 @require_apikey
 def get_user_networks(user_id):
     connection = mysql.get_db()
-    request_count = request.args["count"]
-    count = request_count if request_count is not None else 100
+    count = int(request.args.get("count", 100))
     reg_cursor = connection.cursor()
     #TODO: Implement registration date.
     reg_cursor.execute("SELECT id_network FROM network_registration WHERE id_user=%s", (user_id,))
@@ -89,7 +88,7 @@ def get_user_networks(user_id):
         return make_response(jsonify([]), 200)
     network_cursor = connection.cursor()
     network_cursor.execute('SELECT * FROM networks WHERE id IN %s', (network_ids,))
-    network_arr = network_cursor.fetchmany(int(count))
+    network_arr = network_cursor.fetchmany(count)
     # Now, we need to convert these tuples into objects with key-value pairs
     network_obj = convert_objects(network_arr, network_cursor.description)
     network_cursor.close()
@@ -100,7 +99,7 @@ def get_user_networks(user_id):
 @require_apikey
 def get_user_posts(user_id):
     connection = mysql.get_db()
-    request_count = request.args["count"] if request.args["count"] is not None else 100
+    request_count = int(request.args.get("count", 100))
     post_cursor = connection.cursor()
     print("BEFORE SQL EXECUTE")
     post_cursor.execute("SELECT * FROM posts WHERE id_user=%s", (user_id,))
@@ -117,10 +116,10 @@ def get_user_posts(user_id):
 @require_apikey
 def get_user_events(user_id):
     connection = mysql.get_db()
-    request_count = request.args["count"] if request.args["count"] is not None else 100
+    request_count = int(request.args.get("count", 100))
     event_registration_cursor = connection.cursor()
-    event_registration_cursor.execute("SELECT id_event FROM event_registration WHERE job='%s' AND id_guest=%d %s",
-                                      (request.args["role"], user_id,  generate_max_id_sql(request.args["max_id"])))
+    event_registration_cursor.execute("SELECT id_event FROM event_registration WHERE job='%s' AND id_guest=%s",
+                                      (request.args["role"], user_id))
     event_ids = event_registration_cursor.fetchmany(request_count)
     event_registration_cursor.close()
     event_cursor = connection.cursor()

@@ -56,7 +56,7 @@ def users_query():
     users_cursor = connection.cursor()
     users_cursor.execute("SELECT * FROM users WHERE id IN %s", (tuple(user_ids),))
     users_res = users_cursor.fetchall()
-    connection.close()
+    
     return jsonify(users_res)
 
 
@@ -68,7 +68,7 @@ def get_user_id(user_id):
     user_cursor.execute("SELECT * FROM users WHERE id=%d", user_id)
     user = user_cursor.fetchone()
     user_cursor.close()
-    connection.close()
+    
     return make_response(jsonify(user), 405 if user is None else 200)
 
 
@@ -87,7 +87,6 @@ def get_user_networks(user_id):
     network_cursor.execute(('SELECT * FROM networks WHERE id IN %s' % network_ids) .replace(",)", ")"))
     network_objs = network_cursor.fetchmany(int(count))
     network_cursor.close()
-    connection.close()
     return make_response(jsonify(network_objs), 200)
 
 
@@ -100,7 +99,7 @@ def get_user_posts(user_id):
     post_cursor.execute("SELECT * FROM posts WHERE id=%d%s", user_id, generate_max_id_sql(request.args["max_id"]))
     posts = post_cursor.fetchmany(request_count)
     post_cursor.close()
-    connection.close()
+
     return make_response(jsonify(posts), 200)
 
 
@@ -118,7 +117,7 @@ def get_user_events(user_id):
     event_cursor.execute("SELECT * FROM events WHERE id IN %s", tuple(event_ids))
     events = event_cursor.fetchall()
     event_cursor.close()
-    connection.close()
+    
     return make_response(jsonify(events), 200)
 
 

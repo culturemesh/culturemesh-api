@@ -4,16 +4,16 @@ from api.extensions import mysql
 from json.decoder import JSONDecodeError
 users = Blueprint('user', __name__)
 
+"""
+Modified by Drew Gregory 04/26/18
+Controller for all user endpoints. Check the Swagger spec for more information on each endpoint.
+"""
+
 
 @users.route("/ping")
 @require_apikey
 def test():
     return "pong"
-
-
-"""
-Queries users according to filter.
-"""
 
 
 @users.route("/users")
@@ -60,7 +60,7 @@ def users_query():
     return jsonify(users_res)
 
 
-@users.route("/user/<user_id>")
+@users.route("<user_id>")
 @require_apikey
 def get_user_id(user_id):
     connection = mysql.get_db()
@@ -72,17 +72,62 @@ def get_user_id(user_id):
     return make_response(jsonify(user), 405 if user is None else 200)
 
 
-@users.route("/user/<user_id>/networks")
+@users.route("<user_id>/networks")
 @require_apikey
 def get_user_networks(user_id):
     connection = mysql.get_db()
+    request_count = request.args["count"]
+    count = request_count if request_count is not None else 100
     reg_cursor = connection.cursor()
-    reg_cursor.execute("SELECT id_user FROM network_registrations WHERE id_network=%d ", user_id)
-    user_ids = reg_cursor.fetchall()
+    reg_cursor.execute("SELECT id_network FROM network_registration WHERE id_user=%d ", user_id)
+    network_ids = reg_cursor.fetchall()
     reg_cursor.close()
-    user_cursor = connection.cursor()
-    user_cursor.execute("SELECT * FROM users WHERE id IN %s",(tuple(user_ids,)))
-    user_objs = user_cursor.fetchall()
-    user_cursor.close()
+    network_cursor = connection.cursor()
+    network_cursor.execute("SELECT * FROM networks WHERE id IN %s%s", (tuple(network_ids),),
+                           generate_max_id_sql(request.args["max_id"]))
+    network_objs = network_cursor.fetchmany(count)
+    network_cursor.close()
     connection.close()
-    return make_response(jsonify(user_objs), 200)
+    return make_response(jsonify(network_objs), 200)
+
+
+@users.route("<user_id>/posts")
+@require_apikey
+def get_user_posts(user_id):
+    connection = mysql.get_db()
+    request_count = request.args["count"] if request.args["count"] is not None else 100
+    post_cursor = connection.cursor()
+    post_cursor.execute("SELECT * FROM posts WHERE id=%d%s", user_id, generate_max_id_sql(request.args["max_id"]))
+    posts = post_cursor.fetchmany(request_count)
+    post_cursor.close()
+    connection.close()
+    return make_response(jsonify(posts), 200)
+
+
+@users.route("<user_id>/events")
+@require_apikey
+def get_user_events(user_id):
+    connection = mysql.get_db()
+    request_count = request.args["count"] if request.args["count"] is not None else 100
+    event_registration_cursor = connection.cursor()
+    event_registration_cursor.execute("SELECT id_event FROM event_registration WHERE job='%s' AND id_guest=%d %s",
+                                      (request.args["role"], user_id,  generate_max_id_sql(request.args["max_id"])))
+    event_ids = event_registration_cursor.fetchmany(request_count)
+    event_registration_cursor.close()
+    event_cursor = connection.cursor()
+    event_cursor.execute("SELECT * FROM events WHERE id IN %s", tuple(event_ids))
+    events = event_cursor.fetchall()
+    event_cursor.close()
+    connection.close()
+    return make_response(jsonify(events), 200)
+
+
+def generate_max_id_sql(max_id):
+    """
+    Generates SQL condition so that you only get objects with id less than or equal to max id.
+    :param max_id: id to pass in condition
+    :return: sql condition to be appended to SQL statement with "AND", if max_id is defined.
+    """
+    if max_id is None:
+        return ""
+    return "AND id<=%d", max_id

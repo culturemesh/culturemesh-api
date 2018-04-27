@@ -102,9 +102,13 @@ def get_user_posts(user_id):
     connection = mysql.get_db()
     request_count = request.args["count"] if request.args["count"] is not None else 100
     post_cursor = connection.cursor()
+    print("BEFORE SQL EXECUTE")
     post_cursor.execute("SELECT * FROM posts WHERE id_user=%s", (user_id,))
+    print("SELECT * FROM posts WHERE id_user=%s", (user_id,))
     posts = post_cursor.fetchmany(request_count)
     posts = convert_objects(posts, post_cursor.description)
+    print("After conversion!!!")
+    print(jsonify(posts))
     post_cursor.close()
     return make_response(jsonify(posts), 200)
 

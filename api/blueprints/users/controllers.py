@@ -65,10 +65,11 @@ def users_query():
 def get_user_id(user_id):
     connection = mysql.get_db()
     user_cursor = connection.cursor()
-    user_cursor.execute("SELECT * FROM users WHERE id=%s", user_id)
+    user_cursor.execute("SELECT * FROM users WHERE id=%s", (user_id,))
     user = user_cursor.fetchone()
+    if user is not None:
+        user = convert_objects([user], user_cursor.description)[0]
     user_cursor.close()
-    
     return make_response(jsonify(user), 405 if user is None else 200)
 
 
@@ -103,7 +104,6 @@ def get_user_posts(user_id):
     post_cursor.execute("SELECT * FROM posts WHERE id=%d%s", user_id, generate_max_id_sql(request.args["max_id"]))
     posts = post_cursor.fetchmany(request_count)
     post_cursor.close()
-
     return make_response(jsonify(posts), 200)
 
 

@@ -101,13 +101,9 @@ def get_user_posts(user_id):
     connection = mysql.get_db()
     request_count = int(request.args.get("count", 100))
     post_cursor = connection.cursor()
-    print("BEFORE SQL EXECUTE")
     post_cursor.execute("SELECT * FROM posts WHERE id_user=%s", (user_id,))
-    print("SELECT * FROM posts WHERE id_user=%s", (user_id,))
     posts = post_cursor.fetchmany(int(request_count))
     posts = convert_objects(posts, post_cursor.description)
-    print("After conversion!!!")
-    print(jsonify(posts))
     post_cursor.close()
     return make_response(jsonify(posts), 200)
 
@@ -118,7 +114,7 @@ def get_user_events(user_id):
     connection = mysql.get_db()
     request_count = int(request.args.get("count", 100))
     event_registration_cursor = connection.cursor()
-    event_registration_cursor.execute("SELECT id_event FROM event_registration WHERE job='%s' AND id_guest=%s",
+    event_registration_cursor.execute("SELECT id_event FROM event_registration WHERE job=%s AND id_guest=%s",
                                       (request.args["role"], user_id))
     event_ids = event_registration_cursor.fetchmany(request_count)
     event_registration_cursor.close()

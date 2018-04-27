@@ -65,7 +65,7 @@ def users_query():
 def get_user_id(user_id):
     connection = mysql.get_db()
     user_cursor = connection.cursor()
-    user_cursor.execute("SELECT * FROM users WHERE id=%d", user_id)
+    user_cursor.execute("SELECT * FROM users WHERE id=%s", user_id)
     user = user_cursor.fetchone()
     user_cursor.close()
     
@@ -79,17 +79,20 @@ def get_user_networks(user_id):
     request_count = request.args["count"]
     count = request_count if request_count is not None else 100
     reg_cursor = connection.cursor()
-    reg_cursor.execute("SELECT id_network FROM network_registration WHERE id_user=%s " % user_id)
+    reg_cursor.execute("SELECT id_network FROM network_registration WHERE id_user=%s ", (user_id,))
     network_ids = reg_cursor.fetchall()
     reg_cursor.close()
     # SQL doesn't like empty tuples in IN
     if len(network_ids) == 0:
         return make_response(jsonify([]), 200)
     network_cursor = connection.cursor()
-    print(('SELECT * FROM networks WHERE id IN %s' % (network_ids,)) .replace(",)", ")"))
-    network_cursor.execute(('SELECT * FROM networks WHERE id IN %s' % (network_ids,)) .replace(",)", ")"))
+    # print(('SELECT * FROM networks WHERE id IN %s' % (network_ids,)) .replace(",)", ")"))
+    # network_cursor.execute(('SELECT * FROM networks WHERE id IN %s' % (network_ids,)) .replace(",)", ")"))
+    print('SELECT * FROM networks WHERE id IN %s', (network_ids,))
+    network_cursor.execute('SELECT * FROM networks WHERE id IN %s', (network_ids,))
+
     network_arr = network_cursor.fetchmany(int(count))
-    # Now, we need to convert these tuples into objects
+    # Now, we need to convert these tuples into objects with key-value pairs
     network_obj = []
     columns = network_cursor.description
     for net in network_arr:
@@ -138,3 +141,14 @@ def generate_max_id_sql(max_id):
     if max_id is None or len(max_id) < 1:
         return ""
     return " AND id<=" + max_id
+
+def convert_objects(tuple_arr, description):
+    """A DB cursor returns an array of tuples, without attribute names. This function converts these tuples into objects
+    with key-value pairs.
+    :param tuple_arr:  An array of tuples
+    :param description: The cursor's description, which allows you to
+    :return: An array of objects with attribute names according to key-value paris"""
+    obj_arr = []
+    for tuple_obj in tuple_arr:
+        obj_arr.append({description[index][0]: column for index, column in enumerate(tuple_obj})
+    return obj_arr

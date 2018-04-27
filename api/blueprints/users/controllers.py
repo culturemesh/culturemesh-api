@@ -83,7 +83,7 @@ def get_user_networks(user_id):
     network_ids = reg_cursor.fetchall()
     reg_cursor.close()
     network_cursor = connection.cursor()
-    print(('SELECT * FROM networks WHERE id IN %s' % network_ids) .replace(",)",")"))
+    print(('SELECT * FROM networks WHERE id IN %s' % (network_ids,)) .replace(",)",")"))
     network_cursor.execute(('SELECT * FROM networks WHERE id IN %s' % network_ids) .replace(",)", ")"))
     network_objs = network_cursor.fetchmany(int(count))
     network_cursor.close()

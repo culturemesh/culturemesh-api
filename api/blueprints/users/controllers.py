@@ -85,7 +85,7 @@ def get_user_networks(user_id):
     network_cursor = connection.cursor()
     print(('SELECT * FROM networks WHERE id IN %s' % network_ids) .replace(",)",")"))
     network_cursor.execute(('SELECT * FROM networks WHERE id IN %s' % network_ids) .replace(",)", ")"))
-    network_objs = network_cursor.fetchmany(count)
+    network_objs = network_cursor.fetchmany(int(count))
     network_cursor.close()
     connection.close()
     return make_response(jsonify(network_objs), 200)

@@ -80,8 +80,8 @@ def get_user_networks(user_id):
     request_count = request.args["count"]
     count = request_count if request_count is not None else 100
     reg_cursor = connection.cursor()
-    reg_cursor.execute("SELECT id_network FROM network_registration WHERE id_user=%s %s",
-                       (user_id, generate_max_id_sql(request.args["max_id"], id_name="id_network")))
+    reg_cursor.execute("SELECT id_network FROM network_registration WHERE id_user=%s AND id_network<=",
+                       (user_id, request.args["max_id"]))
     network_ids = reg_cursor.fetchall()
     reg_cursor.close()
     # SQL doesn't like empty tuples in IN

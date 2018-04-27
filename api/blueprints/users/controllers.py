@@ -105,7 +105,7 @@ def get_user_posts(user_id):
     print("BEFORE SQL EXECUTE")
     post_cursor.execute("SELECT * FROM posts WHERE id_user=%s", (user_id,))
     print("SELECT * FROM posts WHERE id_user=%s", (user_id,))
-    posts = post_cursor.fetchmany(request_count)
+    posts = post_cursor.fetchmany(int(request_count))
     posts = convert_objects(posts, post_cursor.description)
     print("After conversion!!!")
     print(jsonify(posts))

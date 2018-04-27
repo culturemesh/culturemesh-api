@@ -62,7 +62,7 @@ def users_query():
 
 @users.route("/<user_id>")
 @require_apikey
-def get_user_id(user_id):
+def get_user(user_id):
     connection = mysql.get_db()
     user_cursor = connection.cursor()
     user_cursor.execute("SELECT * FROM users WHERE id=%s", (user_id,))
@@ -80,7 +80,8 @@ def get_user_networks(user_id):
     request_count = request.args["count"]
     count = request_count if request_count is not None else 100
     reg_cursor = connection.cursor()
-    reg_cursor.execute("SELECT id_network FROM network_registration WHERE id_user=%s ", (user_id,))
+    reg_cursor.execute("SELECT id_network FROM network_registration WHERE id_user=%s %s",
+                       (user_id, generate_max_id_sql(request.args["max_id"])))
     network_ids = reg_cursor.fetchall()
     reg_cursor.close()
     # SQL doesn't like empty tuples in IN
@@ -101,8 +102,9 @@ def get_user_posts(user_id):
     connection = mysql.get_db()
     request_count = request.args["count"] if request.args["count"] is not None else 100
     post_cursor = connection.cursor()
-    post_cursor.execute("SELECT * FROM posts WHERE id=%d%s", user_id, generate_max_id_sql(request.args["max_id"]))
+    post_cursor.execute("SELECT * FROM posts WHERE id=%s %s", (user_id, generate_max_id_sql(request.args["max_id"])))
     posts = post_cursor.fetchmany(request_count)
+    posts = convert_objects(posts, post_cursor.description)
     post_cursor.close()
     return make_response(jsonify(posts), 200)
 

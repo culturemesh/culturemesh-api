@@ -88,9 +88,14 @@ def get_user_networks(user_id):
     network_cursor = connection.cursor()
     print(('SELECT * FROM networks WHERE id IN %s' % (network_ids,)) .replace(",)", ")"))
     network_cursor.execute(('SELECT * FROM networks WHERE id IN %s' % (network_ids,)) .replace(",)", ")"))
-    network_objs = network_cursor.fetchmany(int(count))
+    network_arr = network_cursor.fetchmany(int(count))
+    # Now, we need to convert these tuples into objects
+    network_obj = []
+    columns = network_cursor.description
+    for net in network_obj:
+        network_obj.append({columns[index][0]:column for index, column in enumerate(value) for value in network_arr})
     network_cursor.close()
-    return make_response(jsonify(network_objs), 200)
+    return make_response(jsonify(network_obj), 200)
 
 
 @users.route("/<user_id>/posts")

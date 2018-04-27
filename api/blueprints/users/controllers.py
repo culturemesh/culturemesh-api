@@ -130,4 +130,4 @@ def generate_max_id_sql(max_id):
     """
     if max_id is None:
         return ""
-    return "AND id <=%s" , (max_id,)
+    return "AND id <=" + max_id

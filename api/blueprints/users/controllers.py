@@ -79,7 +79,7 @@ def get_user_networks(user_id):
     request_count = request.args["count"]
     count = request_count if request_count is not None else 100
     reg_cursor = connection.cursor()
-    reg_cursor.execute("SELECT id_network FROM network_registration WHERE id_user=%d ", (int(user_id),))
+    reg_cursor.execute("SELECT id_network FROM network_registration WHERE id_user=%s ", user_id)
     network_ids = reg_cursor.fetchall()
     reg_cursor.close()
     network_cursor = connection.cursor()

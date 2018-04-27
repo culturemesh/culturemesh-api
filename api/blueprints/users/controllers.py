@@ -119,7 +119,7 @@ def get_user_events(user_id):
     event_ids = event_registration_cursor.fetchmany(request_count)
     event_registration_cursor.close()
     event_cursor = connection.cursor()
-    event_cursor.execute("SELECT * FROM events WHERE id IN %s", tuple(event_ids))
+    event_cursor.execute("SELECT * FROM events WHERE id IN %s", (tuple(event_ids),))
     events = event_cursor.fetchall()
     event_cursor.close()
     

@@ -86,17 +86,10 @@ def get_user_networks(user_id):
     if len(network_ids) == 0:
         return make_response(jsonify([]), 200)
     network_cursor = connection.cursor()
-    # print(('SELECT * FROM networks WHERE id IN %s' % (network_ids,)) .replace(",)", ")"))
-    # network_cursor.execute(('SELECT * FROM networks WHERE id IN %s' % (network_ids,)) .replace(",)", ")"))
-    print('SELECT * FROM networks WHERE id IN %s', (network_ids,))
     network_cursor.execute('SELECT * FROM networks WHERE id IN %s', (network_ids,))
-
     network_arr = network_cursor.fetchmany(int(count))
     # Now, we need to convert these tuples into objects with key-value pairs
-    network_obj = []
-    columns = network_cursor.description
-    for net in network_arr:
-        network_obj.append({columns[index][0]: column for index, column in enumerate(net)})
+    network_obj = convert_objects(network_arr, network_cursor.description)
     network_cursor.close()
     return make_response(jsonify(network_obj), 200)
 
@@ -141,6 +134,7 @@ def generate_max_id_sql(max_id):
     if max_id is None or len(max_id) < 1:
         return ""
     return " AND id<=" + max_id
+
 
 def convert_objects(tuple_arr, description):
     """A DB cursor returns an array of tuples, without attribute names. This function converts these tuples into objects

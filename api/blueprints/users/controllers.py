@@ -81,7 +81,7 @@ def get_user_networks(user_id):
     reg_cursor = connection.cursor()
     mysql_string = "SELECT id_network FROM network_registration WHERE id_user=%s"
     if "max_registration_date" in request.args:
-        mysql_string += " AND join_date <= UNIX_TIMESTAMP(\'2018-03-04 12:00:00\')"
+        mysql_string += " AND join_date IS BEFORE DAY_NAME(\'2018-03-04\')"
         reg_cursor.execute(mysql_string, (user_id, ))
     else:
         reg_cursor.execute(mysql_string, (user_id,))

@@ -133,6 +133,8 @@ def get_user_events(user_id):
     event_ids = event_registration_cursor.fetchmany(request_count)"""
     event_registration_cursor.execute("SELECT * FROM event_registration")
     event_ids = event_registration_cursor.fetchall()
+    print("Events Ids")
+    print(str(tuple(event_ids)))
     event_registration_cursor.close()
     event_cursor = connection.cursor()
     if len(event_ids) == 0:

@@ -124,38 +124,21 @@ def get_user_events(user_id):
     connection = mysql.get_db()
     request_count = int(request.args.get("count", 100))
     event_registration_cursor = connection.cursor()
-    """sql_statement = "SELECT id_event FROM event_registration WHERE job=%s AND id_guest=%s"
+    sql_statement = "SELECT id_event FROM event_registration WHERE job=%s AND id_guest=%s"
     if "max_id" in request.args:
         sql_statement += " AND id <= %s"
         event_registration_cursor.execute(sql_statement, (request.args["role"], user_id, request.args["max_id"]))
     else:
         event_registration_cursor.execute(sql_statement, (request.args["role"], user_id))
-    event_ids = event_registration_cursor.fetchmany(request_count)"""
-    event_registration_cursor.execute("SELECT id_event FROM event_registration")
-    event_ids = event_registration_cursor.fetchall()
-    return make_response(jsonify(convert_objects(event_registration_cursor.fetchall(), event_registration_cursor.description)), 200)
-    print("Events Ids")                                                                                                       
-    print(str(tuple(event_ids)))
+    event_ids = event_registration_cursor.fetchmany(request_count)
     event_registration_cursor.close()
     event_cursor = connection.cursor()
     if len(event_ids) == 0:
         return make_response(jsonify([]), 200)
     event_cursor.execute("SELECT * FROM events WHERE id IN %s", (tuple(event_ids),))
-    events = event_cursor.fetchall()
+    events = convert_objects(event_cursor.fetchall(), event_cursor.description)
     event_cursor.close()
     return make_response(jsonify(events), 200)
-
-
-def generate_max_id_sql(max_id, id_name="id"):
-    """
-    Generates SQL condition so that you only get objects with id less than or equal to max id.
-    :param max_id: id to pass in condition
-    :param id_name: Optional parameter to specify id name
-    :return: sql condition to be appended to SQL statement with "AND", if max_id is defined.
-    """
-    if max_id is None or len(str(max_id)) < 1:
-        return ""
-    return " AND " + str(id_name) + "<=" + str(max_id)
 
 
 def convert_objects(tuple_arr, description):

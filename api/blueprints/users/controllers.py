@@ -79,8 +79,12 @@ def get_user_networks(user_id):
     connection = mysql.get_db()
     count = int(request.args.get("count", 100))
     reg_cursor = connection.cursor()
-    #TODO: Implement registration date.
-    reg_cursor.execute("SELECT id_network FROM network_registration WHERE id_user=%s", (user_id,))
+    mysql_string = "SELECT id_network FROM network_registration WHERE id_user=%s"
+    if "max_registration_date" in request.args:
+        mysql_string += " AND date_added <= %s"
+        reg_cursor.execute(mysql_string, (user_id, request.args["max_registration_date"]))
+    else:
+        reg_cursor.execute(mysql_string, (user_id,))
     network_ids = reg_cursor.fetchall()
     reg_cursor.close()
     # SQL doesn't like empty tuples in IN
@@ -101,7 +105,13 @@ def get_user_posts(user_id):
     connection = mysql.get_db()
     request_count = int(request.args.get("count", 100))
     post_cursor = connection.cursor()
-    post_cursor.execute("SELECT * FROM posts WHERE id_user=%s", (user_id,))
+    # Create SQL statement based on whether max_id is set or not.
+    mysql_string = "SELECT * FROM posts WHERE id_user=%s"
+    if "max_id" in request:
+        mysql_string += "AND id<=%s"
+        post_cursor.execute(mysql_string, (user_id, request["max_id"]))
+    else:
+        post_cursor.execute(mysql_string, (user_id,))
     posts = post_cursor.fetchmany(int(request_count))
     posts = convert_objects(posts, post_cursor.description)
     post_cursor.close()
@@ -124,7 +134,6 @@ def get_user_events(user_id):
     event_cursor.execute("SELECT * FROM events WHERE id IN %s", (tuple(event_ids),))
     events = event_cursor.fetchall()
     event_cursor.close()
-    
     return make_response(jsonify(events), 200)
 
 

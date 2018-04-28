@@ -107,7 +107,7 @@ def get_user_posts(user_id):
     post_cursor = connection.cursor()
     # Create SQL statement based on whether max_id is set or not.
     mysql_string = "SELECT * FROM posts WHERE id_user=%s"
-    if "max_id" in request:
+    if "max_id" in request.args:
         mysql_string += "AND id<=%s"
         post_cursor.execute(mysql_string, (user_id, request["max_id"]))
     else:

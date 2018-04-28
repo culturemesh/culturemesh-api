@@ -109,7 +109,7 @@ def get_user_posts(user_id):
     mysql_string = "SELECT * FROM posts WHERE id_user=%s"
     if "max_id" in request.args:
         mysql_string += "AND id<=%s"
-        post_cursor.execute(mysql_string, (user_id, request["max_id"]))
+        post_cursor.execute(mysql_string, (user_id, request.args["max_id"]))
     else:
         post_cursor.execute(mysql_string, (user_id,))
     posts = post_cursor.fetchmany(int(request_count))

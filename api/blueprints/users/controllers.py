@@ -81,18 +81,18 @@ def get_user_networks(user_id):
     reg_cursor = connection.cursor()
     mysql_string = "SELECT id_network FROM network_registration WHERE id_user=%s"
     if "max_registration_date" in request.args:
-        mysql_string += " AND join_date <= UNIX_TIMESTAMP(%s)"
-        reg_cursor.execute(mysql_string, (user_id, request.args["max_registration_date"] + " 23:59:59"))
+        mysql_string += " AND join_date <= FROM_UNIXTIME(%s 23:59:59)"
+        reg_cursor.execute(mysql_string, (user_id, request.args["max_registration_date"]))
     else:
         reg_cursor.execute(mysql_string, (user_id,))
-    network_ids = reg_cursor.fetchall()
+    network_ids = reg_cursor.fetchmany(count)
     reg_cursor.close()
     # SQL doesn't like empty tuples in IN
     if len(network_ids) == 0:
         return make_response(jsonify([]), 200)
     network_cursor = connection.cursor()
     network_cursor.execute('SELECT * FROM networks WHERE id IN %s', (network_ids,))
-    network_arr = network_cursor.fetchmany(count)
+    network_arr = network_cursor.fetchall()
     # Now, we need to convert these tuples into objects with key-value pairs
     network_obj = convert_objects(network_arr, network_cursor.description)
     network_cursor.close()

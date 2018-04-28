@@ -131,7 +131,7 @@ def get_user_events(user_id):
     else:
         event_registration_cursor.execute(sql_statement, (request.args["role"], user_id))
     event_ids = event_registration_cursor.fetchmany(request_count)"""
-    event_registration_cursor.execute("SELECT * FROM event_registration")
+    event_registration_cursor.execute("SELECT id_event FROM event_registration")
     event_ids = event_registration_cursor.fetchall()
     print("Events Ids")
     print(str(tuple(event_ids)))

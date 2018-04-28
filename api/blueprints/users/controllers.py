@@ -124,13 +124,15 @@ def get_user_events(user_id):
     connection = mysql.get_db()
     request_count = int(request.args.get("count", 100))
     event_registration_cursor = connection.cursor()
-    sql_statement = "SELECT id_event FROM event_registration WHERE job=%s AND id_guest=%s"
+    """sql_statement = "SELECT id_event FROM event_registration WHERE job=%s AND id_guest=%s"
     if "max_id" in request.args:
         sql_statement += " AND id <= %s"
         event_registration_cursor.execute(sql_statement, (request.args["role"], user_id, request.args["max_id"]))
     else:
         event_registration_cursor.execute(sql_statement, (request.args["role"], user_id))
-    event_ids = event_registration_cursor.fetchmany(request_count)
+    event_ids = event_registration_cursor.fetchmany(request_count)"""
+    event_registration_cursor.execute("SELECT * FROM event_registration")
+    event_ids = event_registration_cursor.fetchall()
     event_registration_cursor.close()
     event_cursor = connection.cursor()
     if len(event_ids) == 0:

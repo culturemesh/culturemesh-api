@@ -178,7 +178,7 @@ def add_user_to_network(user_id, network_id):
     network_registration_cursor.execute(" INSERT INTO network_registration VALUES (%s, %s, CURRENT_TIMESTAMP)",
                                         (str(user_id), str(network_id)))
     connection.commit()
-    return make_response("OK", 200)
+    return make_response("OK for network " % network_id, 200)
 
 
 def convert_objects(tuple_arr, description):

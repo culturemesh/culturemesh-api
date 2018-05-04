@@ -177,7 +177,7 @@ def add_user_to_network(user_id, network_id):
     network_registration_cursor.execute("IF NOT EXISTS "
                                         "(SELECT * FROM network_registration WHERE id_network=%s AND id_user=%s)"
                                         " INSERT INTO network_registration VALUES (%s, %s, CURRENT_TIMESTAMP)",
-                                        (str(user_id), str(network_id), str(user_id), str(network_id)))
+                                        (int(user_id), int(network_id), str(user_id), str(network_id)))
     connection.commit()
     return make_response("OK", 200)
 

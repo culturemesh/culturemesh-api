@@ -173,9 +173,9 @@ def add_user_to_network(user_id, network_id):
         return make_response("Invalid Network Id", 405)
     connection = mysql.get_db()
     network_registration_cursor = connection.cursor()
-    network_registration_cursor.execute("IF NOT EXISTS "
-                                        "(SELECT * FROM network_registration WHERE id_user='%s' AND id_network='%s')"
-                                        " INSERT INTO network_registration VALUES ('%s', '%s', CURRENT_TIMESTAMP)",
+    # "IF NOT EXISTS "
+    #                                        "(SELECT * FROM network_registration WHERE id_user=%s AND id_network=%s)"
+    network_registration_cursor.execute(" INSERT INTO network_registration VALUES (%s, %s, CURRENT_TIMESTAMP)",
                                         (user_id, network_id, user_id, network_id))
     network_registration_cursor.commit()
     network_registration_cursor.close()

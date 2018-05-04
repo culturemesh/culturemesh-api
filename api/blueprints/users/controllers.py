@@ -2,6 +2,8 @@ from flask import Blueprint, jsonify, request, json, make_response
 from api import require_apikey
 from api.extensions import mysql
 from json.decoder import JSONDecodeError
+import time
+import datetime
 users = Blueprint('user', __name__)
 
 """
@@ -60,7 +62,7 @@ def users_query():
     return jsonify(users_res)
 
 
-@users.route("/<user_id>")
+@users.route("/<user_id>", methods=["GET"])
 @require_apikey
 def get_user(user_id):
     connection = mysql.get_db()
@@ -73,7 +75,7 @@ def get_user(user_id):
     return make_response(jsonify(user), 405 if user is None else 200)
 
 
-@users.route("/<user_id>/networks")
+@users.route("/<user_id>/networks", methods=["GET"])
 @require_apikey
 def get_user_networks(user_id):
     connection = mysql.get_db()
@@ -99,7 +101,7 @@ def get_user_networks(user_id):
     return make_response(jsonify(network_obj), 200)
 
 
-@users.route("/<user_id>/posts")
+@users.route("/<user_id>/posts", methods=["GET"])
 @require_apikey
 def get_user_posts(user_id):
     connection = mysql.get_db()
@@ -118,7 +120,7 @@ def get_user_posts(user_id):
     return make_response(jsonify(posts), 200)
 
 
-@users.route("/<user_id>/events")
+@users.route("/<user_id>/events", methods=["GET"])
 @require_apikey
 def get_user_events(user_id):
     connection = mysql.get_db()
@@ -141,13 +143,60 @@ def get_user_events(user_id):
     return make_response(jsonify(events), 200)
 
 
+@users.route("/<user_id>/addToEvent/<event_id>", methods=["POST"])
+@require_apikey
+def add_user_to_event(user_id, event_id):
+    connection = mysql.get_db()
+    # First, check that event and user are valid
+    if not is_valid_event(event_id):
+        return make_response("Invalid Event Id", 405)
+    if not is_valid_user(user_id):
+        return make_response("Invalid User Id", 405)
+    event_registration_cursor = connection.cursor()
+    event_registration_cursor.execute("INSERT INTO event_registration VALUES (%s,%s,CURRENT_TIMESTAMP,host)",
+                                      (user_id, event_id))
+    event_registration_cursor.commit()
+    event_registration_cursor.close()
+    return make_response("OK", 200)
+
+
 def convert_objects(tuple_arr, description):
     """A DB cursor returns an array of tuples, without attribute names. This function converts these tuples into objects
     with key-value pairs.
     :param tuple_arr:  An array of tuples
     :param description: The cursor's description, which allows you to
-    :return: An array of objects with attribute names according to key-value paris"""
+    :return: An array of objects with attribute names according to key-value pairs"""
     obj_arr = []
     for tuple_obj in tuple_arr:
         obj_arr.append({description[index][0]: column for index, column in enumerate(tuple_obj)})
     return obj_arr
+
+
+def is_valid_event(event_id):
+    """
+    This function is used to validate endpoint input. This function checks if the passed event id is a valid event id
+    (there is a corresponding event with that id.)
+    :param event_id: the event id.
+    :return: true if valid, false if no event found.
+    """
+    connection = mysql.get_db()
+    event_registration_check_cursor = connection.cursor()
+    event_registration_check_cursor.execute("SELECT * FROM events WHERE id=%s", (event_id,))
+    possible_event = event_registration_check_cursor.fetchone()
+    event_registration_check_cursor.close()
+    return possible_event is not None
+
+
+def is_valid_user(user_id):
+    """
+     This function is used to validate endpoint input. This function checks if the passed user id is a valid user id
+    (there is a corresponding user with that id.)
+    :param user_id:
+    :return: true if valid, false if no user found.
+    """
+    connection = mysql.get_db()
+    user_check = connection.cursor()
+    user_check.execute("SELECT * FROM users WHERE id=%s", (user_id,))
+    possible_user = user_check.fetchone()
+    user_check.close()
+    return user_check is not None

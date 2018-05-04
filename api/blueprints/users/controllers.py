@@ -2,8 +2,7 @@ from flask import Blueprint, jsonify, request, json, make_response
 from api import require_apikey
 from api.extensions import mysql
 from json.decoder import JSONDecodeError
-import time
-import datetime
+from pymysql.err import IntegrityError
 users = Blueprint('user', __name__)
 
 """
@@ -158,8 +157,7 @@ def add_user_to_event(user_id, event_id):
     event_registration_cursor = connection.cursor()
     event_registration_cursor.execute("INSERT INTO event_registration VALUES (%s,%s,CURRENT_TIMESTAMP,host)",
                                       (user_id, event_id))
-    event_registration_cursor.commit()
-    event_registration_cursor.close()
+    connection.commit()
     return make_response("OK", 200)
 
 
@@ -173,8 +171,11 @@ def add_user_to_network(user_id, network_id):
         return make_response("Invalid Network Id", 405)
     connection = mysql.get_db()
     network_registration_cursor = connection.cursor()
-    network_registration_cursor.execute("INSERT INTO network_registration VALUES (%s, %s, CURRENT_TIMESTAMP)",
+    try:
+        network_registration_cursor.execute("INSERT INTO network_registration VALUES (%s, %s, CURRENT_TIMESTAMP)",
                                         (str(user_id), str(network_id)))
+    except IntegrityError:
+        return make_response("User already subscribed", 405)
     connection.commit()
     return make_response("OK", 200)
 

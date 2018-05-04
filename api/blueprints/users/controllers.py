@@ -166,6 +166,7 @@ def add_user_to_event(user_id, event_id):
 @users.route("/<user_id>/addToNetwork/<network_id>", methods=["POST"])
 @require_apikey
 def add_user_to_network(user_id, network_id):
+    return make_response("Trying this instead: network %s", network_id, 200)
     # First, check that input is valid.
     if not valid_user(user_id):
         return make_response("Invalid User Id", 405)
@@ -178,7 +179,7 @@ def add_user_to_network(user_id, network_id):
     network_registration_cursor.execute(" INSERT INTO network_registration VALUES (%s, %s, CURRENT_TIMESTAMP)",
                                         (str(user_id), str(network_id)))
     connection.commit()
-    return make_response("blah OK for network " % network_id, 200)
+    return make_response("blah OK for network %s" % network_id, 200)
 
 
 def convert_objects(tuple_arr, description):

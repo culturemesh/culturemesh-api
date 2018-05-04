@@ -166,7 +166,6 @@ def add_user_to_event(user_id, event_id):
 @users.route("/<user_id>/addToNetwork/<network_id>", methods=["POST"])
 @require_apikey
 def add_user_to_network(user_id, network_id):
-    return make_response("Trying this instead: network %s", network_id, 200)
     # First, check that input is valid.
     if not valid_user(user_id):
         return make_response("Invalid User Id", 405)

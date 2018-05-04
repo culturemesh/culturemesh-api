@@ -167,6 +167,7 @@ def add_user_to_event(user_id, event_id):
 @require_apikey
 def add_user_to_network(user_id, network_id):
     # First, check that input is valid.
+    # Maybe changes aren't recognized when redoing SQL statements??
     if not valid_user(user_id):
         return make_response("Invalid User Id", 405)
     if not valid_network(network_id):
@@ -175,7 +176,7 @@ def add_user_to_network(user_id, network_id):
     network_registration_cursor = connection.cursor()
 
     network_registration_cursor.execute("IF NOT EXISTS "
-                                        "(SELECT * FROM network_registration WHERE id_user LIKE %s AND id_network LIKE %s)"
+                                        "(SELECT * FROM network_registration WHERE id_network=%s AND id_user=%s )"
                                         " INSERT INTO network_registration VALUES (%s, %s, CURRENT_TIMESTAMP)",
                                         (user_id, network_id, str(user_id), str(network_id)))
     connection.commit()

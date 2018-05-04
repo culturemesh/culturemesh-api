@@ -173,12 +173,13 @@ def add_user_to_network(user_id, network_id):
         return make_response("Invalid Network Id", 405)
     connection = mysql.get_db()
     network_registration_cursor = connection.cursor()
-    # "IF NOT EXISTS "
-    #                                        "(SELECT * FROM network_registration WHERE id_user=%s AND id_network=%s)"
-    network_registration_cursor.execute(" INSERT INTO network_registration VALUES (%s, %s, CURRENT_TIMESTAMP)",
-                                        (str(user_id), str(network_id)))
+
+    network_registration_cursor.execute("IF NOT EXISTS "
+                                        "(SELECT * FROM network_registration WHERE id_user=%s AND id_network=%s)"
+                                        " INSERT INTO network_registration VALUES (%s, %s, CURRENT_TIMESTAMP)",
+                                        (str(user_id), str(network_id), str(user_id), str(network_id)))
     connection.commit()
-    return make_response("blah OK for network %s" % (network_id,), 200)
+    return make_response("OK", 200)
 
 
 def convert_objects(tuple_arr, description):

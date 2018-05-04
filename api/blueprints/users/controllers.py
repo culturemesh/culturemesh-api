@@ -123,6 +123,7 @@ def get_user_posts(user_id):
 @users.route("/<user_id>/events", methods=["GET"])
 @require_apikey
 def get_user_events(user_id):
+    # TODO: Test when there are events in existence.
     connection = mysql.get_db()
     request_count = int(request.args.get("count", 100))
     event_registration_cursor = connection.cursor()
@@ -146,17 +147,36 @@ def get_user_events(user_id):
 @users.route("/<user_id>/addToEvent/<event_id>", methods=["POST"])
 @require_apikey
 def add_user_to_event(user_id, event_id):
+    # TODO: Test when adding events is in place.
     connection = mysql.get_db()
     # First, check that event and user are valid
-    if not is_valid_event(event_id):
+    if not valid_event(event_id):
         return make_response("Invalid Event Id", 405)
-    if not is_valid_user(user_id):
+    if not valid_user(user_id):
         return make_response("Invalid User Id", 405)
+    # Cool. Let's add that user.
     event_registration_cursor = connection.cursor()
     event_registration_cursor.execute("INSERT INTO event_registration VALUES (%s,%s,CURRENT_TIMESTAMP,host)",
                                       (user_id, event_id))
     event_registration_cursor.commit()
     event_registration_cursor.close()
+    return make_response("OK", 200)
+
+
+@users.route("/<user_id>/addToNetwork/<network_id>", methods=["POST"])
+@require_apikey
+def add_user_to_network(user_id, network_id):
+    # First, check that input is valid.
+    if not valid_user(user_id):
+        return make_response("Invalid User Id", 405)
+    if not valid_network(network_id):
+        return make_response("Invalid Network Id", 405)
+    connection = mysql.get_db()
+    network_registration_cursor = connection.cursor()
+    network_registration_cursor.execute("INSERT INTO network_registration VALUES (%s, %s, CURRENT_TIMESTAMP)",
+                                        (user_id, network_id))
+    network_registration_cursor.commit()
+    network_registration_cursor.close()
     return make_response("OK", 200)
 
 
@@ -172,7 +192,7 @@ def convert_objects(tuple_arr, description):
     return obj_arr
 
 
-def is_valid_event(event_id):
+def valid_event(event_id):
     """
     This function is used to validate endpoint input. This function checks if the passed event id is a valid event id
     (there is a corresponding event with that id.)
@@ -187,7 +207,7 @@ def is_valid_event(event_id):
     return possible_event is not None
 
 
-def is_valid_user(user_id):
+def valid_user(user_id):
     """
      This function is used to validate endpoint input. This function checks if the passed user id is a valid user id
     (there is a corresponding user with that id.)
@@ -199,4 +219,19 @@ def is_valid_user(user_id):
     user_check.execute("SELECT * FROM users WHERE id=%s", (user_id,))
     possible_user = user_check.fetchone()
     user_check.close()
-    return user_check is not None
+    return possible_user is not None
+
+
+def valid_network(network_id):
+    """
+    This function is used to validate endpoint input. This function checks if the passed network id is a valid
+    network id (there is a corresponding network with that id.)
+    :param network_id:
+    :return: true if valid, false if no network found.
+    """
+    connection = mysql.get_db()
+    network_check = connection.cursor()
+    network_check.execute("SELECT * FROM networks WHERE  id=%s", (network_id,))
+    possible_network = network_check.fetchone()
+    network_check.close()
+    return possible_network is not None

@@ -54,11 +54,14 @@ def users_query():
     else:
         user_id_cursor.execute(sql_query_string + sql_order_string, (network_ids,))
     user_ids = user_id_cursor.fetchmany(count)
+    user_id_cursor.close()
     if len(user_ids) == 0:
         return make_response(jsonify([]), HTTPStatus.OK)
     users_cursor = connection.cursor()
     users_cursor.execute("SELECT * FROM users WHERE id IN %s", (tuple(user_ids),))
     users_res = users_cursor.fetchall()
+    users_obj = convert_objects(users_res, users_cursor.description)
+    users_cursor.close()
     return jsonify(users_res)
 
 

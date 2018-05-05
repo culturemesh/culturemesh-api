@@ -2,7 +2,6 @@ from flask import Blueprint, jsonify, request, json, make_response
 from http import HTTPStatus
 from api import require_apikey
 from api.extensions import mysql
-from json.decoder import JSONDecodeError
 from pymysql.err import IntegrityError
 
 users = Blueprint('user', __name__)
@@ -19,7 +18,7 @@ def test():
     return "pong"
 
 
-@users.route("/users")
+@users.route("/users/", methods=["GET"])
 @require_apikey
 def users_query():
     if "near_location" in request.args:

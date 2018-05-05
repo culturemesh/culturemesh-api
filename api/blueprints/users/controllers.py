@@ -26,11 +26,12 @@ def users_query():
     connection = mysql.get_db()
     # Parse id's into collection
     near_ids = request.args["near_location"].split(",")
+    print(near_ids is not None)
     network_cursor = connection.cursor()
     near_loc_query = "id_city_cur=%s AND id_region_cur=%s AND id_country_cur=%s"
     if "language" in request.args:
-        network_cursor.execute("SELECT * FROM networks WHERE " + near_loc_query + "AND id_language_origin=%s",
-                               tuple(near_ids.extend([request.args["language"]])))
+        network_cursor.execute("SELECT * FROM networks WHERE " + near_loc_query + " AND id_language_origin=%s",
+                               tuple(near_ids.extend([str(request.args["language"])])))
     elif "from_location" in request.args:
         network_cursor.execute("SELECT * FROM networks WHERE " + near_loc_query + " AND " +
                                near_loc_query.replace("cur", "origin"),

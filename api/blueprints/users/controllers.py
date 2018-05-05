@@ -41,6 +41,8 @@ def users_query():
         return make_response("No language/from location", HTTPStatus.METHOD_NOT_ALLOWED)
     network_ids = network_cursor.fetchall()
     network_cursor.close()
+    if len(network_ids) == 0:
+        return make_response(jsonify([]), HTTPStatus.OK)
     # Now we need to get all the users subscribed to these networks.
     user_id_cursor = connection.cursor()
     user_id_cursor.execute("SELECT id_user FROM network_registration WHERE id_network IN %s", (tuple(network_ids),))

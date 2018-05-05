@@ -36,7 +36,6 @@ def users_query():
                                near_loc_query.replace("cur", "origin"),
                                tuple(near_ids.extend(request.args["from_location"].split(","))))
     else:
-        network_cursor.close()
         return make_response("No language/from location", HTTPStatus.METHOD_NOT_ALLOWED)
     network_ids = network_cursor.fetchall()
     network_cursor.close()

@@ -21,7 +21,7 @@ def test():
 @users.route("/users/", methods=["GET"])
 @require_apikey
 def users_query():
-    if "near_location" in request.args:
+    if "near_location" not in request.args:
         return make_response("No near location", HTTPStatus.METHOD_NOT_ALLOWED)
     connection = mysql.get_db()
     # Parse id's into collection

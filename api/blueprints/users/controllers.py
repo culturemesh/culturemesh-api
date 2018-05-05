@@ -45,6 +45,8 @@ def users_query():
     user_id_cursor = connection.cursor()
     user_id_cursor.execute("SELECT id_user FROM network_registration WHERE id_network IN %s", (tuple(network_ids),))
     user_ids = user_id_cursor.fetchall()
+    if len(user_ids) == 0:
+        return make_response(jsonify([]), HTTPStatus.OK)
     users_cursor = connection.cursor()
     users_cursor.execute("SELECT * FROM users WHERE id IN %s", (tuple(user_ids),))
     users_res = users_cursor.fetchall()

@@ -27,7 +27,7 @@ def users_query():
     # Parse id's into collection
     near_ids = request.args["near_location"].split(",")
     network_cursor = connection.cursor()
-    near_loc_query = "id_city_cur=%s AND id_region_cur=%s AND id_country_cur=%s"
+    near_loc_query = "id_country_cur=%s AND id_region_cur=%s AND id_city_cur=%s"
     if "language" in request.args:
         near_ids.extend([str(request.args["language"])])
         network_cursor.execute("SELECT * FROM networks WHERE " + near_loc_query + " AND id_language_origin=%s",

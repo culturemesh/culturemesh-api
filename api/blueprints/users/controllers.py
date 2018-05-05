@@ -155,9 +155,9 @@ def add_user_to_event(user_id, event_id):
     # TODO: Test when adding events is in place.
     connection = mysql.get_db()
     # First, check that event and user are valid
-    if not valid_event(event_id):
+    if not event_exists(event_id):
         return make_response("Invalid Event Id", HTTPStatus.METHOD_NOT_ALLOWED)
-    if not valid_user(user_id):
+    if not user_exists(user_id):
         return make_response("Invalid User Id", HTTPStatus.METHOD_NOT_ALLOWED)
     # Cool. Let's add that user.
     event_registration_cursor = connection.cursor()
@@ -171,9 +171,9 @@ def add_user_to_event(user_id, event_id):
 @require_apikey
 def add_user_to_network(user_id, network_id):
     # First, check that input is valid.
-    if not valid_user(user_id):
+    if not user_exists(user_id):
         return make_response("Invalid User Id", HTTPStatus.METHOD_NOT_ALLOWED)
-    if not valid_network(network_id):
+    if not network_exists(network_id):
         return make_response("Invalid Network Id", HTTPStatus.METHOD_NOT_ALLOWED)
     connection = mysql.get_db()
     network_registration_cursor = connection.cursor()
@@ -199,7 +199,7 @@ def convert_objects(tuple_arr, description):
     return obj_arr
 
 
-def valid_event(event_id):
+def event_exists(event_id):
     """
     This function is used to validate endpoint input. This function checks if the passed event id is a valid event id
     (there is a corresponding event with that id.)
@@ -214,7 +214,7 @@ def valid_event(event_id):
     return possible_event is not None
 
 
-def valid_user(user_id):
+def user_exists(user_id):
     """
      This function is used to validate endpoint input. This function checks if the passed user id is a valid user id
     (there is a corresponding user with that id.)
@@ -229,7 +229,7 @@ def valid_user(user_id):
     return possible_user is not None
 
 
-def valid_network(network_id):
+def network_exists(network_id):
     """
     This function is used to validate endpoint input. This function checks if the passed network id is a valid
     network id (there is a corresponding network with that id.)

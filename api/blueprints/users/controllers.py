@@ -61,7 +61,7 @@ def users_query():
     users_cursor.execute("SELECT * FROM users WHERE id IN %s", (tuple(user_ids),))
     users_obj = convert_objects(users_cursor.fetchall(), users_cursor.description)
     users_cursor.close()
-    return jsonify(users_obj)
+    return make_response(jsonify(users_obj), HTTPStatus.OK)
 
 
 @users.route("/<user_id>", methods=["GET"])
@@ -191,7 +191,7 @@ def convert_objects(tuple_arr, description):
     """A DB cursor returns an array of tuples, without attribute names. This function converts these tuples into objects
     with key-value pairs.
     :param tuple_arr:  An array of tuples
-    :param description: The cursor's description, which allows you to
+    :param description: The cursor's description, which allows you to find the attribute names.
     :return: An array of objects with attribute names according to key-value pairs"""
     obj_arr = []
     for tuple_obj in tuple_arr:

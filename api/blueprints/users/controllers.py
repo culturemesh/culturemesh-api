@@ -59,8 +59,7 @@ def users_query():
         return make_response(jsonify([]), HTTPStatus.OK)
     users_cursor = connection.cursor()
     users_cursor.execute("SELECT * FROM users WHERE id IN %s", (tuple(user_ids),))
-    users_res = users_cursor.fetchall()
-    users_obj = convert_objects(users_res, users_cursor.description)
+    users_obj = convert_objects(users_cursor.fetchall(), users_cursor.description)
     users_cursor.close()
     return jsonify(users_obj)
 

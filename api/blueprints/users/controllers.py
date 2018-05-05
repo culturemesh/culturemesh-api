@@ -4,6 +4,7 @@ from api import require_apikey
 from api.extensions import mysql
 from json.decoder import JSONDecodeError
 from pymysql.err import IntegrityError
+
 users = Blueprint('user', __name__)
 
 """

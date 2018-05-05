@@ -11,7 +11,7 @@ mysql.init_app(api)
 
 # Register API submodules (aka blueprints)
 
-from api.blueprints.users import users
+from api.blueprints.users.controllers import users
 from api.blueprints.networks.controllers import networks
 from api.blueprints.posts.controllers import posts
 from api.blueprints.events.controllers import events

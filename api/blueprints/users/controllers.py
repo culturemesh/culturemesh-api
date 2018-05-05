@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request, json, make_response
+from http import HTTPStatus
 from api import require_apikey
 from api.extensions import mysql
 from json.decoder import JSONDecodeError
@@ -20,36 +21,22 @@ def test():
 @users.route("/users")
 @require_apikey
 def users_query():
-    # Allegedly, we need to run get_data() first
-    request.get_data()
-    try:
-        request_filter = json.loads(request.data)
-    except JSONDecodeError:
-        return make_response("Error: malformed request body", 405)
-
+    if request.args["near_location"] is None:
+        return make_response("No near location", HTTPStatus.METHOD_NOT_ALLOWED)
     connection = mysql.get_db()
-    network_ids = []
-    for near_loc in request_filter['near_location']:
-        near_query_string = "id_city_cur=%d AND id_region_cur=%d AND id_city_cur=%d", (near_loc.city_id,
-                                                                                       near_loc.region_id,
-                                                                                       near_loc.country_id)
-        for from_loc in request_filter['from_location']:
-            # Query networks with that near and from_location
-            cursor = connection.cursor()
-            cursor.execute(
-                "SELECT id FROM networks WHERE %s AND id_city_origin=%d AND id_region_origin=%d AND id_country_origin=%d",
-                (near_query_string, from_loc.city_id, from_loc.region_id, from_loc.country_id))
-            network_ids.append(cursor.fetchall())
-            cursor.commit()
-            cursor.close()
-
-        for lang in request_filter['language']:
-            # Query networks with that near location and language
-            cursor = connection.cursor()
-            cursor.execute("SELECT id FROM networks WHERE %s AND language_origin=%s", (near_query_string, lang))
-            network_ids.append(cursor.fetchall())
-            cursor.commit()
-            cursor.close()
+    # Parse id's into collection
+    near_ids = request.args["near_location"].split(",")
+    network_cursor = connection.cursor()
+    near_loc_query = "id_city_cur=%s AND id_region_cur=%s AND id_country_cur=%s"
+    if request.args["language"] is not None:
+        network_cursor.execute("SELECT * FROM networks WHERE " + near_loc_query + "AND id_language_origin=%s",
+                               tuple(near_ids.extend([request.args["language"]])))
+    elif request.args["from_location"] is not None:
+        network_cursor.execute("SELECT * FROM networks WHERE " + near_loc_query + " AND " +
+                               near_loc_query.replace("cur", "origin"),
+                               tuple(near_ids.extend(request.args["from_location"].split(","))))
+    network_ids = network_cursor.fetchall()
+    network_cursor.close()
     # Now we need to get all the users subscribed to these networks.
     user_id_cursor = connection.cursor()
     user_id_cursor.execute("SELECT id_user FROM network_registration WHERE id_network IN %s", (tuple(network_ids),))
@@ -57,7 +44,6 @@ def users_query():
     users_cursor = connection.cursor()
     users_cursor.execute("SELECT * FROM users WHERE id IN %s", (tuple(user_ids),))
     users_res = users_cursor.fetchall()
-    
     return jsonify(users_res)
 
 
@@ -71,7 +57,7 @@ def get_user(user_id):
     if user is not None:
         user = convert_objects([user], user_cursor.description)[0]
     user_cursor.close()
-    return make_response(jsonify(user), 405 if user is None else 200)
+    return make_response(jsonify(user), HTTPStatus.METHOD_NOT_ALLOWED if user is None else HTTPStatus.OK)
 
 
 @users.route("/<user_id>/networks", methods=["GET"])
@@ -90,14 +76,14 @@ def get_user_networks(user_id):
     reg_cursor.close()
     # SQL doesn't like empty tuples in IN
     if len(network_ids) == 0:
-        return make_response(jsonify([]), 200)
+        return make_response(jsonify([]), HTTPStatus.OK)
     network_cursor = connection.cursor()
     network_cursor.execute('SELECT * FROM networks WHERE id IN %s', (network_ids,))
     network_arr = network_cursor.fetchall()
     # Now, we need to convert these tuples into objects with key-value pairs
     network_obj = convert_objects(network_arr, network_cursor.description)
     network_cursor.close()
-    return make_response(jsonify(network_obj), 200)
+    return make_response(jsonify(network_obj), HTTPStatus.OK)
 
 
 @users.route("/<user_id>/posts", methods=["GET"])
@@ -107,6 +93,7 @@ def get_user_posts(user_id):
     request_count = int(request.args.get("count", 100))
     post_cursor = connection.cursor()
     # Create SQL statement based on whether max_id is set or not.
+    #TODO: Sort order by DESC
     mysql_string = "SELECT * FROM posts WHERE id_user=%s"
     if "max_id" in request.args:
         mysql_string += "AND id<=%s"
@@ -116,7 +103,7 @@ def get_user_posts(user_id):
     posts = post_cursor.fetchmany(int(request_count))
     posts = convert_objects(posts, post_cursor.description)
     post_cursor.close()
-    return make_response(jsonify(posts), 200)
+    return make_response(jsonify(posts), HTTPStatus.OK)
 
 
 @users.route("/<user_id>/events", methods=["GET"])
@@ -136,11 +123,11 @@ def get_user_events(user_id):
     event_registration_cursor.close()
     event_cursor = connection.cursor()
     if len(event_ids) == 0:
-        return make_response(jsonify([]), 200)
+        return make_response(jsonify([]), HTTPStatus.OK)
     event_cursor.execute("SELECT * FROM events WHERE id IN %s", (tuple(event_ids),))
     events = convert_objects(event_cursor.fetchall(), event_cursor.description)
     event_cursor.close()
-    return make_response(jsonify(events), 200)
+    return make_response(jsonify(events), HTTPStatus.OK)
 
 
 @users.route("/<user_id>/addToEvent/<event_id>", methods=["POST"])
@@ -150,15 +137,15 @@ def add_user_to_event(user_id, event_id):
     connection = mysql.get_db()
     # First, check that event and user are valid
     if not valid_event(event_id):
-        return make_response("Invalid Event Id", 405)
+        return make_response("Invalid Event Id", HTTPStatus.METHOD_NOT_ALLOWED)
     if not valid_user(user_id):
-        return make_response("Invalid User Id", 405)
+        return make_response("Invalid User Id", HTTPStatus.METHOD_NOT_ALLOWED)
     # Cool. Let's add that user.
     event_registration_cursor = connection.cursor()
     event_registration_cursor.execute("INSERT INTO event_registration VALUES (%s,%s,CURRENT_TIMESTAMP,host)",
                                       (user_id, event_id))
     connection.commit()
-    return make_response("OK", 200)
+    return make_response("OK", HTTPStatus.OK)
 
 
 @users.route("/<user_id>/addToNetwork/<network_id>", methods=["POST"])
@@ -166,18 +153,19 @@ def add_user_to_event(user_id, event_id):
 def add_user_to_network(user_id, network_id):
     # First, check that input is valid.
     if not valid_user(user_id):
-        return make_response("Invalid User Id", 405)
+        return make_response("Invalid User Id", HTTPStatus.METHOD_NOT_ALLOWED)
     if not valid_network(network_id):
-        return make_response("Invalid Network Id", 405)
+        return make_response("Invalid Network Id", HTTPStatus.METHOD_NOT_ALLOWED)
     connection = mysql.get_db()
     network_registration_cursor = connection.cursor()
     try:
         network_registration_cursor.execute("INSERT INTO network_registration VALUES (%s, %s, CURRENT_TIMESTAMP)",
                                         (str(user_id), str(network_id)))
     except IntegrityError:
-        return make_response("User already subscribed", 405)
+        connection.commit()
+        return make_response("User already subscribed", HTTPStatus.METHOD_NOT_ALLOWED)
     connection.commit()
-    return make_response("OK", 200)
+    return make_response("OK", HTTPStatus.OK)
 
 
 def convert_objects(tuple_arr, description):

@@ -11,14 +11,13 @@ mysql.init_app(api)
 
 # Register API submodules (aka blueprints)
 
-from api.blueprints.users.controllers import users
+from api.blueprints.users import users
 from api.blueprints.networks.controllers import networks
 from api.blueprints.posts.controllers import posts
 from api.blueprints.events.controllers import events
 from api.blueprints.locations.controllers import locations
 from api.blueprints.languages.controllers import languages
 from api.blueprints.accounts.controllers import accounts
-
 
 
 api.register_blueprint(users, url_prefix='/user')
@@ -28,3 +27,4 @@ api.register_blueprint(events, url_prefix='/event')
 api.register_blueprint(locations, url_prefix='/location')
 api.register_blueprint(languages, url_prefix='/language')
 api.register_blueprint(accounts, url_prefix='/account')
+api

@@ -35,6 +35,9 @@ def users_query():
         network_cursor.execute("SELECT * FROM networks WHERE " + near_loc_query + " AND " +
                                near_loc_query.replace("cur", "origin"),
                                tuple(near_ids.extend(request.args["from_location"].split(","))))
+    else:
+        network_cursor.close()
+        return make_response("No language/from location", HTTPStatus.METHOD_NOT_ALLOWED)
     network_ids = network_cursor.fetchall()
     network_cursor.close()
     # Now we need to get all the users subscribed to these networks.

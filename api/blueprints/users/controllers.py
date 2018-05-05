@@ -62,7 +62,7 @@ def users_query():
     users_res = users_cursor.fetchall()
     users_obj = convert_objects(users_res, users_cursor.description)
     users_cursor.close()
-    return jsonify(users_res)
+    return jsonify(users_obj)
 
 
 @users.route("/<user_id>", methods=["GET"])

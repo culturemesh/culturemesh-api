@@ -30,11 +30,11 @@ def users_query():
     near_loc_query = "id_country_cur=%s AND id_region_cur=%s AND id_city_cur=%s"
     if "language" in request.args:
         near_ids.extend([str(request.args["language"])])
-        network_cursor.execute("SELECT * FROM networks WHERE " + near_loc_query + " AND id_language_origin=%s",
+        network_cursor.execute("SELECT id FROM networks WHERE " + near_loc_query + " AND id_language_origin=%s",
                                tuple(near_ids))
     elif "from_location" in request.args:
         near_ids.extend(request.args["from_location"].split(","))
-        network_cursor.execute("SELECT * FROM networks WHERE " + near_loc_query + " AND " +
+        network_cursor.execute("SELECT id FROM networks WHERE " + near_loc_query + " AND " +
                                near_loc_query.replace("cur", "origin"),
                                tuple(near_ids))
     else:

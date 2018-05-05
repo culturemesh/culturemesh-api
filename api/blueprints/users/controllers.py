@@ -23,6 +23,7 @@ def test():
 def users_query():
     if "near_location" not in request.args:
         return make_response("No near location", HTTPStatus.METHOD_NOT_ALLOWED)
+    count = int(request.args.get("count", 100))
     connection = mysql.get_db()
     # Parse id's into collection
     near_ids = request.args["near_location"].split(",")
@@ -43,11 +44,16 @@ def users_query():
     network_cursor.close()
     if len(network_ids) == 0:
         return make_response(jsonify([]), HTTPStatus.OK)
-    print(str(network_ids) + " net ids asdf")
     # Now we need to get all the users subscribed to these networks.
     user_id_cursor = connection.cursor()
-    user_id_cursor.execute("SELECT id_user FROM network_registration WHERE id_network IN %s", (network_ids,))
-    user_ids = user_id_cursor.fetchall()
+    sql_query_string = "SELECT id_user FROM network_registration WHERE id_network IN %s"
+    sql_order_string = "ORDER BY id_user DESC"
+    if "max_id" in request.args:
+        sql_query_string += " AND id_user<=%s"
+        user_id_cursor.execute(sql_query_string + sql_order_string, (network_ids, request.args["max_id"]))
+    else:
+        user_id_cursor.execute(sql_query_string + sql_order_string, (network_ids,))
+    user_ids = user_id_cursor.fetchmany(count)
     if len(user_ids) == 0:
         return make_response(jsonify([]), HTTPStatus.OK)
     users_cursor = connection.cursor()
@@ -76,11 +82,12 @@ def get_user_networks(user_id):
     count = int(request.args.get("count", 100))
     reg_cursor = connection.cursor()
     mysql_string = "SELECT id_network FROM network_registration WHERE id_user=%s"
+    sql_string_order = "ORDER BY id_network DESC"
     if "max_registration_date" in request.args:
         mysql_string += " AND DATE(join_date) < %s"
-        reg_cursor.execute(mysql_string, (user_id, request.args["max_registration_date"]))
+        reg_cursor.execute(mysql_string + sql_string_order, (user_id, request.args["max_registration_date"]))
     else:
-        reg_cursor.execute(mysql_string, (user_id,))
+        reg_cursor.execute(mysql_string + sql_string_order, (user_id,))
     network_ids = reg_cursor.fetchmany(count)
     reg_cursor.close()
     # SQL doesn't like empty tuples in IN
@@ -102,13 +109,13 @@ def get_user_posts(user_id):
     request_count = int(request.args.get("count", 100))
     post_cursor = connection.cursor()
     # Create SQL statement based on whether max_id is set or not.
-    #TODO: Sort order by DESC
     mysql_string = "SELECT * FROM posts WHERE id_user=%s"
+    sql_string_order = "ORDER BY id DESC"
     if "max_id" in request.args:
         mysql_string += "AND id<=%s"
-        post_cursor.execute(mysql_string, (user_id, request.args["max_id"]))
+        post_cursor.execute(mysql_string + sql_string_order, (user_id, request.args["max_id"]))
     else:
-        post_cursor.execute(mysql_string, (user_id,))
+        post_cursor.execute(mysql_string + sql_string_order, (user_id,))
     posts = post_cursor.fetchmany(int(request_count))
     posts = convert_objects(posts, post_cursor.description)
     post_cursor.close()
@@ -123,11 +130,12 @@ def get_user_events(user_id):
     request_count = int(request.args.get("count", 100))
     event_registration_cursor = connection.cursor()
     sql_statement = "SELECT id_event FROM event_registration WHERE job=%s AND id_guest=%s"
+    sql_string_order = "ORDER BY id_event DESC"
     if "max_id" in request.args:
         sql_statement += " AND id <= %s"
-        event_registration_cursor.execute(sql_statement, (request.args["role"], user_id, request.args["max_id"]))
+        event_registration_cursor.execute(sql_statement + sql_string_order, (request.args["role"], user_id, request.args["max_id"]))
     else:
-        event_registration_cursor.execute(sql_statement, (request.args["role"], user_id))
+        event_registration_cursor.execute(sql_statement + sql_string_order, (request.args["role"], user_id))
     event_ids = event_registration_cursor.fetchmany(request_count)
     event_registration_cursor.close()
     event_cursor = connection.cursor()

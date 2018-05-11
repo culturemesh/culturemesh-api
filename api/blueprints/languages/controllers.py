@@ -32,7 +32,7 @@ def get_language_autocomplete():
              LIMIT 20"
 
     cursor.execute(query, (input_text))
-    langs = cursor.fetchall(count)
+    langs = cursor.fetchall()
     if len(langs) == 0:
       cursor.close()
       return make_response(jsonify([]), HTTPStatus.OK)

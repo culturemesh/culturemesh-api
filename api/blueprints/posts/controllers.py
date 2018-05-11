@@ -28,5 +28,5 @@ def get_post_replies(post_id):
                           selection_fields=[post_id],
                           args=request.args,
                           order_clause="ORDER BY id DESC",
-                          order_index_format="id <= %s",
+                          order_index_format="post_replies.id <= %s",
                           order_arg="max_id")

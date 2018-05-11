@@ -25,7 +25,7 @@ def get_post_replies(post_id):
                           INNER JOIN post_replies \
                           ON posts.id = post_replies.id_parent \
                           WHERE posts.id=%s",
-                          selection_fields=[network_id],
+                          selection_fields=[post_id],
                           args=request.args,
                           order_clause="ORDER BY id DESC",
                           order_index_format="id <= %s",

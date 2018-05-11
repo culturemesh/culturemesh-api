@@ -104,7 +104,7 @@ def get_user_posts(user_id):
     return get_paginated("SELECT * \
                          FROM posts \
                          WHERE id_user=%s",
-                         selection_id=user_id,
+                         selection_fields=[user_id],
                          args=request.args,
                          order_clause="ORDER BY id DESC",
                          order_index_format="id <= %s",
@@ -114,6 +114,16 @@ def get_user_posts(user_id):
 @users.route("/<user_id>/events", methods=["GET"])
 @require_apikey
 def get_user_events(user_id):
+    # return get_paginated("SELECT events.* \
+    #                       FROM event_registration \
+    #                       INNER JOIN events \
+    #                       ON events.id = event_registration.id_event \
+    #                       WHERE id_guest=%s AND job=%s",
+    #                       selection_ids=(user_id, request.args["role"]),
+    #                       args=request.args,
+    #                       order_clause="ORDER BY id_event DESC",
+    #                       order_index_format="id <= %s",
+    #                       order_arg="max_id")
     # TODO: Test when there are events in existence.
     connection = mysql.get_db()
     request_count = int(request.args.get("count", 100))

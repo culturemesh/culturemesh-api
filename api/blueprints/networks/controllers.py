@@ -22,7 +22,7 @@ def get_network_posts(network_id):
     return get_paginated("SELECT * \
                          FROM posts \
                          WHERE id_network=%s",
-                         selection_id=network_id,
+                         selection_fields=[network_id],
                          args=request.args,
                          order_clause="ORDER BY id DESC",
                          order_index_format="id <= %s",
@@ -34,7 +34,7 @@ def get_network_events(network_id):
     return get_paginated("SELECT * \
                           FROM events \
                           WHERE id_network=%s",
-                          selection_id=network_id,
+                          selection_fields=[network_id],
                           args=request.args,
                           order_clause="ORDER BY id DESC",
                           order_index_format="id <= %s",
@@ -48,7 +48,7 @@ def get_network_users(network_id):
                           INNER JOIN users \
                           ON users.id = network_registration.id_user \
                           WHERE id_network=%s",
-                          selection_id=network_id,
+                          selection_fields=[network_id],
                           args=request.args,
                           order_clause="ORDER BY join_date DESC",
                           order_index_format="join_date <= %s",

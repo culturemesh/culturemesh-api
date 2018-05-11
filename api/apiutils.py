@@ -60,7 +60,7 @@ def get_by_id(table_name, id_):
     cursor.close()
     return response
 
-def get_paginated(sql_q_format, selection_id, args,
+def get_paginated(sql_q_format, selection_fields, args,
     order_clause, order_index_format, order_arg):
     """
     Utility function for getting paginated results from a
@@ -73,8 +73,8 @@ def get_paginated(sql_q_format, selection_id, args,
 
     NOTE: the only thing here not provided by the user is args.
 
-    :param sql_q_format: A partial SQL query with a single %s
-    :param selection_id: The value of the id that goes in the WHERE clause
+    :param sql_q_format: A partial SQL query with zero or more %s
+    :param selection_fields: A list of the values to be substituted into sql_q_format
     :param args: The query parameters (request.args)
     :params order_clause: The SQL part that dictates order on the final results
     :params order_index_format: The partial SQL query to be used for pagination
@@ -89,10 +89,10 @@ def get_paginated(sql_q_format, selection_id, args,
       order_arg_val = args[order_arg]
       sql_q_format += " AND " + order_index_format
       cursor.execute(sql_q_format + order_clause,
-                    (selection_id, order_arg_val))
+                    (*selection_fields, order_arg_val))
     else:
       cursor.execute(sql_q_format + order_clause,
-                    (selection_id,))
+                    (*selection_fields,))
 
     items = cursor.fetchmany(count)
     if len(items) == 0:

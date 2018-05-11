@@ -81,11 +81,11 @@ def get_paginated(sql_q_format, selection_id, args, order_clause, order_indices)
     :returns: A response object ready to return to the client
     """
     conn = mysql.get_db()
-    count = int(request.args.get("count", 100))
+    count = int(args.get("count", 100))
     cursor = conn.cursor()
     (order_arg, order_arg_sqlname) = order_indices
-    if order_arg in request.args:
-      order_arg_val = request.args[order_arg]
+    if order_arg in args:
+      order_arg_val = args[order_arg]
       query += " AND %s <= %s"
       cursor.execute(query + order_clause,
                     (selection_id, order_arg_sqlname, order_arg_val))

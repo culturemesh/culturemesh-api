@@ -85,7 +85,6 @@ def get_network_users(network_id):
     else:
       users_cursor.execute(query + order, (network_id,))
     users = users_cursor.fetchmany(count)
-    users_cursor.close()
 
     if len(users) == 0:
       return make_response(jsonify([]), HTTPStatus.OK)

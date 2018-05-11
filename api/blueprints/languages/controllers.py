@@ -27,7 +27,7 @@ def get_language_autocomplete():
 
     query = "SELECT * \
              FROM languages \
-             WHERE name REGEXP %s \
+             WHERE name REGEXP '%s' \
              ORDER BY num_speakers DESC \
              LIMIT 20"
 

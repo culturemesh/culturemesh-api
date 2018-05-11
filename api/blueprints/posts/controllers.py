@@ -15,3 +15,18 @@ def test():
 @require_apikey
 def get_post(post_id):
     return get_by_id("posts", post_id)
+
+
+@posts.route("/<post_id>/replies", methods=["GET"])
+@require_apikey
+def get_post_replies(post_id):
+    return get_paginated("SELECT post_replies.* \
+                          FROM posts \
+                          INNER JOIN post_replies \
+                          ON post.id = post_replies.id_parent \
+                          WHERE post.id=%s",
+                          selection_fields=[network_id],
+                          args=request.args,
+                          order_clause="ORDER BY id DESC",
+                          order_index_format="id <= %s",
+                          order_arg="max_id")

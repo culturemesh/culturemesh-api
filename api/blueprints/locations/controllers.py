@@ -14,7 +14,7 @@ def test():
 @locations.route("/countries/<country_id>", methods=["GET"])
 @require_apikey
 def get_country(country_id):
-    return get_by_id("countries", region_id)
+    return get_by_id("countries", country_id)
 
 @locations.route("/regions/<region_id>", methods=["GET"])
 @require_apikey
@@ -24,4 +24,4 @@ def get_region(region_id):
 @locations.route("/cities/<city_id>", methods=["GET"])
 @require_apikey
 def get_city(city_id):
-    return get_by_id("cities", region_id)
+    return get_by_id("cities", city_id)

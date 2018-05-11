@@ -46,7 +46,7 @@ def get_by_id(table_name, id_):
     and returns a response object ready to be returned to the client.
 
     :param table_name: The name of the table to query
-    :param id: The id of the object to fetch
+    :param id_: The id of the object to fetch
     :returns: A response object ready to return to the client.
     """
     connection = mysql.get_db()

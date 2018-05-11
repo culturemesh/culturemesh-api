@@ -25,7 +25,7 @@ def get_network_posts(network_id):
                          selection_id=network_id,
                          args=request.args,
                          order_clause="ORDER BY id DESC",
-                         order_indices=("max_id", "id"),
+                         order_index_format="id <= %s",
                          order_arg="max_id")
 
 @networks.route("/<network_id>/events", methods=["GET"])
@@ -37,7 +37,7 @@ def get_network_events(network_id):
                           selection_id=network_id,
                           args=request.args,
                           order_clause="ORDER BY id DESC",
-                          order_indices=("max_id", "id"),
+                          order_index_format="id <= %s",
                           order_arg="max_id")
 
 

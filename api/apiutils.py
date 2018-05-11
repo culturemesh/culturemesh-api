@@ -54,10 +54,10 @@ def get_by_id(table_name, id):
 
     # Note table_name is never supplied by a client, so we do not
     # need to escape it.
-    query_str = ('SELECT * \
-                 FROM %s \
-                 WHERE id=' % table_name)
-    cursor.execute(query_str[0] + '%s', (id,))
+    query_str = 'SELECT * \
+                 FROM {table} \
+                 WHERE id={{id_}}'.format(table=table_name)
+    cursor.execute(query_str, {id_: id})
     response = make_response_from_single_tuple(cursor)
     cursor.close()
     return response

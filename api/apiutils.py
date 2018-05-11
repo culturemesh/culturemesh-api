@@ -115,7 +115,10 @@ def event_exists(event_id):
     """
     connection = mysql.get_db()
     event_registration_check_cursor = connection.cursor()
-    event_registration_check_cursor.execute("SELECT * FROM events WHERE id=%s", (event_id,))
+    event_registration_check_cursor.execute("SELECT * \
+                                             FROM events \
+                                             WHERE id=%s",
+                                             (event_id,))
     possible_event = event_registration_check_cursor.fetchone()
     event_registration_check_cursor.close()
     return possible_event is not None
@@ -131,7 +134,10 @@ def user_exists(user_id):
     """
     connection = mysql.get_db()
     user_check = connection.cursor()
-    user_check.execute("SELECT * FROM users WHERE id=%s", (user_id,))
+    user_check.execute("SELECT * \
+                        FROM users \
+                        WHERE id=%s",
+                        (user_id,))
     possible_user = user_check.fetchone()
     user_check.close()
     return possible_user is not None
@@ -147,7 +153,10 @@ def network_exists(network_id):
     """
     connection = mysql.get_db()
     network_check = connection.cursor()
-    network_check.execute("SELECT * FROM networks WHERE id=%s", (network_id,))
+    network_check.execute("SELECT * \
+                           FROM networks \
+                           WHERE id=%s",
+                           (network_id,))
     possible_network = network_check.fetchone()
     network_check.close()
     return possible_network is not None

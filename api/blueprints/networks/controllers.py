@@ -14,13 +14,4 @@ def test():
 @networks.route("/<network_id>", methods=["GET"])
 @require_apikey
 def get_network(network_id):
-    connection = mysql.get_db()
-    network_cursor = connection.cursor()
-
-    network_cursor.execute('SELECT * '
-                           'FROM networks '
-                           'WHERE id=%s', (network_id,))
-
-    response = make_response_from_single_tuple(network_cursor)
-    network_cursor.close()
-    return response
+    return get_by_id("networks", network_id)

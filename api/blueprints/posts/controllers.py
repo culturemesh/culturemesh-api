@@ -14,13 +14,4 @@ def test():
 @posts.route("/<post_id>", methods=["GET"])
 @require_apikey
 def get_post(post_id):
-    connection = mysql.get_db()
-    posts_cursor = connection.cursor()
-
-    posts_cursor.execute('SELECT * '
-                         'FROM posts '
-                         'WHERE id=%s', (post_id,))
-
-    response = make_response_from_single_tuple(posts_cursor)
-    posts_cursor.close()
-    return response
+    return get_by_id("posts", post_id)

@@ -3,7 +3,8 @@ from api.extensions import mysql
 from http import HTTPStatus
 
 """
-Contains utility routines for API controller logic.
+Contains utility routines for API controller logic. Mostly
+dirty work and repeated logic.
 """
 
 def convert_objects(tuple_arr, description):
@@ -38,6 +39,24 @@ def make_response_from_single_tuple(cursor):
         obj = convert_objects([obj], cursor.description)[0]
     status = HTTPStatus.METHOD_NOT_ALLOWED if obj is None else HTTPStatus.OK
     return make_response(jsonify(obj), status)
+
+def get_by_id(table_name, id):
+    """
+    Given a table name and an id to search for, queries the table
+    and returns a response object ready to be returned to the client.
+
+    :param table_name: The name of the table to query
+    :param id: The id of the object to fetch
+    :returns: A response object ready to return to the client.
+    """
+    connection = mysql.get_db()
+    cursor = connection.cursor()
+    cursor.execute('SELECT * '
+                   'FROM %s '
+                   'WHERE id=%s', (table_name, id))
+    response = make_response_from_single_tuple(cursor)
+    cursor.close()
+    return response
 
 def event_exists(event_id):
     """

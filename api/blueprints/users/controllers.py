@@ -68,12 +68,7 @@ def users_query():
 @users.route("/<user_id>", methods=["GET"])
 @require_apikey
 def get_user(user_id):
-    connection = mysql.get_db()
-    user_cursor = connection.cursor()
-    user_cursor.execute("SELECT * FROM users WHERE id=%s", (user_id,))
-    response = make_response_from_single_tuple(user_cursor)
-    user_cursor.close()
-    return response
+    return get_by_id("users", user_id)
 
 
 @users.route("/<user_id>/networks", methods=["GET"])

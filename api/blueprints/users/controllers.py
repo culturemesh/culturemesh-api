@@ -77,7 +77,7 @@ def get_user_networks(user_id):
     return get_paginated("SELECT networks.* \
                           FROM network_registration \
                           INNER JOIN networks \
-                          ON networks.id = network_registration.id_event \
+                          ON networks.id = network_registration.id_user \
                           WHERE network_registration.id_user=%s",
                           selection_fields=[user_id],
                           args=request.args,

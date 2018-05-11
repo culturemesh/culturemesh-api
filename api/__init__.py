@@ -27,4 +27,3 @@ api.register_blueprint(events, url_prefix='/event')
 api.register_blueprint(locations, url_prefix='/location')
 api.register_blueprint(languages, url_prefix='/language')
 api.register_blueprint(accounts, url_prefix='/account')
-api

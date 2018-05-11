@@ -13,13 +13,12 @@ from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSign
 
 
 accounts = Blueprint('account', __name__)
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'culturemeshrocks lol good times also drew is kool'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
-app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
+accounts.config['SECRET_KEY'] = 'culturemeshrocks lol good times also drew is kool'
+accounts.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
+accounts.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 
 # extensions
-db = SQLAlchemy(app)
+db = SQLAlchemy(accounts)
 auth = HTTPBasicAuth()
 
 class User(db.Model):
@@ -35,12 +34,12 @@ class User(db.Model):
         return pwd_context.verify(password, self.password_hash)
 
     def generate_auth_token(self, expiration=600):
-        s = Serializer(app.config['SECRET_KEY'], expires_in=expiration)
+        s = Serializer(accounts.config['SECRET_KEY'], expires_in=expiration)
         return s.dumps({'id': self.id})
 
     @staticmethod
     def verify_auth_token(token):
-        s = Serializer(app.config['SECRET_KEY'])
+        s = Serializer(accounts.config['SECRET_KEY'])
         try:
             data = s.loads(token)
         except SignatureExpired:
@@ -64,7 +63,7 @@ def verify_password(username_or_token, password):
     return True
 
 
-@app.route('/api/users', methods=['POST'])
+@accounts.route('/api/users', methods=['POST'])
 def new_user():
     username = request.json.get('username')
     password = request.json.get('password')
@@ -80,7 +79,7 @@ def new_user():
             {'Location': url_for('get_user', id=user.id, _external=True)})
 
 
-@app.route('/api/users/<int:id>')
+@accounts.route('/api/users/<int:id>')
 def get_user(id):
     user = User.query.get(id)
     if not user:
@@ -88,19 +87,15 @@ def get_user(id):
     return jsonify({'username': user.username})
 
 
-@app.route('/api/token')
+@accounts.route('/api/token')
 @auth.login_required
 def get_auth_token(): # Login Required things
     token = g.user.generate_auth_token(600)
     return jsonify({'token': token.decode('ascii'), 'duration': 600})
 
 
-@app.route('/api/resource')
+@accounts.route('/api/resource')
 @auth.login_required
 def get_resource(): # Login Required things
     return jsonify({'data': 'Hello, %s!' % g.user.username})
 
-if __name__ == '__main__':
-    if not os.path.exists('db.sqlite'):
-        db.create_all()
-    app.run(debug=True)

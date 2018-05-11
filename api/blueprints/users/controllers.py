@@ -101,25 +101,14 @@ def get_user_networks(user_id):
 @users.route("/<user_id>/posts", methods=["GET"])
 @require_apikey
 def get_user_posts(user_id):
-    connection = mysql.get_db()
-    request_count = int(request.args.get("count", 100))
-    post_cursor = connection.cursor()
-    # Create SQL statement based on whether max_id is set or not.
-    mysql_string = "SELECT * FROM posts WHERE id_user=%s"
-    sql_string_order = "ORDER BY id DESC"
-    if "max_id" in request.args:
-        mysql_string += "AND id<=%s"
-        post_cursor.execute(mysql_string + sql_string_order, (user_id, request.args["max_id"]))
-    else:
-        post_cursor.execute(mysql_string + sql_string_order, (user_id,))
-    posts = post_cursor.fetchmany(int(request_count))
-
-    if len(posts) == 0:
-      return make_response(jsonify([]), HTTPStatus.OK)
-
-    posts = convert_objects(posts, post_cursor.description)
-    post_cursor.close()
-    return make_response(jsonify(posts), HTTPStatus.OK)
+    return get_paginated("SELECT * \
+                         FROM posts \
+                         WHERE id_user=%s",
+                         selection_id=user_id,
+                         args=request.args,
+                         order_clause="ORDER BY id DESC",
+                         order_index_format="id <= %s",
+                         order_arg="max_id")
 
 
 @users.route("/<user_id>/events", methods=["GET"])

@@ -57,7 +57,7 @@ def get_by_id(table_name, id):
     query_str = 'SELECT * \
                  FROM {table} \
                  WHERE id={{id_}}'.format(table=table_name)
-    cursor.execute(query_str, {id_: id})
+    cursor.execute(query_str, {'id_': id})
     response = make_response_from_single_tuple(cursor)
     cursor.close()
     return response

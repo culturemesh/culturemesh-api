@@ -80,7 +80,7 @@ def get_network_users(network_id):
     order = "ORDER BY join_date DESC"
     if "max_registration_date" in request.args:
       max_registration_date = request.args["max_registration_date"]
-      query += " AND DATE(join_date) <= %s"
+      query += " AND join_date <= %s"
       users_cursor.execute(query + order, (network_id, max_registration_date))
     else:
       users_cursor.execute(query + order, (network_id,))

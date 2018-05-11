@@ -90,13 +90,13 @@ def get_user_networks(user_id):
 @require_apikey
 def get_user_posts(user_id):
     return get_paginated("SELECT * \
-                         FROM posts \
-                         WHERE id_user=%s",
-                         selection_fields=[user_id],
-                         args=request.args,
-                         order_clause="ORDER BY id DESC",
-                         order_index_format="id <= %s",
-                         order_arg="max_id")
+                          FROM posts \
+                          WHERE id_user=%s",
+                          selection_fields=[user_id],
+                          args=request.args,
+                          order_clause="ORDER BY id DESC",
+                          order_index_format="id <= %s",
+                          order_arg="max_id")
 
 
 @users.route("/<user_id>/events", methods=["GET"])

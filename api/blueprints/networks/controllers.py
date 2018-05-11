@@ -40,30 +40,43 @@ def get_network_events(network_id):
                           order_index_format="id <= %s",
                           order_arg="max_id")
 
-
 @networks.route("/<network_id>/users", methods=["GET"])
 @require_apikey
 def get_network_users(network_id):
-    conn = mysql.get_db()
-    count = int(request.args.get("count", 100))
-    users_cursor = conn.cursor()
-    query = "SELECT users.*, join_date \
-             FROM network_registration \
-             INNER JOIN users \
-             ON users.id = network_registration.id_user \
-             WHERE id_network=%s"
-    order = "ORDER BY join_date DESC"
-    if "max_registration_date" in request.args:
-      max_registration_date = request.args["max_registration_date"]
-      query += " AND join_date <= %s"
-      users_cursor.execute(query + order, (network_id, max_registration_date))
-    else:
-      users_cursor.execute(query + order, (network_id,))
-    users = users_cursor.fetchmany(count)
+    return get_paginated("SELECT users.*, join_date \
+                          FROM network_registration \
+                          INNER JOIN users \
+                          ON users.id = network_registration.id_user \
+                          WHERE id_network=%s",
+                          selection_id=network_id,
+                          args=request.args,
+                          order_clause="ORDER BY join_date DESC",
+                          order_index_format="join_date <= %s",
+                          order_arg="max_registration_date")
 
-    if len(users) == 0:
-      return make_response(jsonify([]), HTTPStatus.OK)
+# @networks.route("/<network_id>/users", methods=["GET"])
+# @require_apikey
+# def get_network_users(network_id):
+#     conn = mysql.get_db()
+#     count = int(request.args.get("count", 100))
+#     users_cursor = conn.cursor()
+#     query = "SELECT users.*, join_date \
+#              FROM network_registration \
+#              INNER JOIN users \
+#              ON users.id = network_registration.id_user \
+#              WHERE id_network=%s"
+#     order = "ORDER BY join_date DESC"
+#     if "max_registration_date" in request.args:
+#       max_registration_date = request.args["max_registration_date"]
+#       query += " AND join_date <= %s"
+#       users_cursor.execute(query + order, (network_id, max_registration_date))
+#     else:
+#       users_cursor.execute(query + order, (network_id,))
+#     users = users_cursor.fetchmany(count)
 
-    users = convert_objects(users, users_cursor.description)
-    users_cursor.close()
-    return make_response(jsonify(users), HTTPStatus.OK)
+#     if len(users) == 0:
+#       return make_response(jsonify([]), HTTPStatus.OK)
+
+#     users = convert_objects(users, users_cursor.description)
+#     users_cursor.close()
+#     return make_response(jsonify(users), HTTPStatus.OK)

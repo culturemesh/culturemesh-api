@@ -23,8 +23,8 @@ def get_post_replies(post_id):
     return get_paginated("SELECT post_replies.* \
                           FROM posts \
                           INNER JOIN post_replies \
-                          ON post.id = post_replies.id_parent \
-                          WHERE post.id=%s",
+                          ON posts.id = post_replies.id_parent \
+                          WHERE posts.id=%s",
                           selection_fields=[network_id],
                           args=request.args,
                           order_clause="ORDER BY id DESC",

@@ -71,11 +71,9 @@ def get_user(user_id):
     connection = mysql.get_db()
     user_cursor = connection.cursor()
     user_cursor.execute("SELECT * FROM users WHERE id=%s", (user_id,))
-    user = user_cursor.fetchone()
-    if user is not None:
-        user = convert_objects([user], user_cursor.description)[0]
+    response = make_response_from_single_tuple(user_cursor)
     user_cursor.close()
-    return make_response(jsonify(user), HTTPStatus.METHOD_NOT_ALLOWED if user is None else HTTPStatus.OK)
+    return response
 
 
 @users.route("/<user_id>/networks", methods=["GET"])

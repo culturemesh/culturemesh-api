@@ -21,9 +21,6 @@ def get_network(network_id):
                            'FROM networks '
                            'WHERE id=%s', (network_id,))
 
-    network = network_cursor.fetchone()
-    if network is not None:
-        network = convert_objects([network], network_cursor.description)[0]
+    response = make_response_from_single_tuple(network_cursor)
     network_cursor.close()
-    return make_response(jsonify(network),
-      HTTPStatus.METHOD_NOT_ALLOWED if network is None else HTTPStatus.OK)
+    return response

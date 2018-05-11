@@ -1,11 +1,13 @@
 from api.extensions import mysql
+from http import HTTPStatus
 
 """
 Contains utility routines for API controller logic.
 """
 
 def convert_objects(tuple_arr, description):
-    """A DB cursor returns an array of tuples, without attribute names.
+    """
+    A DB cursor returns an array of tuples, without attribute names.
     This function converts these tuples into objects
     with key-value pairs.
     :param tuple_arr:  An array of tuples
@@ -16,6 +18,25 @@ def convert_objects(tuple_arr, description):
         obj_arr.append({description[index][0]: column for index, column in enumerate(tuple_obj)})
     return obj_arr
 
+def make_response_from_single_tuple(cursor):
+    """
+    Given a database cursor from which we expect only one result to be
+    returned, extracts that tuple into an object and makes a response
+    from it.
+
+    If there are no results in the cursor, this method also returns
+    the correct response.
+
+    NOTE: the cursor must be closed by the caller.
+
+    :param cursor: A 'loaded' cursor
+    :return: A response object ready to return to the client
+    """
+    obj = cursor.fetchone()
+    if obj is not None:
+        obj = convert_objects([obj], cursor.description)[0]
+    status = HTTPStatus.METHOD_NOT_ALLOWED if obj is None else HTTPStatus.OK
+    return make_response(jsonify(obj), status)
 
 def event_exists(event_id):
     """

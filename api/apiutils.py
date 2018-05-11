@@ -85,7 +85,6 @@ def get_paginated(sql_q_format, selection_id, args,
     conn = mysql.get_db()
     count = int(args.get("count", 100))
     cursor = conn.cursor()
-    (order_arg, order_arg_sqlname) = order_indices
     if order_arg in args:
       order_arg_val = args[order_arg]
       sql_q_format += " AND " + order_index_format

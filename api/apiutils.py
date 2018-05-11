@@ -40,7 +40,7 @@ def make_response_from_single_tuple(cursor):
     status = HTTPStatus.METHOD_NOT_ALLOWED if obj is None else HTTPStatus.OK
     return make_response(jsonify(obj), status)
 
-def get_by_id(table_name, id):
+def get_by_id(table_name, id_):
     """
     Given a table name and an id to search for, queries the table
     and returns a response object ready to be returned to the client.
@@ -54,10 +54,9 @@ def get_by_id(table_name, id):
 
     # Note table_name is never supplied by a client, so we do not
     # need to escape it.
-    query_str = 'SELECT * \
-                 FROM {table} \
-                 WHERE id={{id_}}'.format(table=table_name)
-    cursor.execute(query_str, {'id_': id})
+    cursor.execute('SELECT *'
+                   'FROM %s'
+                   'WHERE id=%s', (table_name, id_))
     response = make_response_from_single_tuple(cursor)
     cursor.close()
     return response

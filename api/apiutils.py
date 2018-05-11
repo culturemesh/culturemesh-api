@@ -86,11 +86,11 @@ def get_paginated(sql_q_format, selection_id, args, order_clause, order_indices)
     (order_arg, order_arg_sqlname) = order_indices
     if order_arg in args:
       order_arg_val = args[order_arg]
-      query += " AND %s <= %s"
-      cursor.execute(query + order_clause,
+      sql_q_format += " AND %s <= %s"
+      cursor.execute(sql_q_format + order_clause,
                     (selection_id, order_arg_sqlname, order_arg_val))
     else:
-      cursor.execute(query + order_clause,
+      cursor.execute(sql_q_format + order_clause,
                     (selection_id,))
 
     items = cursor.fetchmany(count)

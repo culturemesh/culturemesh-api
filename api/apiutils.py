@@ -1,4 +1,4 @@
-from Flask import jsonify, make_response
+from flask import jsonify, make_response
 from api.extensions import mysql
 from http import HTTPStatus
 

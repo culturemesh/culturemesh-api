@@ -51,9 +51,12 @@ def get_by_id(table_name, id):
     """
     connection = mysql.get_db()
     cursor = connection.cursor()
+
+    # Note table_name is never supplied by a client, so we do not
+    # need to escape it.
     cursor.execute('SELECT * '
                    'FROM %s '
-                   'WHERE id=%s', (table_name, id))
+                   'WHERE id=%s' % table_name, (id,))
     response = make_response_from_single_tuple(cursor)
     cursor.close()
     return response

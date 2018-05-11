@@ -27,11 +27,11 @@ def get_language_autocomplete():
 
     query = "SELECT * \
              FROM languages \
-             WHERE name REGEXP '%s' \
+             WHERE name REGEXP %s \
              ORDER BY num_speakers DESC \
-             LIMIT 20"
+             LIMIT 20" % input_text
 
-    cursor.execute(query, (input_text))
+    cursor.execute(query)
     langs = cursor.fetchall()
     if len(langs) == 0:
       cursor.close()

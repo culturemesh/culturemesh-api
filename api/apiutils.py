@@ -60,6 +60,49 @@ def get_by_id(table_name, id_):
     cursor.close()
     return response
 
+def get_paginated(sql_q_format, selection_id, args, order_clause, order_indices):
+    """
+    Utility function for getting paginated results from a
+    database.
+
+    See OneNote documentation for Pagination mechanics.
+
+    NOTE: only works if the WHERE class of the SQL statement
+          matches a single id.
+
+    NOTE: the only thing here not provided by the user is args.
+
+    :param sql_q_format: A partial SQL query with a single %s
+    :param selection_id: The value of the id that goes in the WHERE clause
+    :param args: The query parameters (request.args)
+    :params order_clause: The SQL part that dictates order on the final results
+    :params order_indices: A pair (arg_name, SQL entity name) that indicates the
+                           order_index when we paginate.
+    :returns: A response object ready to return to the client
+    """
+    conn = mysql.get_db()
+    count = int(request.args.get("count", 100))
+    cursor = conn.cursor()
+    (order_arg, order_arg_sqlname) = order_indices
+    if order_arg in request.args:
+      order_arg_val = request.args[order_arg]
+      query += " AND %s <= %s"
+      cursor.execute(query + order_clause,
+                    (selection_id, order_arg_sqlname, order_arg_val))
+    else:
+      cursor.execute(query + order_clause,
+                    (selection_id,))
+
+    items = cursor.fetchmany(count)
+
+    if len(items) == 0:
+      cursor.close()
+      return make_response(jsonify([]), HTTPStatus.OK)
+
+    items = convert_objects(items, cursor.description)
+    cursor.close()
+    return make_response(jsonify(items), HTTPStatus.OK)
+
 def event_exists(event_id):
     """
     This function is used to validate endpoint input.

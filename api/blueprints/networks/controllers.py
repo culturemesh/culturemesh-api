@@ -44,27 +44,14 @@ def get_network_posts(network_id):
 @networks.route("/<network_id>/events", methods=["GET"])
 @require_apikey
 def get_network_events(network_id):
-    conn = mysql.get_db()
-    count = int(request.args.get("count", 100))
-    cursor = conn.cursor()
-    query = "SELECT * \
-             FROM events \
-             WHERE id_network=%s"
-    order = "ORDER BY id DESC"
-    if "max_id" in request.args:
-      max_id = request.args["max_id"]
-      query += " AND id <= %s"
-      cursor.execute(query + order, (network_id, max_id))
-    else:
-      cursor.execute(query + order, (network_id,))
-    events = cursor.fetchmany(count)
+    return get_paginated("SELECT * \
+                          FROM events \
+                          WHERE id_network=%s",
+                          selection_id=network_id,
+                          args=request.args,
+                          order_clause="ORDER BY id DESC",
+                          order_indices=("max_id", "id"))
 
-    if len(events) == 0:
-      return make_response(jsonify([]), HTTPStatus.OK)
-
-    events = convert_objects(events, cursor.description)
-    cursor.close()
-    return make_response(jsonify(events), HTTPStatus.OK)
 
 @networks.route("/<network_id>/users", methods=["GET"])
 @require_apikey

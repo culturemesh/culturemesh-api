@@ -113,6 +113,10 @@ def get_user_posts(user_id):
     else:
         post_cursor.execute(mysql_string + sql_string_order, (user_id,))
     posts = post_cursor.fetchmany(int(request_count))
+
+    if len(posts) == 0:
+      return make_response(jsonify([]), HTTPStatus.OK)
+
     posts = convert_objects(posts, post_cursor.description)
     post_cursor.close()
     return make_response(jsonify(posts), HTTPStatus.OK)

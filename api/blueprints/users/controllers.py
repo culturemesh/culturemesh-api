@@ -114,36 +114,17 @@ def get_user_posts(user_id):
 @users.route("/<user_id>/events", methods=["GET"])
 @require_apikey
 def get_user_events(user_id):
-    # return get_paginated("SELECT events.* \
-    #                       FROM event_registration \
-    #                       INNER JOIN events \
-    #                       ON events.id = event_registration.id_event \
-    #                       WHERE id_guest=%s AND job=%s",
-    #                       selection_ids=(user_id, request.args["role"]),
-    #                       args=request.args,
-    #                       order_clause="ORDER BY id_event DESC",
-    #                       order_index_format="id <= %s",
-    #                       order_arg="max_id")
     # TODO: Test when there are events in existence.
-    connection = mysql.get_db()
-    request_count = int(request.args.get("count", 100))
-    event_registration_cursor = connection.cursor()
-    sql_statement = "SELECT id_event FROM event_registration WHERE job=%s AND id_guest=%s"
-    sql_string_order = "ORDER BY id_event DESC"
-    if "max_id" in request.args:
-        sql_statement += " AND id <= %s"
-        event_registration_cursor.execute(sql_statement + sql_string_order, (request.args["role"], user_id, request.args["max_id"]))
-    else:
-        event_registration_cursor.execute(sql_statement + sql_string_order, (request.args["role"], user_id))
-    event_ids = event_registration_cursor.fetchmany(request_count)
-    event_registration_cursor.close()
-    event_cursor = connection.cursor()
-    if len(event_ids) == 0:
-        return make_response(jsonify([]), HTTPStatus.OK)
-    event_cursor.execute("SELECT * FROM events WHERE id IN %s", (tuple(event_ids),))
-    events = convert_objects(event_cursor.fetchall(), event_cursor.description)
-    event_cursor.close()
-    return make_response(jsonify(events), HTTPStatus.OK)
+    return get_paginated("SELECT events.* \
+                          FROM event_registration \
+                          INNER JOIN events \
+                          ON events.id = event_registration.id_event \
+                          WHERE id_guest=%s AND job=%s",
+                          selection_ids=[user_id, request.args["role"]],
+                          args=request.args,
+                          order_clause="ORDER BY id_event DESC",
+                          order_index_format="id <= %s",
+                          order_arg="max_id")
 
 
 @users.route("/<user_id>/addToEvent/<event_id>", methods=["POST"])

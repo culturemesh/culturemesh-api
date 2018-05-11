@@ -74,28 +74,16 @@ def get_user(user_id):
 @users.route("/<user_id>/networks", methods=["GET"])
 @require_apikey
 def get_user_networks(user_id):
-    connection = mysql.get_db()
-    count = int(request.args.get("count", 100))
-    reg_cursor = connection.cursor()
-    mysql_string = "SELECT id_network FROM network_registration WHERE id_user=%s"
-    sql_string_order = "ORDER BY id_network DESC"
-    if "max_registration_date" in request.args:
-        mysql_string += " AND DATE(join_date) < %s"
-        reg_cursor.execute(mysql_string + sql_string_order, (user_id, request.args["max_registration_date"]))
-    else:
-        reg_cursor.execute(mysql_string + sql_string_order, (user_id,))
-    network_ids = reg_cursor.fetchmany(count)
-    reg_cursor.close()
-    # SQL doesn't like empty tuples in IN
-    if len(network_ids) == 0:
-        return make_response(jsonify([]), HTTPStatus.OK)
-    network_cursor = connection.cursor()
-    network_cursor.execute('SELECT * FROM networks WHERE id IN %s', (network_ids,))
-    network_arr = network_cursor.fetchall()
-    # Now, we need to convert these tuples into objects with key-value pairs
-    network_obj = convert_objects(network_arr, network_cursor.description)
-    network_cursor.close()
-    return make_response(jsonify(network_obj), HTTPStatus.OK)
+    return get_paginated("SELECT networks.* \
+                          FROM network_registration \
+                          INNER JOIN networks \
+                          ON networks.id = network_registration.id_event \
+                          WHERE network_registration.id_user=%s",
+                          selection_fields=[user_id],
+                          args=request.args,
+                          order_clause="ORDER BY id_network DESC",
+                          order_index_format="join_date <= %s",
+                          order_arg="max_registration_date")
 
 
 @users.route("/<user_id>/posts", methods=["GET"])

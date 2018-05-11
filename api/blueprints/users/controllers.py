@@ -74,7 +74,7 @@ def get_user(user_id):
 @users.route("/<user_id>/networks", methods=["GET"])
 @require_apikey
 def get_user_networks(user_id):
-    return get_paginated("SELECT networks.* \
+    return get_paginated("SELECT networks.*, join_date \
                           FROM network_registration \
                           INNER JOIN networks \
                           ON networks.id = network_registration.id_network \

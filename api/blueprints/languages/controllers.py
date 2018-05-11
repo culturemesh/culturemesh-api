@@ -25,6 +25,8 @@ def get_language_autocomplete():
     connection = mysql.get_db()
     cursor = connection.cursor()
 
+    # TODO: this is entirely unsafe, need better way to
+    #       work with autocomplete.
     query = "SELECT * \
              FROM languages \
              WHERE name REGEXP %s \

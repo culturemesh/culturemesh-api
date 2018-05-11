@@ -19,7 +19,7 @@ def get_event(event_id):
 
     events_cursor.execute('SELECT * '
                          'FROM events '
-                         'WHERE id=%s', (post_id,))
+                         'WHERE id=%s', (event_id,))
 
     response = make_response_from_single_tuple(events_cursor)
     events_cursor.close()

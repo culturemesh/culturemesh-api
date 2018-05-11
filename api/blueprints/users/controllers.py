@@ -119,7 +119,7 @@ def get_user_events(user_id):
                           FROM event_registration \
                           INNER JOIN events \
                           ON events.id = event_registration.id_event \
-                          WHERE id_guest=%s AND job=%s",
+                          WHERE event_registration.id_guest=%s AND event_registration.job=%s",
                           selection_ids=[user_id, request.args["role"]],
                           args=request.args,
                           order_clause="ORDER BY id_event DESC",

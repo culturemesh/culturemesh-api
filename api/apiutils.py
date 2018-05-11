@@ -60,7 +60,8 @@ def get_by_id(table_name, id_):
     cursor.close()
     return response
 
-def get_paginated(sql_q_format, selection_id, args, order_clause, order_indices):
+def get_paginated(sql_q_format, selection_id, args,
+    order_clause, order_index_format, order_arg):
     """
     Utility function for getting paginated results from a
     database.
@@ -76,8 +77,9 @@ def get_paginated(sql_q_format, selection_id, args, order_clause, order_indices)
     :param selection_id: The value of the id that goes in the WHERE clause
     :param args: The query parameters (request.args)
     :params order_clause: The SQL part that dictates order on the final results
-    :params order_indices: A pair (arg_name, SQL entity name) that indicates the
-                           order_index when we paginate.
+    :params order_index_format: The partial SQL query to be used for pagination
+                                ordering, of the form "FIELD <= %s"
+    :params order_arg: The query param on which order is based for pagination
     :returns: A response object ready to return to the client
     """
     conn = mysql.get_db()
@@ -86,9 +88,9 @@ def get_paginated(sql_q_format, selection_id, args, order_clause, order_indices)
     (order_arg, order_arg_sqlname) = order_indices
     if order_arg in args:
       order_arg_val = args[order_arg]
-      sql_q_format += " AND %s <= %s"
+      sql_q_format += " AND " + order_index_format
       cursor.execute(sql_q_format + order_clause,
-                    (selection_id, order_arg_sqlname, order_arg_val))
+                    (selection_id, order_arg_val))
     else:
       cursor.execute(sql_q_format + order_clause,
                     (selection_id,))

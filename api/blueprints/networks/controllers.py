@@ -25,7 +25,8 @@ def get_network_posts(network_id):
                          selection_id=network_id,
                          args=request.args,
                          order_clause="ORDER BY id DESC",
-                         order_indices=("max_id", "id"))
+                         order_indices=("max_id", "id"),
+                         order_arg="max_id")
 
 @networks.route("/<network_id>/events", methods=["GET"])
 @require_apikey
@@ -36,7 +37,8 @@ def get_network_events(network_id):
                           selection_id=network_id,
                           args=request.args,
                           order_clause="ORDER BY id DESC",
-                          order_indices=("max_id", "id"))
+                          order_indices=("max_id", "id"),
+                          order_arg="max_id")
 
 
 @networks.route("/<network_id>/users", methods=["GET"])

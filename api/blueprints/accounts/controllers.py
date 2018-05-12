@@ -13,8 +13,6 @@ from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSign
 
 
 accounts = Blueprint('account', __name__)
-accounts.config['SECRET_KEY'] = 'culturemeshrocks lol good times also drew is kool'
-accounts.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
 accounts.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 
 # extensions
@@ -34,12 +32,12 @@ class User(db.Model):
         return pwd_context.verify(password, self.password_hash)
 
     def generate_auth_token(self, expiration=600):
-        s = Serializer(accounts.config['SECRET_KEY'], expires_in=expiration)
+        s = Serializer(accounts.config['ACCOUNT_SECRET_KEY'], expires_in=expiration)
         return s.dumps({'id': self.id})
 
     @staticmethod
     def verify_auth_token(token):
-        s = Serializer(accounts.config['SECRET_KEY'])
+        s = Serializer(accounts.config['ACCOUNT_SECRET_KEY'])
         try:
             data = s.loads(token)
         except SignatureExpired:

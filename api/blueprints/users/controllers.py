@@ -74,73 +74,45 @@ def get_user(user_id):
 @users.route("/<user_id>/networks", methods=["GET"])
 @require_apikey
 def get_user_networks(user_id):
-    connection = mysql.get_db()
-    count = int(request.args.get("count", 100))
-    reg_cursor = connection.cursor()
-    mysql_string = "SELECT id_network FROM network_registration WHERE id_user=%s"
-    sql_string_order = "ORDER BY id_network DESC"
-    if "max_registration_date" in request.args:
-        mysql_string += " AND DATE(join_date) < %s"
-        reg_cursor.execute(mysql_string + sql_string_order, (user_id, request.args["max_registration_date"]))
-    else:
-        reg_cursor.execute(mysql_string + sql_string_order, (user_id,))
-    network_ids = reg_cursor.fetchmany(count)
-    reg_cursor.close()
-    # SQL doesn't like empty tuples in IN
-    if len(network_ids) == 0:
-        return make_response(jsonify([]), HTTPStatus.OK)
-    network_cursor = connection.cursor()
-    network_cursor.execute('SELECT * FROM networks WHERE id IN %s', (network_ids,))
-    network_arr = network_cursor.fetchall()
-    # Now, we need to convert these tuples into objects with key-value pairs
-    network_obj = convert_objects(network_arr, network_cursor.description)
-    network_cursor.close()
-    return make_response(jsonify(network_obj), HTTPStatus.OK)
+    return get_paginated("SELECT networks.*, join_date \
+                          FROM network_registration \
+                          INNER JOIN networks \
+                          ON networks.id = network_registration.id_network \
+                          WHERE network_registration.id_user=%s",
+                          selection_fields=[user_id],
+                          args=request.args,
+                          order_clause="ORDER BY id_network DESC",
+                          order_index_format="join_date <= %s",
+                          order_arg="max_registration_date")
 
 
 @users.route("/<user_id>/posts", methods=["GET"])
 @require_apikey
 def get_user_posts(user_id):
-    connection = mysql.get_db()
-    request_count = int(request.args.get("count", 100))
-    post_cursor = connection.cursor()
-    # Create SQL statement based on whether max_id is set or not.
-    mysql_string = "SELECT * FROM posts WHERE id_user=%s"
-    sql_string_order = "ORDER BY id DESC"
-    if "max_id" in request.args:
-        mysql_string += "AND id<=%s"
-        post_cursor.execute(mysql_string + sql_string_order, (user_id, request.args["max_id"]))
-    else:
-        post_cursor.execute(mysql_string + sql_string_order, (user_id,))
-    posts = post_cursor.fetchmany(int(request_count))
-    posts = convert_objects(posts, post_cursor.description)
-    post_cursor.close()
-    return make_response(jsonify(posts), HTTPStatus.OK)
+    return get_paginated("SELECT * \
+                          FROM posts \
+                          WHERE id_user=%s",
+                          selection_fields=[user_id],
+                          args=request.args,
+                          order_clause="ORDER BY id DESC",
+                          order_index_format="id <= %s",
+                          order_arg="max_id")
 
 
 @users.route("/<user_id>/events", methods=["GET"])
 @require_apikey
 def get_user_events(user_id):
     # TODO: Test when there are events in existence.
-    connection = mysql.get_db()
-    request_count = int(request.args.get("count", 100))
-    event_registration_cursor = connection.cursor()
-    sql_statement = "SELECT id_event FROM event_registration WHERE job=%s AND id_guest=%s"
-    sql_string_order = "ORDER BY id_event DESC"
-    if "max_id" in request.args:
-        sql_statement += " AND id <= %s"
-        event_registration_cursor.execute(sql_statement + sql_string_order, (request.args["role"], user_id, request.args["max_id"]))
-    else:
-        event_registration_cursor.execute(sql_statement + sql_string_order, (request.args["role"], user_id))
-    event_ids = event_registration_cursor.fetchmany(request_count)
-    event_registration_cursor.close()
-    event_cursor = connection.cursor()
-    if len(event_ids) == 0:
-        return make_response(jsonify([]), HTTPStatus.OK)
-    event_cursor.execute("SELECT * FROM events WHERE id IN %s", (tuple(event_ids),))
-    events = convert_objects(event_cursor.fetchall(), event_cursor.description)
-    event_cursor.close()
-    return make_response(jsonify(events), HTTPStatus.OK)
+    return get_paginated("SELECT events.* \
+                          FROM event_registration \
+                          INNER JOIN events \
+                          ON events.id = event_registration.id_event \
+                          WHERE event_registration.id_guest=%s AND event_registration.job=%s",
+                          selection_fields=[user_id, request.args["role"]],
+                          args=request.args,
+                          order_clause="ORDER BY id_event DESC",
+                          order_index_format="id <= %s",
+                          order_arg="max_id")
 
 
 @users.route("/<user_id>/addToEvent/<event_id>", methods=["POST"])

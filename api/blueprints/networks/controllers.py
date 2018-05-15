@@ -19,23 +19,24 @@ def get_networks():
     if "location_cur" not in request.args:
         return make_response("No location_cur specified", HTTPStatus.METHOD_NOT_ALLOWED)
     near_ids = request.args["location_cur"].split(",")
-    print(type(near_ids))
     # All requests will start with the same query and query for location_cur.
     mysql_string_start = "SELECT * \
                           FROM networks \
                           WHERE id_country_cur=%s AND id_region_cur=%s AND id_city_cur=%s"
     # Need to check if querying a location or language network. That changes our queries.
     if "location_origin" in request.args:
+        near_ids.extend(request.args["location_origin"].split(","))
         return get_paginated(mysql_string_start + "AND id_country_origin=%s AND id_region_origin=%s \
                              AND id_country_origin=%s",
-                             selection_fields=near_ids.extend(request.args["location_origin"].split(",")),
+                             selection_fields= near_ids,
                              args=request.args,
                              order_clause="ORDER BY id DESC",
                              order_index_format="id <= %s",
                              order_arg="max_id")
     elif "language_origin" in request.args:
+        near_ids.append(request.args["language_origin"])
         return get_paginated(mysql_string_start + "AND language_origin=%s",
-                             selection_fields=near_ids.append(request.args["language_origin"]),
+                             selection_fields= near_ids,
                              args=request.args,
                              order_clause="ORDER BY id DESC",
                              order_index_format="id <= %s",

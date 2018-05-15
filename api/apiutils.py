@@ -7,6 +7,7 @@ Contains utility routines for API controller logic. Mostly
 dirty work and repeated logic.
 """
 
+
 def convert_objects(tuple_arr, description):
     """
     A DB cursor returns an array of tuples, without attribute names.
@@ -19,6 +20,7 @@ def convert_objects(tuple_arr, description):
     for tuple_obj in tuple_arr:
         obj_arr.append({description[index][0]: column for index, column in enumerate(tuple_obj)})
     return obj_arr
+
 
 def make_response_from_single_tuple(cursor):
     """
@@ -40,6 +42,7 @@ def make_response_from_single_tuple(cursor):
     status = HTTPStatus.METHOD_NOT_ALLOWED if obj is None else HTTPStatus.OK
     return make_response(jsonify(obj), status)
 
+
 def get_by_id(table_name, id_):
     """
     Given a table name and an id to search for, queries the table
@@ -60,6 +63,7 @@ def get_by_id(table_name, id_):
     cursor.close()
     return response
 
+
 def get_paginated(sql_q_format, selection_fields, args,
     order_clause, order_index_format, order_arg):
     """
@@ -76,10 +80,10 @@ def get_paginated(sql_q_format, selection_fields, args,
     :param sql_q_format: A partial SQL query with zero or more %s
     :param selection_fields: A list of the values to be substituted into sql_q_format
     :param args: The query parameters (request.args)
-    :params order_clause: The SQL part that dictates order on the final results
-    :params order_index_format: The partial SQL query to be used for pagination
+    :param order_clause: The SQL part that dictates order on the final results
+    :param order_index_format: The partial SQL query to be used for pagination
                                 ordering, of the form "FIELD <= %s"
-    :params order_arg: The query param on which order is based for pagination
+    :param order_arg: The query param on which order is based for pagination
     :returns: A response object ready to return to the client
     """
     conn = mysql.get_db()
@@ -101,6 +105,7 @@ def get_paginated(sql_q_format, selection_fields, args,
     items = convert_objects(items, cursor.description)
     cursor.close()
     return make_response(jsonify(items), HTTPStatus.OK)
+
 
 def event_exists(event_id):
     """

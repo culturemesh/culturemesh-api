@@ -27,14 +27,14 @@ def get_networks():
     if "location_origin" in request.args:
         return get_paginated(mysql_string_start + "AND id_country_origin=%s AND id_region_origin=%s \
                              AND id_country_origin=%s",
-                             selection_fields=[near_ids.extend(request.args["location_origin"].split(","))],
+                             selection_fields=near_ids.extend(request.args["location_origin"].split(",")),
                              args=request.args,
                              order_clause="ORDER BY id DESC",
                              order_index_format="id <= %s",
                              order_arg="max_id")
     elif "language_origin" in request.args:
         return get_paginated(mysql_string_start + "AND language_origin=%s",
-                             selection_fields=[near_ids.append(request.args["language_origin"])],
+                             selection_fields=near_ids.append(request.args["language_origin"]),
                              args=request.args,
                              order_clause="ORDER BY id DESC",
                              order_index_format="id <= %s",

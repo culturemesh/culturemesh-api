@@ -19,6 +19,7 @@ def get_networks():
     if "location_cur" not in request.args:
         return make_response("No location_cur specified", HTTPStatus.METHOD_NOT_ALLOWED)
     near_ids = request.args["location_cur"].split(",")
+    print(type(near_ids))
     # All requests will start with the same query and query for location_cur.
     mysql_string_start = "SELECT * \
                           FROM networks \

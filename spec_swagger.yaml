@@ -1,0 +1,1213 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: CultureMesh
+host: www.culturemesh.com
+basePath: /api/v1
+tags:
+  - name: users
+    description: Data and actions about CultureMesh users.
+  - name: networks
+    description: Data and actions about CultureMesh networks.
+  - name: posts
+    description: Data and actions about CultureMesh posts.
+  - name: events
+    description: Data and actions about CultureMesh events.
+  - name: locations
+    description: API for getting location information from CultureMesh.
+  - name: languages
+    description: API for getting language information from CultureMesh.
+  - name: accounts
+    description: Data and actions about CultureMesh accounts.
+schemes:
+  - https
+paths:
+  /users:
+    get:
+      tags:
+        - users
+      summary: Get users.
+      description: ''
+      operationId: getUsers
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: count
+          type: integer
+          description: |
+            The number of results to return.  Between 1 and 100.
+        - in: query
+          name: max_id
+          type: integer
+          description: |
+            The maximum ID, inclusive, to return data for.
+        - in: query
+          name: near_location
+          type: string
+          description: |
+            A comma-separated list of country_id, region_id, and city_id, in that order.
+        - in: query
+          name: from_location
+          type: string
+          description: |
+             A comma-separated list of country_id, region_id, and city_id, in that order.
+        - in: query
+          name: language
+          type: string
+          description: |
+             Name of language.
+      responses:
+        '200':
+          description: A list of users matching filter.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        '405':
+          description: Invalid input
+  '/user/{userId}':
+    get:
+      tags:
+        - users
+      summary: Get a particular user.
+      description: Gets a user.
+      operationId: getUser
+      produces:
+        - application/json
+      parameters:
+        - name: userId
+          in: path
+          description: ID of user to return.
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Ok
+          schema:
+            $ref: '#/definitions/User'
+        '405':
+          description: Invalid input
+  '/user/{userId}/networks':
+    get:
+      tags:
+        - users
+      summary: Get networks a user belongs to.
+      description: ''
+      operationId: getUserNetworks
+      produces:
+        - application/json
+      parameters:
+        - name: userId
+          in: path
+          description: ID of user to return.
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: count
+          type: integer
+          description: |
+            The number of results to return.  Between 1 and 100.
+        - in: query
+          name: max_registration_date
+          type: string
+          format: timestamp
+          description: |
+            The latest registration date, inclusive, in the networks returned.
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Network'
+        '405':
+          description: Invalid input
+  '/user/{userId}/posts':
+    get:
+      tags:
+        - users
+      summary: Get list of posts made by a user.
+      description: ''
+      operationId: getUserPosts
+      produces:
+        - application/json
+      parameters:
+        - name: userId
+          in: path
+          description: ID of user to return.
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: count
+          type: integer
+          description: |
+            The number of results to return.  Between 1 and 100.
+        - in: query
+          name: max_id
+          type: integer
+          description: |
+            The maximum ID, inclusive, to return data for.
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Post'
+        '405':
+          description: Invalid input
+  '/user/{userId}/events':
+    get:
+      tags:
+        - users
+      summary: Get list of events associated with a user.
+      description: ''
+      operationId: getUserEvents
+      produces:
+        - application/json
+      parameters:
+        - name: userId
+          in: path
+          description: ID of user to return.
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: role
+          description: 'Can be "hosting" or " attending"  '
+          required: true
+          type: string
+          enum:
+            - hosting
+            - attending
+        - in: query
+          name: count
+          type: integer
+          description: |
+            The number of results to return.  Between 1 and 100.
+        - in: query
+          name: max_id
+          type: integer
+          description: |
+            The maximum ID, inclusive, to return data for.
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Event'
+        '405':
+          description: Invalid input
+  '/user/{userId}/addToEvent/{eventId}':
+    post:
+      tags:
+        - users
+      summary: Add user to an event.
+      description: ''
+      operationId: addUserToEvent
+      produces:
+        - application/json
+      parameters:
+        - name: userId
+          in: path
+          description: ID of user to add.
+          required: true
+          type: integer
+          format: int64
+        - name: eventId
+          in: path
+          description: ID of event to add user to.
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '405':
+          description: Invalid input
+  '/user/{userId}/addToNetwork/{networkId}':
+    post:
+      tags:
+        - users
+      summary: Add user to a network.
+      description: ''
+      operationId: addUserToNetwork
+      produces:
+        - application/json
+      parameters:
+        - name: userId
+          in: path
+          description: ID of user to add.
+          required: true
+          type: integer
+          format: int64
+        - name: networkId
+          in: path
+          description: ID of network to add user to.
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '405':
+          description: Invalid input
+  /user:
+    post:
+      tags:
+        - users
+      summary: Create a new user
+      description: ''
+      operationId: createUser
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: user
+          description: Created user object
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        '200':
+          description: OK
+    put:
+      tags:
+        - users
+      summary: Update a user
+      description: ''
+      operationId: updateUser
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: User object with which to update
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        '200':
+          description: OK
+  /networks:
+    get:
+      tags:
+        - networks
+      summary: Get a list of all networks.
+      description: ''
+      operationId: getNetworks
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: count
+          type: integer
+          description: |
+            The number of results to return.  Between 1 and 100.
+        - in: query
+          name: max_id
+          type: integer
+          description: |
+            The maximum ID, inclusive, to return data for.
+        - in: query
+          name: near_location
+          type: string
+          description: |
+            A comma-separated list of country_id, region_id, and city_id, in that order.
+        - in: query
+          name: from_location
+          type: string
+          description: |
+             A comma-separated list of country_id, region_id, and city_id, in that order.
+        - in: query
+          name: language
+          type: string
+          description: |
+             Name of language.
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Network'
+        '405':
+          description: Invalid input
+  '/network/{networkId}':
+    get:
+      tags:
+        - networks
+      summary: Get a specific network.
+      description: ''
+      operationId: getNetwork
+      produces:
+        - application/json
+      parameters:
+        - name: networkId
+          in: path
+          description: ID of network to return.
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Network'
+        '405':
+          description: Invalid input
+  '/network/{networkId}/posts':
+    get:
+      tags:
+        - networks
+      summary: Get all posts in a network.
+      description: ''
+      operationId: getNetworkPosts
+      produces:
+        - application/json
+      parameters:
+        - name: networkId
+          in: path
+          description: ID of network to get posts from.
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: count
+          type: integer
+          description: |
+            The number of results to return.  Between 1 and 100.
+        - in: query
+          name: max_id
+          type: integer
+          description: |
+            The maximum ID, inclusive, to return data for.
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Post'
+        '405':
+          description: Invalid input
+  '/network/{networkId}/events':
+    get:
+      tags:
+        - networks
+      summary: Get all events in a network.
+      description: ''
+      operationId: getNetworkEvents
+      produces:
+        - application/json
+      parameters:
+        - name: networkId
+          in: path
+          description: ID of network get events from.
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: count
+          type: integer
+          description: |
+            The number of results to return.  Between 1 and 100.
+        - in: query
+          name: max_id
+          type: integer
+          description: |
+            The maximum ID, inclusive, to return data for.
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Event'
+        '405':
+          description: Invalid input
+  '/network/{networkId}/users':
+    get:
+      tags:
+        - networks
+      summary: Get all members of a network.
+      description: ''
+      operationId: getNetworkUsers
+      produces:
+        - application/json
+      parameters:
+        - name: networkId
+          in: path
+          description: ID of network to return members from.
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: count
+          type: integer
+          description: |
+            The number of results to return.  Between 1 and 100.
+        - in: query
+          name: max_register_date
+          type: string
+          format: timestamp
+          description: |
+            The latest user registration date, inclusive, to users for.
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/NetworkRegistration'
+        '405':
+          description: Invalid input
+  /network:
+    post:
+      tags:
+        - networks
+      summary: Create a new network.
+      description: ''
+      operationId: createNetwork
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: network
+          required: true
+          schema:
+            $ref: '#/definitions/Network'
+          description: Create a new network
+      responses:
+        '200':
+          description: OK
+        '405':
+          description: Invalid input
+  '/post/{postId}':
+    get:
+      tags:
+        - posts
+      summary: Get a post.
+      description: ''
+      operationId: getPost
+      produces:
+        - application/json
+      parameters:
+        - name: postId
+          in: path
+          description: ID of post to return.
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: The post object
+          schema:
+            $ref: '#/definitions/Post'
+        '405':
+          description: Invalid input
+  '/post/{postId}/replies':
+    get:
+      tags:
+        - posts
+      summary: Get the replies for a post.
+      operationId: getPostReplies
+      produces:
+        - application/json
+      parameters:
+        - name: postId
+          in: path
+          description: ID of post to get replies for.
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: count
+          type: integer
+          description: |
+            The number of results to return.  Between 1 and 100.
+        - in: query
+          name: max_id
+          type: integer
+          description: |
+            The maximum ID, inclusive, to return data for.
+      responses:
+        '200':
+          description: The post object
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PostReply'
+        '404':
+          description: Post does not exist.
+        '405':
+          description: Invalid input
+  /post:
+    post:
+      tags:
+        - posts
+      summary: Create a post.
+      description: ''
+      operationId: createPost
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: post
+          description: The post specification.
+          required: true
+          schema:
+            $ref: '#/definitions/Post'
+      responses:
+        '200':
+          description: Ok
+        '405':
+          description: Invalid input
+  '/post/{postId}/reply':
+    post:
+      tags:
+        - posts
+      summary: Reply to a post.
+      description: ''
+      operationId: replyToPost
+      consumes:
+        - application/json
+      parameters:
+        - name: postId
+          in: path
+          description: ID of post to reply to.
+          required: true
+          type: integer
+          format: int64
+        - in: body
+          name: post_reply
+          description: The post specification.
+          required: true
+          schema:
+            $ref: '#/definitions/PostReply'
+      responses:
+        '200':
+          description: Ok
+        '405':
+          description: Invalid input
+  '/event/{eventId}':
+    get:
+      tags:
+        - events
+      summary: Get an event.
+      description: ''
+      operationId: getEvent
+      produces:
+        - application/json
+      parameters:
+        - name: eventId
+          in: path
+          description: ID of event to return.
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Ok
+          schema:
+            $ref: '#/definitions/Event'
+        '405':
+          description: Invalid input
+  '/event/{eventId}/reg':
+    get:
+      tags:
+        - events
+      summary: Get list of registration JSONs for an event.
+      description: ''
+      operationId: getEventAttendance
+      produces:
+        - application/json
+      parameters:
+        - name: eventId
+          in: path
+          description: ID of event to fetch attendees.
+          required: true
+          type: integer
+          format: int64
+        - in: query
+          name: count
+          type: integer
+          description: |
+            The number of results to return.  Between 1 and 100.
+        - in: query
+          name: max_register_date
+          type: string
+          format: timestamp
+          description: |
+            The latest date of registration, inclusive, to return data for.
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/EventRegistration'
+        '405':
+          description: Invalid input
+  /event:
+    post:
+      tags:
+        - events
+      summary: Create an event.
+      description: ''
+      operationId: updateEvent
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: event
+          description: The event specification.
+          required: true
+          schema:
+            $ref: '#/definitions/Event'
+      responses:
+        '200':
+          description: Ok
+        '405':
+          description: Invalid input
+    put:
+      tags:
+        - events
+      summary: Update an event.
+      description: ''
+      operationId: createEvent
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: event
+          description: The event specification.
+          required: true
+          schema:
+            $ref: '#/definitions/Event'
+      responses:
+        '200':
+          description: Ok
+        '405':
+          description: Invalid input
+  '/location/cities/{cityId}':
+    get:
+      tags:
+        - locations
+      summary: Get information about a city.
+      operationId: getCity
+      produces:
+        - application/json
+      parameters:
+        - name: cityId
+          in: path
+          description: ID of city to get info from.
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Ok
+          schema:
+            $ref: '#/definitions/City'
+        '405':
+          description: Invalid input
+  '/location/regions/{regionId}':
+    get:
+      tags:
+        - locations
+      summary: Get information about a region.
+      description: ''
+      operationId: getRegion
+      produces:
+        - application/json
+      parameters:
+        - name: regionId
+          in: path
+          description: ID of region to get info from.
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Ok
+          schema:
+            $ref: '#/definitions/Region'
+        '405':
+          description: Invalid input
+  '/location/countries/{countryId}':
+    get:
+      tags:
+        - locations
+      summary: Get information about a country.
+      description: ''
+      operationId: getCountry
+      produces:
+        - application/json
+      parameters:
+        - name: countryId
+          in: path
+          description: ID of country to get info from.
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Ok
+          schema:
+            $ref: '#/definitions/Country'
+        '405':
+          description: Invalid input
+  /location/autocomplete:
+    get:
+      tags:
+        - locations
+      summary: Get an array of autocomplete entries for a location.
+      description: ''
+      operationId: getLocationAutocomplete
+      produces:
+        - application/json
+      parameters:
+        - name: input_text
+          in: query
+          description: Partial input query text.
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Location'
+        '405':
+          description: Invalid input
+  '/language/{langId}':
+    get:
+      tags:
+        - languages
+      summary: Get language information by id.
+      description: ''
+      operationId: getLangById
+      produces:
+        - application/json
+      parameters:
+        - name: langId
+          in: path
+          description: ID of language to get information for.
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Ok
+          schema:
+            $ref: '#/definitions/Language'
+        '405':
+          description: Invalid input
+  /language/autocomplete:
+    get:
+      tags:
+        - languages
+      summary: Get an array of autocomplete entries for a language.
+      description: ''
+      operationId: getLanguageAutocomplete
+      produces:
+        - application/json
+      parameters:
+        - name: input_text
+          in: query
+          description: Partial input query text.
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Language'
+        '405':
+          description: Invalid input
+  '/verify_account/{email_or_username}/{password}':
+    get:
+      tags:
+        - accounts
+      summary: Verify that username/email and password match. Return -1 if there is no match
+      description: Verify that username/email and password match. Return -1 if there is no match
+      operationId: verify_account
+      produces:
+        - application/json
+      parameters:
+        - name: email_or_username
+          in: path
+          description: Email or username for login.
+          required: true
+          type: string
+        - name: password
+          in: path
+          description: Password for login.
+          required: true
+          type: string  
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: integer
+            items:
+              $ref: '#/definitions/verify_account'
+        '405':
+          description: Invalid input          
+          
+          
+definitions:
+  NetworkFilter:
+    type: object
+    properties:
+      locations_cur:
+        type: array
+        items:
+          $ref: '#/definitions/Location'
+      locations_origin:
+        type: array
+        items:
+          $ref: '#/definitions/Location'
+      languages_origin:
+        type: array
+        items:
+          type: string
+  UserFilter:
+    type: object
+    properties:
+      near_location:
+        type: array
+        items:
+          $ref: '#/definitions/Location'
+      from_location:
+        type: array
+        items:
+          $ref: '#/definitions/Location'    
+      languages:
+        type: array
+        items:
+          type: string
+  User:
+    type: object
+    required:
+      - id
+      - firstName
+      - lastName
+      - email
+      - role
+    properties:
+      id:
+        type: integer
+        format: int64
+      username:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      email:
+        type: string
+      registerDate:
+        type: string
+        format: timestamp
+      role:
+        type: integer
+        format: int32
+      last_login:
+        type: string
+        format: timestamp
+      gender:
+        type: string
+      about_me:
+        type: string
+      confirmed:
+        type: boolean
+      act_code:
+        type: string
+        description: Not sure what this is.
+      img_link:
+        type: string
+        description: URL of image
+      fp_code:
+        type: string
+        description: Not sure what this is.
+  Network:
+    type: object
+    required:
+      - id
+      - location_cur
+    properties:
+      id:
+        type: integer
+        format: bigint20
+      location_cur:
+        $ref: '#/definitions/Location'
+      location_origin:
+        $ref: '#/definitions/Location'
+      language_origin:
+        $ref: '#/definitions/Language'
+      network_class:
+        type: integer
+        description: |
+          Fairly sure this is an enum for whether this is a location or
+          a language network.
+      date_added:
+        type: string
+        format: timestamp
+      img_link:
+        type: string
+  NetworkRegistration:
+    type: object
+    required:
+      - id_user
+      - id_network
+    properties:
+      id_user:
+        type: integer
+        format: int64
+      id_network:
+        type: integer
+        format: int64
+      join_date:
+        type: string
+        format: timestamp
+  Event:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: integer
+        format: int64
+      network_id:
+        type: integer
+        format: int64
+      host_id:
+        type: integer
+        format: int64
+      date_created:
+        type: string
+        format: timestamp
+      event_date:
+        type: string
+        format: date-time
+      title:
+        type: string
+      address_1:
+        type: string
+      address_2:
+        type: string
+      location:
+        $ref: '#/definitions/Location'
+      description:
+        type: string
+  EventRegistration:
+    type: object
+    required:
+      - id_guest
+      - id_event
+    properties:
+      id_guest:
+        type: integer
+        format: int64
+      id_event:
+        type: integer
+        format: int64
+      date_registered:
+        type: string
+        format: timestamp
+      job:
+        type: string
+  Post:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: integer
+        format: int64
+      user_id:
+        type: integer
+        format: int64
+      network_id:
+        type: integer
+        format: int64
+      post_date:
+        type: string
+        format: timestamp
+      post_text:
+        type: string
+      post_class:
+        type: integer
+        description: Not sure what this is.
+      post_original:
+        type: string
+        description: Not sure what this is.
+      vid_link:
+        type: string
+      img_link:
+        type: string
+  PostReply:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: integer
+        format: int64
+      parent_id:
+        type: integer
+        format: int64
+        description: The ID of the parent post (or post reply?)
+      user_id:
+        type: integer
+        format: int64
+      network_id:
+        type: integer
+        format: int64
+      reply_date:
+        type: string
+        format: timestamp
+      reply_text:
+        type: string
+  Location:
+    type: object
+    required:
+      - country_id
+    description: |
+      A location is defined by a tuple (country_id, region_id, city_id),
+      where at least one of them must be specified.  Valid locations 
+      are fully specified prefixes of the tuple, since suffixes
+      can be auto-completed.
+    properties:
+      country_id:
+        type: integer
+        format: int64
+      region_id:
+        type: integer
+        format: int64
+      city_id:
+        type: integer
+        format: int64
+  City:
+    type: object
+    required:
+      - id
+    description: |
+      A city.
+    properties:
+      id:
+        type: integer
+        format: bigint20
+      name:
+        type: string
+      latitude:
+        type: number
+        format: float
+      longitude:
+        type: number
+        format: float
+      region_id:
+        type: integer
+        format: bigint20
+      region_name:
+        type: string
+      country_id:
+        type: integer
+        format: bigint20
+      country_name:
+        type: string
+      population:
+        type: integer
+      feature_code:
+        type: string
+        description: Not sure what this is.
+      tweet_terms:
+        type: string
+        description: Not sure what this is.
+  Region:
+    type: object
+    required:
+      - id
+    description: |
+      A region.
+    properties:
+      id:
+        type: integer
+        format: bigint20
+      name:
+        type: string
+      latitude:
+        type: number
+        format: float
+      longitude:
+        type: number
+        format: float
+      country_id:
+        type: integer
+        format: bigint20
+      country_name:
+        type: string
+      population:
+        type: integer
+      feature_code:
+        type: string
+        description: Not sure what this is.
+  Country:
+    type: object
+    required:
+      - id
+    description: |
+      A country.
+    properties:
+      id:
+        type: integer
+        format: bigint20
+      iso_a2:
+        type: integer
+        description: Not sure what this is.
+      name:
+        type: string
+      latitude:
+        type: number
+        format: float
+      longitude:
+        type: number
+        format: float
+      population:
+        type: integer
+      feature_code:
+        type: string
+        description: Not sure what this is.
+  Language:
+    type: object
+    required:
+      - lang_id
+    description: |
+      A language.
+    properties:
+      lang_id:
+        type: integer
+        format: bigint20
+      name:
+        type: string
+      num_speakers:
+        type: integer
+        format: int4
+      added:
+        type: integer
+        format: smallint
+        description: Not sure what this is.
+  verify_account:
+    type: integer

@@ -18,6 +18,7 @@ from api.blueprints.events.controllers import events
 from api.blueprints.locations.controllers import locations
 from api.blueprints.languages.controllers import languages
 from api.blueprints.accounts.controllers import accounts
+from api.blueprints.upload.controllers import upload
 
 
 api.register_blueprint(users, url_prefix='/user')
@@ -27,3 +28,4 @@ api.register_blueprint(events, url_prefix='/event')
 api.register_blueprint(locations, url_prefix='/location')
 api.register_blueprint(languages, url_prefix='/language')
 api.register_blueprint(accounts, url_prefix='/account')
+api.register_blueprint(upload, url_prefix='/upload')

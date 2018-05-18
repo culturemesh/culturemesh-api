@@ -21,7 +21,7 @@ upload = Blueprint('upload', __name__)
 def test():
     print(" THE REAL FLASK PATH  ")
     print(os.path)
-    with open(host_path+"file_write_test.txt", "w") as text_file:
+    with open(host_path['image_uploads']+"file_write_test.txt", "w") as text_file:
         text_file.write("Drew wrote with flask!!")
     return "pong"
 
@@ -40,7 +40,7 @@ def upload_image():
     # We need to safeguard against mischievous file names.
     #file_name = secure_filename(file.name)
     #file.save(os.path)
-    with open(host_path+"file_write_test.txt", "w") as text_file:
+    with open(host_path['image_uploads']+"file_write_test.txt", "w") as text_file:
         text_file.write("Drew wrote with flask!!")
     # TODO: Fetch image binary
 

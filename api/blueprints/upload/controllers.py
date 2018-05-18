@@ -1,8 +1,15 @@
+#enable imports from dir above ... we need to get credentials.
 import os
-from ...credentials import host_path
+import sys
+import inspect
+sys.path.append(os.path.abspath(
+    os.path.dirname(inspect.getfile(inspect.currentframe()))+"/..."))
+from .credentials import host_path
 from flask import Blueprint, request, make_response
 from http import HTTPStatus
 from api import require_apikey
+
+
 from werkzeug.utils import secure_filename
 
 upload = Blueprint('upload', __name__)
@@ -14,7 +21,7 @@ def test():
     print(" THE REAL FLASK PATH  ")
     print(os.path)
     with open("Output.txt", "w") as text_file:
-        text_file.write("Purchase Amount: %s" % TotalAmount)
+        text_file.write("Purchase Amount: %s")
     return "pong"
 
 

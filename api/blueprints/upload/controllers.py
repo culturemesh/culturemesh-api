@@ -12,7 +12,7 @@ upload = Blueprint('upload', __name__)
 @upload.route("/ping")
 @require_apikey
 def test():
-    print(" FLASK PATH ")
+    print(" THE REAL FLASK PATH  ")
     print(os.path)
     return "pong"
 

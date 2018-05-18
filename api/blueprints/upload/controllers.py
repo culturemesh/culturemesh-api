@@ -5,7 +5,7 @@ import inspect
 # sys.path.append('../../')
 # sys.path.append(os.path.abspath(
 #    os.path.dirname(inspect.getfile(inspect.currentframe()))+"/..."))
-from ...credentials import host_path
+from api.credentials import  host_path
 from flask import Blueprint, request, make_response
 from http import HTTPStatus
 from api import require_apikey

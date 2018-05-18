@@ -36,14 +36,12 @@ def upload_image():
     """
     if request.files is None:
         return make_response("No image in request body.", HTTPStatus.METHOD_NOT_ALLOWED)
-    #file = request.files['file']
+    # Fetch image binary
+    file = request.files['file']
     # We need to safeguard against mischievous file names.
-    #file_name = secure_filename(file.name)
-    #file.save(os.path)
-    with open(host_path['image_uploads']+"file_write_test.txt", "w") as text_file:
-        text_file.write("Drew wrote with flask!!")
-    # TODO: Fetch image binary
-
-    # TODO: Upload image to file system.
-    # TODO: Return new url.
-    return "pong"
+    file_name = secure_filename(file.name)
+    # Upload image to file system.
+    path = os.path.join(host_path['image_uploads'], file_name)
+    file.save(path)
+    # Return new url.
+    return path

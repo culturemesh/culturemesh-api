@@ -2,6 +2,7 @@
 import os
 import sys
 import inspect
+sys.path.append('../../')
 # sys.path.append(os.path.abspath(
 #    os.path.dirname(inspect.getfile(inspect.currentframe()))+"/..."))
 from ...credentials import host_path
@@ -20,8 +21,8 @@ upload = Blueprint('upload', __name__)
 def test():
     print(" THE REAL FLASK PATH  ")
     print(os.path)
-    with open("Output.txt", "w") as text_file:
-        text_file.write("Purchase Amount: %s")
+    with open(host_path+"file_write_test.txt", "w") as text_file:
+        text_file.write("Drew wrote with flask!!")
     return "pong"
 
 

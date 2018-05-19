@@ -36,7 +36,7 @@ def upload_image():
     # We need to safeguard against mischievous file names.
     file_name = secure_filename(file.name)
     # Upload image to file system.
-    path = os.path.join(host_path['image_uploads'], hashlib.md5(file_name.encode('utf-8')) + "/" + file_name)
+    path = os.path.join(host_path['image_uploads'], hashlib.md5(file_name.encode('utf-8')).hexdigest() + "/" + file_name)
     file.save(path)
     # Return new url.
     return path

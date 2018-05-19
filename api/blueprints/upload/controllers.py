@@ -34,7 +34,7 @@ def upload_image():
     # Fetch image binary
     file = request.files['file']
     # We need to safeguard against mischievous file names.
-    file_name = secure_filename(file.name)
+    file_name = secure_filename(file.filename)
     # Upload image to file system.
     path = os.path.join(host_path['image_uploads'], hashlib.md5(file_name.encode('utf-8')).hexdigest() +
                         "." + str(file.name).split(".")[-1])

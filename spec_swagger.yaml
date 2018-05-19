@@ -836,6 +836,34 @@ paths:
               $ref: '#/definitions/Language'
         '405':
           description: Invalid input
+  '/uploads/image':
+    post:
+      consumes:
+        - "multipart/form-data"
+      tags:
+        - uploads
+      summary: Upload an image to the BlueHost server.
+      produces:
+        - text/plain
+      parameters:
+        - name: file
+          in: formData
+
+          description: Image file < 2MB and of type .png, .gif, or  .jpg
+          required: true
+          type: file
+          format: int64
+      description: |
+        Uploads image to server. Must pass file in enctype multipart-formdata with key being 'file' and value being the file itself. Acceptable file types are .png, .jpg, and .gif. The file must also be < 2MB.
+
+      responses:
+        '200':
+
+          description: Returns new URL for image.
+        '405':
+          description: Invalid file type.
+        '413':
+          description: File too large (>= 2MB)
   '/verify_account/{email_or_username}/{password}':
     get:
       tags:

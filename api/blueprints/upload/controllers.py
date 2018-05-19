@@ -13,7 +13,7 @@ upload = Blueprint('upload', __name__)
 # Our buffer size for file reads is
 BUF_SIZE = 2 << ((10 * 1) + 4)  # 16 KB
 MAX_SIZE = 2 << ((10 * 2) + 1)  # 2 MB
-ALLOWED_EXTENSIONS = set(['gif', 'png', '.jpg'])
+ALLOWED_EXTENSIONS = {'gif', 'png', '.jpg'}
 IMAGES_BASE = "https://www.culturemesh.com/user_images/"
 
 @upload.route("/ping")

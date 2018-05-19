@@ -1,15 +1,10 @@
 #enable imports from dir above ... we need to get credentials.
 import os
-import sys
-import inspect
-# sys.path.append('../../')
-# sys.path.append(os.path.abspath(
-#    os.path.dirname(inspect.getfile(inspect.currentframe()))+"/..."))
 from api.credentials import  host_path
 from flask import Blueprint, request, make_response
 from http import HTTPStatus
 from api import require_apikey
-
+import hashlib
 
 from werkzeug.utils import secure_filename
 
@@ -41,7 +36,7 @@ def upload_image():
     # We need to safeguard against mischievous file names.
     file_name = secure_filename(file.name)
     # Upload image to file system.
-    path = os.path.join(host_path['image_uploads'], file_name)
+    path = os.path.join(host_path['image_uploads'], hashlib(file_name) + "/" + file_name)
     file.save(path)
     # Return new url.
     return path

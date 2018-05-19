@@ -14,7 +14,7 @@ upload = Blueprint('upload', __name__)
 BUF_SIZE = 2 << ((10 * 1) + 4)  # 16 KB
 MAX_SIZE = 2 << ((10 * 2) + 1)  # 2 MB
 ALLOWED_EXTENSIONS = set(['gif', 'png', '.jpg'])
-IMAGES_BASE = "https://www.culturemesh.com/user_images"
+IMAGES_BASE = "https://www.culturemesh.com/user_images/"
 
 @upload.route("/ping")
 @require_apikey
@@ -55,7 +55,7 @@ def upload_image():
     path = os.path.join(host_path['image_uploads'], directory_name + '/' + file_name)
     file.save(path)
     # Return new url.
-    return IMAGES_BASE + path[len(host_path['image_uploads']):]
+    return IMAGES_BASE + directory_name + "/" + file_name
 
 
 def hash_file(file):

@@ -41,8 +41,8 @@ def upload_image():
     directory_name = hash_file(file)
     # Upload image to file system.
     # Make hash directory
-    if not os.path.exists(directory_name):
-        os.makedirs(directory_name)
+    if not os.path.exists(os.path.join(host_path['image_uploads'], directory_name)):
+        os.makedirs(os.path.join(host_path['image_uploads'], directory_name))
     path = os.path.join(host_path['image_uploads'], directory_name + '/' + file_name)
     file.save(path)
     # Return new url.

@@ -1,6 +1,6 @@
 #enable imports from dir above ... we need to get credentials.
 import os
-from api.credentials import  host_path
+from api.credentials import host_path
 from flask import Blueprint, request, make_response
 from http import HTTPStatus
 from api import require_apikey
@@ -36,7 +36,8 @@ def upload_image():
     # We need to safeguard against mischievous file names.
     file_name = secure_filename(file.name)
     # Upload image to file system.
-    path = os.path.join(host_path['image_uploads'], hashlib.md5(file_name.encode('utf-8')).hexdigest() + "/" + file_name)
+    path = os.path.join(host_path['image_uploads'], hashlib.md5(file_name.encode('utf-8')).hexdigest() +
+                        "." + str(file.name).split(".")[-1])
     file.save(path)
     # Return new url.
     return path

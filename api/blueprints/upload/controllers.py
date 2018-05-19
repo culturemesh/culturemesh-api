@@ -55,7 +55,7 @@ def upload_image():
     path = os.path.join(host_path['image_uploads'], directory_name + '/' + file_name)
     file.save(path)
     # Return new url.
-    return IMAGES_BASE + path[len(host_path):]
+    return IMAGES_BASE + path[len(host_path['image_uploads']):]
 
 
 def hash_file(file):

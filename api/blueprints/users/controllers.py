@@ -85,7 +85,7 @@ def handle_users_put(request):
     columns = content.keys()
 
     if "id" not in columns:
-      return make_response("Require ID", HTTPStatus.METHOD_NOT_ALLOWED)
+      return make_response("ID not specified", HTTPStatus.METHOD_NOT_ALLOWED)
 
     query = "UPDATE users SET "
     args = []

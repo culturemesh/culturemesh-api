@@ -83,7 +83,6 @@ def handle_users_post(request):
 def handle_users_put(request):
     content = request.get_json()
     columns = content.keys()
-    return make_response(str(columns) + str(content), HTTPStatus.OK)
 
     if "id" not in columns:
       return make_response("Require ID", HTTPStatus.METHOD_NOT_ALLOWED)

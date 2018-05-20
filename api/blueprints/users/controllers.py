@@ -77,7 +77,7 @@ def users_query():
       query = "INSERT INTO users \
                (username, first_name, last_name, email, password, role, act_code) \
                values \
-               (%s, %s, %s, %s, %s, %s, %s, %s);"
+               (%s, %s, %s, %s, %s, %s, %s);"
 
       args = (content['username'],
               content['first_name'],

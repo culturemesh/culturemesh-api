@@ -27,7 +27,7 @@ def users_query():
       # GET
 
       if "near_location" not in request.args:
-          return make_response(request.method, HTTPStatus.METHOD_NOT_ALLOWED)
+          return make_response("No near location", HTTPStatus.METHOD_NOT_ALLOWED)
       count = int(request.args.get("count", 100))
       connection = mysql.get_db()
       # Parse id's into collection
@@ -70,7 +70,7 @@ def users_query():
 
     else:
 
-      content = json.loads(request.get_json())
+      content = request.get_json()
 
       # POST
 

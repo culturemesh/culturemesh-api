@@ -97,7 +97,7 @@ def handle_users_put(request):
     query += " WHERE id=%s"
     args.append(content['id'])
 
-    return make_response(query, HTTPStatus.OK)
+    return make_response(query + str(args), HTTPStatus.OK)
     execute_insert(query, tuple(args))
     return make_response("OK", HTTPStatus.OK)
 

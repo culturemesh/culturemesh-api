@@ -22,7 +22,7 @@ def test():
 @users.route("/users/", methods=["GET", "POST"])
 @require_apikey
 def users_query():
-    if request.method = 'GET':
+    if request.method == 'GET':
 
       # GET
 

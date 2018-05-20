@@ -80,13 +80,34 @@ def handle_users_post(request):
     execute_insert(query, args)
     return make_response("OK", HTTPStatus.OK)
 
-@users.route("/users", methods=["GET", "POST"])
+def handle_users_put(request):
+    content = request.get_json()
+    columns = content.keys()
+
+    if "id" not in columns:
+      return make_response("Require ID", HTTPStatus.METHOD_NOT_ALLOWED)
+
+    query = "UPDATE users SET "
+    args = []
+    for col in columns:
+      query += "`%s`=%%s," % col
+      args.append(content[col])
+    query += " WHERE id=%s"
+    args.append(columns['id'])
+
+    return make_response(query, HTTPStatus.OK)
+    execute_insert(query, tuple(args))
+    return make_response("OK", HTTPStatus.OK)
+
+@users.route("/users", methods=["GET", "POST", "PUT"])
 @require_apikey
 def users_query():
     if request.method == 'GET':
       return handle_users_get(request)
-    else:
+    elif request.method == 'POST':
       return handle_users_post(request)
+    else:
+      return handle_users_put(request)
 
 
 @users.route("/<user_id>", methods=["GET"])

@@ -28,6 +28,15 @@ def get_network_posts(network_id):
                          order_index_format="id <= %s",
                          order_arg="max_id")
 
+@networks.route("/<network_id>/post_count", methods=["GET"])
+@require_apikey
+def get_network_post_count(network_id):
+    query = "SELECT count(*) \
+             as post_count \
+             from posts \
+             where id_network=%s"
+    return execute_single_tuple_query(query, (network_id,))
+
 @networks.route("/<network_id>/events", methods=["GET"])
 @require_apikey
 def get_network_events(network_id):
@@ -53,3 +62,12 @@ def get_network_users(network_id):
                           order_clause="ORDER BY join_date DESC",
                           order_index_format="join_date <= %s",
                           order_arg="max_registration_date")
+
+@networks.route("/<network_id>/user_count", methods=["GET"])
+@require_apikey
+def get_network_user_count(network_id):
+    query = "SELECT count(*) \
+             as user_count \
+             from network_registration \
+             where id_network=%s"
+    return execute_single_tuple_query(query, (network_id,))

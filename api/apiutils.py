@@ -40,6 +40,22 @@ def make_response_from_single_tuple(cursor):
     status = HTTPStatus.METHOD_NOT_ALLOWED if obj is None else HTTPStatus.OK
     return make_response(jsonify(obj), status)
 
+def execute_single_tuple_query(sql_q_format, args):
+    """
+    Returns a single tuple of results from a SQL query
+    format string and correpsonding arguments.
+
+    :param sql_q_format: A complete SQL query with zero or more %s
+    :param args: List of parameters to be substituted into the SQL query
+    :return: A response object ready to return to the client
+    """
+    connection = mysql.get_db()
+    cursor = connection.cursor()
+    cursor.execute(sql_q_format, args)
+    response = make_response_from_single_tuple(cursor)
+    cursor.close()
+    return response
+
 def get_by_id(table_name, id_):
     """
     Given a table name and an id to search for, queries the table

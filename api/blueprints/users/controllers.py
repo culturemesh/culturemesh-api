@@ -92,7 +92,7 @@ def handle_users_put(request):
     for col in columns:
       if col == "id":
         continue
-      query += "`%s`=%%s," % col
+      query += "%s=%%s," % col
       args.append(content[col])
     query += " WHERE id=%s"
     args.append(content['id'])

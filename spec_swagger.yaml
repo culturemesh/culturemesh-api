@@ -531,7 +531,7 @@ paths:
         '405':
           description: Invalid input
 
-  /network:
+  /network/new:
     post:
       tags:
         - networks
@@ -545,7 +545,46 @@ paths:
           name: network
           required: true
           schema:
-            $ref: '#/definitions/Network'
+            type: object
+            properties:
+              id_city_cur:
+                type: integer
+                format: bigint20
+              city_cur:
+                type: string
+              id_region_cur:
+                type: integer
+                format: bigint20
+              region_cur:
+                type: string
+              id_country_cur:
+                type: integer
+                format: bigint20
+              country_cur:
+                type: string
+              id_city_origin:
+                type: integer
+                format: bigint20
+              city_origin:
+                type: string
+              id_region_origin:
+                type: integer
+                format: bigint20
+              region_origin:
+                type: string
+              id_country_origin:
+                type: integer
+                format: bigint20
+              country_origin:
+                type: string
+              id_language_origin:
+                type: integer
+                format: bigint20
+              language_origin:
+                type: string
+              network_class:
+                type: string
+
           description: Create a new network
       responses:
         '200':
@@ -575,6 +614,7 @@ paths:
             $ref: '#/definitions/Post'
         '405':
           description: Invalid input
+
   '/post/{postId}/replies':
     get:
       tags:
@@ -611,7 +651,7 @@ paths:
           description: Post does not exist.
         '405':
           description: Invalid input
-  /post:
+  /post/new:
     post:
       tags:
         - posts
@@ -626,7 +666,7 @@ paths:
           description: The post specification.
           required: true
           schema:
-            $ref: '#/definitions/Post'
+            $ref: '#/definitions/NewPost'
       responses:
         '200':
           description: Ok
@@ -1086,6 +1126,27 @@ definitions:
       img_link:
         type: string
 
+  NewNetwork:
+    description: The fields needed to create a new network.
+    type: object
+    required:
+      - id
+      - location_cur
+    properties:
+      location_cur:
+        $ref: '#/definitions/Location'
+      location_origin:
+        $ref: '#/definitions/Location'
+      language_origin:
+        $ref: '#/definitions/Language'
+      network_class:
+        type: integer
+        description: |
+          Fairly sure this is an enum for whether this is a location or
+          a language network.
+      img_link:
+        type: string
+
   NetworkRegistration:
     type: object
     required:
@@ -1176,6 +1237,23 @@ definitions:
       post_original:
         type: string
         description: Not sure what this is.
+      vid_link:
+        type: string
+      img_link:
+        type: string
+
+  NewPost:
+    description: The required fields for a new post.
+    type: object
+    properties:
+      id_user:
+        type: integer
+        format: int64
+      id_network:
+        type: integer
+        format: int64
+      post_text:
+        type: string
       vid_link:
         type: string
       img_link:
@@ -1336,5 +1414,7 @@ definitions:
         type: integer
         format: smallint
         description: Not sure what this is.
+
   verify_account:
     type: integer
+

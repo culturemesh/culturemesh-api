@@ -270,7 +270,7 @@ paths:
           description: Created user object
           required: true
           schema:
-            $ref: '#/definitions/User'
+            $ref: '#/definitions/NewUser'
       responses:
         '200':
           description: OK
@@ -972,6 +972,7 @@ definitions:
         type: array
         items:
           type: string
+
   UserFilter:
     type: object
     properties:
@@ -987,6 +988,7 @@ definitions:
         type: array
         items:
           type: string
+
   User:
     type: object
     required:
@@ -994,7 +996,9 @@ definitions:
       - firstName
       - lastName
       - email
+      - username
       - role
+      - act_code
     properties:
       id:
         type: integer
@@ -1031,6 +1035,28 @@ definitions:
       fp_code:
         type: string
         description: Not sure what this is.
+
+  NewUser:
+    description: The fields needed to create a new user.
+    type: object
+    properties:
+      username:
+        type: string
+      password:
+        type: string
+      first_name:
+        type: string
+      last_lame:
+        type: string
+      email:
+        type: string
+      role:
+        type: integer
+        format: int32
+      act_code:
+        type: string
+        description: Not sure what this is.
+
   Network:
     type: object
     required:
@@ -1056,6 +1082,7 @@ definitions:
         format: timestamp
       img_link:
         type: string
+
   NetworkRegistration:
     type: object
     required:
@@ -1071,6 +1098,7 @@ definitions:
       join_date:
         type: string
         format: timestamp
+
   Event:
     type: object
     required:
@@ -1101,6 +1129,7 @@ definitions:
         $ref: '#/definitions/Location'
       description:
         type: string
+
   EventRegistration:
     type: object
     required:
@@ -1118,6 +1147,7 @@ definitions:
         format: timestamp
       job:
         type: string
+
   Post:
     type: object
     required:
@@ -1147,6 +1177,7 @@ definitions:
         type: string
       img_link:
         type: string
+
   PostReply:
     type: object
     required:
@@ -1189,6 +1220,7 @@ definitions:
       city_id:
         type: integer
         format: int64
+
   City:
     type: object
     required:
@@ -1225,6 +1257,7 @@ definitions:
       tweet_terms:
         type: string
         description: Not sure what this is.
+
   Region:
     type: object
     required:
@@ -1253,6 +1286,7 @@ definitions:
       feature_code:
         type: string
         description: Not sure what this is.
+
   Country:
     type: object
     required:
@@ -1279,6 +1313,7 @@ definitions:
       feature_code:
         type: string
         description: Not sure what this is.
+
   Language:
     type: object
     required:

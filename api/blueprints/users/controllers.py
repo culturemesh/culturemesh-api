@@ -19,50 +19,75 @@ def test():
     return "pong"
 
 
-@users.route("/users/", methods=["GET"])
+@users.route("/users/", methods=["GET", "POST"])
 @require_apikey
 def users_query():
-    if "near_location" not in request.args:
-        return make_response("No near location", HTTPStatus.METHOD_NOT_ALLOWED)
-    count = int(request.args.get("count", 100))
-    connection = mysql.get_db()
-    # Parse id's into collection
-    near_ids = request.args["near_location"].split(",")
-    network_cursor = connection.cursor()
-    near_loc_query = "id_country_cur=%s AND id_region_cur=%s AND id_city_cur=%s"
-    if "language" in request.args:
-        near_ids.extend([str(request.args["language"])])
-        network_cursor.execute("SELECT id FROM networks WHERE " + near_loc_query + " AND id_language_origin=%s",
-                               tuple(near_ids))
-    elif "from_location" in request.args:
-        near_ids.extend(request.args["from_location"].split(","))
-        network_cursor.execute("SELECT id FROM networks WHERE " + near_loc_query + " AND " +
-                               near_loc_query.replace("cur", "origin"),
-                               tuple(near_ids))
+    if request.method = 'GET':
+
+      # GET
+
+      if "near_location" not in request.args:
+          return make_response("No near location", HTTPStatus.METHOD_NOT_ALLOWED)
+      count = int(request.args.get("count", 100))
+      connection = mysql.get_db()
+      # Parse id's into collection
+      near_ids = request.args["near_location"].split(",")
+      network_cursor = connection.cursor()
+      near_loc_query = "id_country_cur=%s AND id_region_cur=%s AND id_city_cur=%s"
+      if "language" in request.args:
+          near_ids.extend([str(request.args["language"])])
+          network_cursor.execute("SELECT id FROM networks WHERE " + near_loc_query + " AND id_language_origin=%s",
+                                 tuple(near_ids))
+      elif "from_location" in request.args:
+          near_ids.extend(request.args["from_location"].split(","))
+          network_cursor.execute("SELECT id FROM networks WHERE " + near_loc_query + " AND " +
+                                 near_loc_query.replace("cur", "origin"),
+                                 tuple(near_ids))
+      else:
+          return make_response("No language/from location", HTTPStatus.METHOD_NOT_ALLOWED)
+      network_ids = network_cursor.fetchall()
+      network_cursor.close()
+      if len(network_ids) == 0:
+          return make_response(jsonify([]), HTTPStatus.OK)
+      # Now we need to get all the users subscribed to these networks.
+      user_id_cursor = connection.cursor()
+      sql_query_string = "SELECT id_user FROM network_registration WHERE id_network IN %s"
+      sql_order_string = "ORDER BY id_user DESC"
+      if "max_id" in request.args:
+          sql_query_string += " AND id_user<=%s"
+          user_id_cursor.execute(sql_query_string + sql_order_string, (network_ids, request.args["max_id"]))
+      else:
+          user_id_cursor.execute(sql_query_string + sql_order_string, (network_ids,))
+      user_ids = user_id_cursor.fetchmany(count)
+      user_id_cursor.close()
+      if len(user_ids) == 0:
+          return make_response(jsonify([]), HTTPStatus.OK)
+      users_cursor = connection.cursor()
+      users_cursor.execute("SELECT * FROM users WHERE id IN %s", (tuple(user_ids),))
+      users_obj = convert_objects(users_cursor.fetchall(), users_cursor.description)
+      users_cursor.close()
+      return make_response(jsonify(users_obj), HTTPStatus.OK)
+
     else:
-        return make_response("No language/from location", HTTPStatus.METHOD_NOT_ALLOWED)
-    network_ids = network_cursor.fetchall()
-    network_cursor.close()
-    if len(network_ids) == 0:
-        return make_response(jsonify([]), HTTPStatus.OK)
-    # Now we need to get all the users subscribed to these networks.
-    user_id_cursor = connection.cursor()
-    sql_query_string = "SELECT id_user FROM network_registration WHERE id_network IN %s"
-    sql_order_string = "ORDER BY id_user DESC"
-    if "max_id" in request.args:
-        sql_query_string += " AND id_user<=%s"
-        user_id_cursor.execute(sql_query_string + sql_order_string, (network_ids, request.args["max_id"]))
-    else:
-        user_id_cursor.execute(sql_query_string + sql_order_string, (network_ids,))
-    user_ids = user_id_cursor.fetchmany(count)
-    user_id_cursor.close()
-    if len(user_ids) == 0:
-        return make_response(jsonify([]), HTTPStatus.OK)
-    users_cursor = connection.cursor()
-    users_cursor.execute("SELECT * FROM users WHERE id IN %s", (tuple(user_ids),))
-    users_obj = convert_objects(users_cursor.fetchall(), users_cursor.description)
-    users_cursor.close()
-    return make_response(jsonify(users_obj), HTTPStatus.OK)
+
+      content = json.loads(request.get_json())
+
+      # POST
+
+      query = "INSERT INTO users \
+               (username, first_name, last_name, email, password, role, act_code) \
+               values \
+               (%s, %s, %s, %s, %s, %s, %s, %s);"
+
+      args = (content['username'],
+              content['first_name'],
+              content['last_name'],
+              content['email'],
+              content['password'], # TODO: hash and salt
+              content['role'],
+              content['act_code'])
+      execute_insert(query, args)
+      return make_response("OK", HTTPStatus.OK)
 
 
 @users.route("/<user_id>", methods=["GET"])

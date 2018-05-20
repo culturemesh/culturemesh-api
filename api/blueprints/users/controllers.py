@@ -88,12 +88,14 @@ def handle_users_put(request):
       return make_response("ID not specified", HTTPStatus.METHOD_NOT_ALLOWED)
 
     query = "UPDATE users SET "
+    query_clauses = []
     args = []
     for col in columns:
       if col == "id":
         continue
-      query += "%s=%%s," % col
+      query_clauses.append("%s=%%s" % col)
       args.append(content[col])
+    query += ", ".join(query_clauses)
     query += " WHERE id=%s"
     args.append(content['id'])
 

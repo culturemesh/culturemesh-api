@@ -90,10 +90,12 @@ def handle_users_put(request):
     query = "UPDATE users SET "
     args = []
     for col in columns:
+      if col == "id":
+        continue
       query += "`%s`=%%s," % col
       args.append(content[col])
     query += " WHERE id=%s"
-    args.append(columns['id'])
+    args.append(content['id'])
 
     return make_response(query, HTTPStatus.OK)
     execute_insert(query, tuple(args))

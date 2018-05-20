@@ -278,7 +278,10 @@ paths:
       tags:
         - users
       summary: Update a user
-      description: ''
+      description: Uses the ID given in the JSON object to determine
+                   what user tuple to modify, then updates the rest
+                   of the fields with the JSON values given. Note
+                   that it is impossible to update a user id.
       operationId: updateUser
       consumes:
         - application/json
@@ -1046,7 +1049,7 @@ definitions:
         type: string
       first_name:
         type: string
-      last_lame:
+      last_name:
         type: string
       email:
         type: string

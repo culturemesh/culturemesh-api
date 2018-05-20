@@ -72,9 +72,9 @@ def get_network_user_count(network_id):
              where id_network=%s"
     return execute_single_tuple_query(query, (network_id,))
 
-@users.route("/new_network", methods=["POST"])
+@networks.route("/new_network", methods=["POST"])
 @require_apikey
-def new_network():
+def make_new_network():
     content = request.get_json()
     query = "INSERT INTO network \
              (city_cur, id_city_cur, \

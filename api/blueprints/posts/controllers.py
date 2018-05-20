@@ -35,33 +35,24 @@ def get_post_replies(post_id):
 @require_apikey
 def make_new_post():
     content = request.get_json()
-    query = "INSERT INTO network \
-             (city_cur, id_city_cur, \
-              region_cur, id_region_cur, \
-              country_cur, id_country_cur, \
-              city_origin, id_city_origin, \
-              region_origin, id_region_origin, \
-              country_origin, id_country_origin, \
-              language_origin, id_language_origin, \
-              network_class) \
+    query = "INSERT INTO posts \
+             (id_user, \
+              id_network, \
+              post_text, \
+              vid_link, \
+              img_link) \
              values \
-             (%s, %s, \
-              %s, %s, \
-              %s, %s, \
-              %s, %s, \
-              %s, %s, \
-              %s, %s, \
-              %s, %s, \
+             (%s, \
+              %s, \
+              %s, \
+              %s, \
               %s);"
 
-    args = (content['city_cur'], content['id_city_cur'],
-            content['region_cur'], content['id_region_cur'],
-            content['country_cur'], content['id_country_cur'],
-            content['city_origin'], content['id_city_origin'],
-            content['region_origin'], content['id_region_origin'],
-            content['country_origin'], content['id_country_origin'],
-            content['language_origin'], content['id_language_origin'],
-            content['network_class'])
+    args = (content['id_user'],
+            content['id_network'],
+            content['post_text'],
+            content['vid_link'],
+            content['img_link'],)
 
     execute_insert(query, args)
     return make_response("OK", HTTPStatus.OK)

@@ -76,7 +76,7 @@ def get_network_user_count(network_id):
 @require_apikey
 def make_new_network():
     content = request.get_json()
-    query = "INSERT INTO network \
+    query = "INSERT INTO networks \
              (city_cur, id_city_cur, \
               region_cur, id_region_cur, \
               country_cur, id_country_cur, \

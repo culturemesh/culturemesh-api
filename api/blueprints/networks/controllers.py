@@ -84,8 +84,7 @@ def make_new_network():
               region_origin, id_region_origin, \
               country_origin, id_country_origin, \
               language_origin, id_language_origin, \
-              network_class, \
-              img_link) \
+              network_class) \
              values \
              (%s, %s, \
               %s, %s, \
@@ -94,7 +93,6 @@ def make_new_network():
               %s, %s, \
               %s, %s, \
               %s, %s, \
-              %s, \
               %s);"
 
     args = (content['city_cur'], content['id_city_cur'],
@@ -104,8 +102,7 @@ def make_new_network():
             content['region_origin'], content['id_region_origin'],
             content['country_origin'], content['id_country_origin'],
             content['language_origin'], content['id_language_origin'],
-            content['network_class'],
-            content['img_link'])
+            content['network_class'])
 
     execute_insert(query, args)
     return make_response("OK", HTTPStatus.OK)

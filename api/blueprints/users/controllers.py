@@ -19,7 +19,7 @@ def test():
     return "pong"
 
 
-@users.route("/users/", methods=["GET", "POST"])
+@users.route("/users", methods=["GET", "POST"])
 @require_apikey
 def users_query():
     if request.method == 'GET':

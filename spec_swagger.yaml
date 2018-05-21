@@ -270,7 +270,7 @@ paths:
           description: Created user object
           required: true
           schema:
-            $ref: '#/definitions/User'
+            $ref: '#/definitions/NewUser'
       responses:
         '200':
           description: OK
@@ -278,7 +278,10 @@ paths:
       tags:
         - users
       summary: Update a user
-      description: ''
+      description: Uses the ID given in the JSON object to determine
+                   what user tuple to modify, then updates the rest
+                   of the fields with the JSON values given. Note
+                   that it is impossible to update a user id.
       operationId: updateUser
       consumes:
         - application/json
@@ -396,6 +399,36 @@ paths:
               $ref: '#/definitions/Post'
         '405':
           description: Invalid input
+
+  '/network/{networkId}/post_count':
+    get:
+      tags:
+        - networks
+      summary: Get the number of posts in a network.
+      description: ''
+      operationId: getNetworkPostCount
+      produces:
+        - application/json
+      parameters:
+        - name: networkId
+          in: path
+          description: ID of network to count posts for.
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              post_count:
+                type: integer
+                format: int64
+                example: 120
+        '405':
+          description: Invalid input
+
   '/network/{networkId}/events':
     get:
       tags:
@@ -431,6 +464,7 @@ paths:
               $ref: '#/definitions/Event'
         '405':
           description: Invalid input
+  
   '/network/{networkId}/users':
     get:
       tags:
@@ -467,7 +501,37 @@ paths:
               $ref: '#/definitions/NetworkRegistration'
         '405':
           description: Invalid input
-  /network:
+
+  '/network/{networkId}/user_count':
+    get:
+      tags:
+        - networks
+      summary: Get the number of users that belong in a network.
+      description: ''
+      operationId: getNetworkUserCount
+      produces:
+        - application/json
+      parameters:
+        - name: networkId
+          in: path
+          description: ID of network to count users for.
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              user_count:
+                type: integer
+                format: int64
+                example: 250
+        '405':
+          description: Invalid input
+
+  /network/new:
     post:
       tags:
         - networks
@@ -481,7 +545,46 @@ paths:
           name: network
           required: true
           schema:
-            $ref: '#/definitions/Network'
+            type: object
+            properties:
+              id_city_cur:
+                type: integer
+                format: bigint20
+              city_cur:
+                type: string
+              id_region_cur:
+                type: integer
+                format: bigint20
+              region_cur:
+                type: string
+              id_country_cur:
+                type: integer
+                format: bigint20
+              country_cur:
+                type: string
+              id_city_origin:
+                type: integer
+                format: bigint20
+              city_origin:
+                type: string
+              id_region_origin:
+                type: integer
+                format: bigint20
+              region_origin:
+                type: string
+              id_country_origin:
+                type: integer
+                format: bigint20
+              country_origin:
+                type: string
+              id_language_origin:
+                type: integer
+                format: bigint20
+              language_origin:
+                type: string
+              network_class:
+                type: string
+
           description: Create a new network
       responses:
         '200':
@@ -511,6 +614,7 @@ paths:
             $ref: '#/definitions/Post'
         '405':
           description: Invalid input
+  
   '/post/{postId}/replies':
     get:
       tags:
@@ -547,7 +651,7 @@ paths:
           description: Post does not exist.
         '405':
           description: Invalid input
-  /post:
+  /post/new:
     post:
       tags:
         - posts
@@ -562,7 +666,7 @@ paths:
           description: The post specification.
           required: true
           schema:
-            $ref: '#/definitions/Post'
+            $ref: '#/definitions/NewPost'
       responses:
         '200':
           description: Ok
@@ -883,7 +987,7 @@ paths:
           in: path
           description: Password for login.
           required: true
-          type: string  
+          type: string
       responses:
         '200':
           description: OK
@@ -911,6 +1015,7 @@ definitions:
         type: array
         items:
           type: string
+  
   UserFilter:
     type: object
     properties:
@@ -926,6 +1031,7 @@ definitions:
         type: array
         items:
           type: string
+  
   User:
     type: object
     required:
@@ -933,7 +1039,9 @@ definitions:
       - firstName
       - lastName
       - email
+      - username
       - role
+      - act_code
     properties:
       id:
         type: integer
@@ -970,6 +1078,28 @@ definitions:
       fp_code:
         type: string
         description: Not sure what this is.
+
+  NewUser:
+    description: The fields needed to create a new user.
+    type: object
+    properties:
+      username:
+        type: string
+      password:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      email:
+        type: string
+      role:
+        type: integer
+        format: int32
+      act_code:
+        type: string
+        description: Not sure what this is.
+
   Network:
     type: object
     required:
@@ -995,6 +1125,28 @@ definitions:
         format: timestamp
       img_link:
         type: string
+
+  NewNetwork:
+    description: The fields needed to create a new network.
+    type: object
+    required:
+      - id
+      - location_cur
+    properties:
+      location_cur:
+        $ref: '#/definitions/Location'
+      location_origin:
+        $ref: '#/definitions/Location'
+      language_origin:
+        $ref: '#/definitions/Language'
+      network_class:
+        type: integer
+        description: |
+          Fairly sure this is an enum for whether this is a location or
+          a language network.
+      img_link:
+        type: string
+
   NetworkRegistration:
     type: object
     required:
@@ -1010,6 +1162,7 @@ definitions:
       join_date:
         type: string
         format: timestamp
+  
   Event:
     type: object
     required:
@@ -1040,6 +1193,7 @@ definitions:
         $ref: '#/definitions/Location'
       description:
         type: string
+  
   EventRegistration:
     type: object
     required:
@@ -1057,6 +1211,7 @@ definitions:
         format: timestamp
       job:
         type: string
+
   Post:
     type: object
     required:
@@ -1086,6 +1241,24 @@ definitions:
         type: string
       img_link:
         type: string
+
+  NewPost:
+    description: The required fields for a new post.
+    type: object
+    properties:
+      id_user:
+        type: integer
+        format: int64
+      id_network:
+        type: integer
+        format: int64
+      post_text:
+        type: string
+      vid_link:
+        type: string
+      img_link:
+        type: string
+
   PostReply:
     type: object
     required:
@@ -1115,7 +1288,7 @@ definitions:
       - country_id
     description: |
       A location is defined by a tuple (country_id, region_id, city_id),
-      where at least one of them must be specified.  Valid locations 
+      where at least one of them must be specified.  Valid locations
       are fully specified prefixes of the tuple, since suffixes
       can be auto-completed.
     properties:
@@ -1128,6 +1301,7 @@ definitions:
       city_id:
         type: integer
         format: int64
+
   City:
     type: object
     required:
@@ -1164,6 +1338,7 @@ definitions:
       tweet_terms:
         type: string
         description: Not sure what this is.
+
   Region:
     type: object
     required:
@@ -1192,6 +1367,7 @@ definitions:
       feature_code:
         type: string
         description: Not sure what this is.
+
   Country:
     type: object
     required:
@@ -1218,6 +1394,7 @@ definitions:
       feature_code:
         type: string
         description: Not sure what this is.
+
   Language:
     type: object
     required:
@@ -1237,5 +1414,7 @@ definitions:
         type: integer
         format: smallint
         description: Not sure what this is.
+
   verify_account:
     type: integer
+

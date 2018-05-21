@@ -64,6 +64,14 @@ def get_network_posts(network_id):
                          order_index_format="id <= %s",
                          order_arg="max_id")
 
+@networks.route("/<network_id>/post_count", methods=["GET"])
+@require_apikey
+def get_network_post_count(network_id):
+    query = "SELECT count(*) \
+             as post_count \
+             from posts \
+             where id_network=%s"
+    return execute_single_tuple_query(query, (network_id,))
 
 @networks.route("/<network_id>/events", methods=["GET"])
 @require_apikey
@@ -91,3 +99,47 @@ def get_network_users(network_id):
                           order_clause="ORDER BY join_date DESC",
                           order_index_format="join_date <= %s",
                           order_arg="max_registration_date")
+
+@networks.route("/<network_id>/user_count", methods=["GET"])
+@require_apikey
+def get_network_user_count(network_id):
+    query = "SELECT count(*) \
+             as user_count \
+             from network_registration \
+             where id_network=%s"
+    return execute_single_tuple_query(query, (network_id,))
+
+@networks.route("/new", methods=["POST"])
+@require_apikey
+def make_new_network():
+    content = request.get_json()
+    query = "INSERT INTO networks \
+             (city_cur, id_city_cur, \
+              region_cur, id_region_cur, \
+              country_cur, id_country_cur, \
+              city_origin, id_city_origin, \
+              region_origin, id_region_origin, \
+              country_origin, id_country_origin, \
+              language_origin, id_language_origin, \
+              network_class) \
+             values \
+             (%s, %s, \
+              %s, %s, \
+              %s, %s, \
+              %s, %s, \
+              %s, %s, \
+              %s, %s, \
+              %s, %s, \
+              %s);"
+
+    args = (content['city_cur'], content['id_city_cur'],
+            content['region_cur'], content['id_region_cur'],
+            content['country_cur'], content['id_country_cur'],
+            content['city_origin'], content['id_city_origin'],
+            content['region_origin'], content['id_region_origin'],
+            content['country_origin'], content['id_country_origin'],
+            content['language_origin'], content['id_language_origin'],
+            content['network_class'])
+
+    execute_insert(query, args)
+    return make_response("OK", HTTPStatus.OK)

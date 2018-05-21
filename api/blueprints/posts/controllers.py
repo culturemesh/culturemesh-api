@@ -30,3 +30,29 @@ def get_post_replies(post_id):
                           order_clause="ORDER BY id DESC",
                           order_index_format="post_replies.id <= %s",
                           order_arg="max_id")
+
+@posts.route("/new", methods=["POST"])
+@require_apikey
+def make_new_post():
+    content = request.get_json()
+    query = "INSERT INTO posts \
+             (id_user, \
+              id_network, \
+              post_text, \
+              vid_link, \
+              img_link) \
+             values \
+             (%s, \
+              %s, \
+              %s, \
+              %s, \
+              %s);"
+
+    args = (content['id_user'],
+            content['id_network'],
+            content['post_text'],
+            content['vid_link'],
+            content['img_link'],)
+
+    execute_insert(query, args)
+    return make_response("OK", HTTPStatus.OK)

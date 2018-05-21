@@ -11,10 +11,46 @@ networks = Blueprint('network', __name__)
 def test():
     return "pong"
 
+
+@networks.route("/networks", methods=["GET"])
+@require_apikey
+def get_networks():
+    # Validate that we have valid input data (we need a near_location.
+    if "near_location" not in request.args:
+        return make_response("No near_location specified", HTTPStatus.METHOD_NOT_ALLOWED)
+    near_ids = request.args["near_location"].split(",")
+    # All requests will start with the same query and query for near_location.
+    mysql_string_start = "SELECT * \
+                          FROM networks \
+                          WHERE id_country_cur=%s AND id_region_cur=%s AND id_city_cur=%s"
+    # Need to check if querying a location or language network. That changes our queries.
+    if "from_location" in request.args:
+        near_ids.extend(request.args["from_location"].split(","))
+        return get_paginated(mysql_string_start + "AND id_country_origin=%s AND id_region_origin=%s \
+                             AND id_city_origin=%s",
+                             selection_fields=near_ids,
+                             args=request.args,
+                             order_clause="ORDER BY id DESC",
+                             order_index_format="id <= %s",
+                             order_arg="max_id")
+    elif "language" in request.args:
+        near_ids.append(request.args["language"])
+        return get_paginated(mysql_string_start + "AND language=%s",
+                             selection_fields=near_ids,
+                             args=request.args,
+                             order_clause="ORDER BY id DESC",
+                             order_index_format="id <= %s",
+                             order_arg="max_id")
+    else:
+        make_response("No location/language query parameter", HTTPStatus.METHOD_NOT_ALLOWED)
+
+
+
 @networks.route("/<network_id>", methods=["GET"])
 @require_apikey
 def get_network(network_id):
     return get_by_id("networks", network_id)
+
 
 @networks.route("/<network_id>/posts", methods=["GET"])
 @require_apikey
@@ -28,6 +64,7 @@ def get_network_posts(network_id):
                          order_index_format="id <= %s",
                          order_arg="max_id")
 
+
 @networks.route("/<network_id>/events", methods=["GET"])
 @require_apikey
 def get_network_events(network_id):
@@ -39,6 +76,7 @@ def get_network_events(network_id):
                           order_clause="ORDER BY id DESC",
                           order_index_format="id <= %s",
                           order_arg="max_id")
+
 
 @networks.route("/<network_id>/users", methods=["GET"])
 @require_apikey

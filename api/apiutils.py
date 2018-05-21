@@ -1,12 +1,17 @@
 from flask import jsonify, make_response
 from api.extensions import mysql
 from http import HTTPStatus
+import hashlib
 
 """
 Contains utility routines for API controller logic. Mostly
 dirty work and repeated logic.
 """
 
+# Our buffer size for file reads is
+BUF_SIZE = 2 << ((10 * 1) + 4)  # 16 KB
+MAX_SIZE = 2 << ((10 * 2) + 1)  # 2 MB
+ALLOWED_EXTENSIONS = {'gif', 'png', 'jpg'}
 
 def convert_objects(tuple_arr, description):
     """
@@ -162,3 +167,34 @@ def network_exists(network_id):
     possible_network = network_check.fetchone()
     network_check.close()
     return possible_network is not None
+
+
+def hash_file(file):
+    """
+    Generates a string hex hash (using md5) of the image file. We use a buffer to separate the file into
+    memory-manageable chunks.
+    This also throws TooLargeImageException if the file buffer manages to read more than 2MB of data.
+    :param file: should be a python file.
+    :return: string of hash in hex.
+    """
+    md5 = hashlib.md5()
+    data = file.read(BUF_SIZE)
+    file_size = BUF_SIZE
+    while data:
+        md5.update(data)
+        data = file.read(BUF_SIZE)
+        file_size += BUF_SIZE
+        if file_size >= MAX_SIZE:
+            raise MemoryError("file size too large")
+    # Reset cursor for file write
+    file.seek(0, 0)
+    return md5.hexdigest()
+
+
+def valid_file_type(file):
+    """
+    Checks if file type is either PNG, JPG, or GIF, which are our valid image formats.
+    :param file: python file.
+    :return: true if file is .png, .jpg, or .gif, false otherwise.
+    """
+    return file.filename.split(".")[-1] in ALLOWED_EXTENSIONS

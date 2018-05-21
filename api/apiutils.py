@@ -1,11 +1,17 @@
 from flask import jsonify, make_response
 from api.extensions import mysql
 from http import HTTPStatus
+import hashlib
 
 """
 Contains utility routines for API controller logic. Mostly
 dirty work and repeated logic.
 """
+
+# Our buffer size for file reads is
+BUF_SIZE = 2 << ((10 * 1) + 4)  # 16 KB
+MAX_SIZE = 2 << ((10 * 2) + 1)  # 2 MB
+ALLOWED_EXTENSIONS = {'gif', 'png', 'jpg'}
 
 def convert_objects(tuple_arr, description):
     """
@@ -19,6 +25,7 @@ def convert_objects(tuple_arr, description):
     for tuple_obj in tuple_arr:
         obj_arr.append({description[index][0]: column for index, column in enumerate(tuple_obj)})
     return obj_arr
+
 
 def make_response_from_single_tuple(cursor):
     """
@@ -88,6 +95,7 @@ def get_by_id(table_name, id_):
     cursor.close()
     return response
 
+
 def get_paginated(sql_q_format, selection_fields, args,
     order_clause, order_index_format, order_arg):
     """
@@ -104,10 +112,10 @@ def get_paginated(sql_q_format, selection_fields, args,
     :param sql_q_format: A partial SQL query with zero or more %s
     :param selection_fields: A list of the values to be substituted into sql_q_format
     :param args: The query parameters (request.args)
-    :params order_clause: The SQL part that dictates order on the final results
-    :params order_index_format: The partial SQL query to be used for pagination
+    :param order_clause: The SQL part that dictates order on the final results
+    :param order_index_format: The partial SQL query to be used for pagination
                                 ordering, of the form "FIELD <= %s"
-    :params order_arg: The query param on which order is based for pagination
+    :param order_arg: The query param on which order is based for pagination
     :returns: A response object ready to return to the client
     """
     conn = mysql.get_db()
@@ -129,6 +137,7 @@ def get_paginated(sql_q_format, selection_fields, args,
     items = convert_objects(items, cursor.description)
     cursor.close()
     return make_response(jsonify(items), HTTPStatus.OK)
+
 
 def event_exists(event_id):
     """
@@ -185,3 +194,34 @@ def network_exists(network_id):
     possible_network = network_check.fetchone()
     network_check.close()
     return possible_network is not None
+
+
+def hash_file(file):
+    """
+    Generates a string hex hash (using md5) of the image file. We use a buffer to separate the file into
+    memory-manageable chunks.
+    This also throws TooLargeImageException if the file buffer manages to read more than 2MB of data.
+    :param file: should be a python file.
+    :return: string of hash in hex.
+    """
+    md5 = hashlib.md5()
+    data = file.read(BUF_SIZE)
+    file_size = BUF_SIZE
+    while data:
+        md5.update(data)
+        data = file.read(BUF_SIZE)
+        file_size += BUF_SIZE
+        if file_size >= MAX_SIZE:
+            raise MemoryError("file size too large")
+    # Reset cursor for file write
+    file.seek(0, 0)
+    return md5.hexdigest()
+
+
+def valid_file_type(file):
+    """
+    Checks if file type is either PNG, JPG, or GIF, which are our valid image formats.
+    :param file: python file.
+    :return: true if file is .png, .jpg, or .gif, false otherwise.
+    """
+    return file.filename.split(".")[-1] in ALLOWED_EXTENSIONS

@@ -464,7 +464,7 @@ paths:
               $ref: '#/definitions/Event'
         '405':
           description: Invalid input
-
+  
   '/network/{networkId}/users':
     get:
       tags:
@@ -614,7 +614,7 @@ paths:
             $ref: '#/definitions/Post'
         '405':
           description: Invalid input
-
+  
   '/post/{postId}/replies':
     get:
       tags:
@@ -996,9 +996,9 @@ paths:
             items:
               $ref: '#/definitions/verify_account'
         '405':
-          description: Invalid input
-
-
+          description: Invalid input          
+          
+          
 definitions:
   NetworkFilter:
     type: object
@@ -1015,7 +1015,7 @@ definitions:
         type: array
         items:
           type: string
-
+  
   UserFilter:
     type: object
     properties:
@@ -1026,12 +1026,12 @@ definitions:
       from_location:
         type: array
         items:
-          $ref: '#/definitions/Location'
+          $ref: '#/definitions/Location'    
       languages:
         type: array
         items:
           type: string
-
+  
   User:
     type: object
     required:
@@ -1162,7 +1162,7 @@ definitions:
       join_date:
         type: string
         format: timestamp
-
+  
   Event:
     type: object
     required:
@@ -1193,7 +1193,7 @@ definitions:
         $ref: '#/definitions/Location'
       description:
         type: string
-
+  
   EventRegistration:
     type: object
     required:

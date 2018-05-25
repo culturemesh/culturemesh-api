@@ -33,10 +33,8 @@ def get_city(city_id):
 @require_apikey
 def autocomplete():
     # TODO: Have fancier queries. For now, we will just take advantage of regex, which functions as a "contains"
-    # TODO: Since we can't let pymysql put quotes for us (we need the %'s in between to have regex), we have to do
     # a direct format. This is a SQL injection vulnerability.
     # First, get relevant cities.
-
     conn = mysql.get_db()
     location_objects = []
     city_cur = conn.cursor()

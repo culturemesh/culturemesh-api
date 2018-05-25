@@ -144,7 +144,7 @@ def execute_post_by_table(request, content_fields, table_name):
     for _ in content_fields:
         query += "%s,"
     if query[-1] == ",":
-        query = query[-1] + ")"
+        query = query[:-1] + ")"
     query += ";"
 
     args = []

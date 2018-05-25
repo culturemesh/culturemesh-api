@@ -40,7 +40,7 @@ def autocomplete():
     conn = mysql.get_db()
     location_objects = []
     city_cur = conn.cursor()
-    city_cur.execute("SELECT cities.name, id AS city_id, region_id, country_id FROM cities WHERE cities.name REGEEXP %s LIMIT 100"
+    city_cur.execute("SELECT cities.name, id AS city_id, region_id, country_id FROM cities WHERE cities.name REGEXP %s LIMIT 100"
                      , (request.args["input_text"],))
     location_objects.extend(convert_objects(city_cur.fetchall(), city_cur.description))
     if len(location_objects) == 100:  # If we already have 100 results, which is plenty, let's just return those.

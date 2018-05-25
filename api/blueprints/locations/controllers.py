@@ -44,5 +44,11 @@ def autocomplete():
     location_objects.extend(convert_objects(city_cur.fetchall(), city_cur.description))
     if len(location_objects) == 100:
         return make_response(jsonify(location_objects), HTTPStatus.OK)
+    region_cur = conn.cursor()
+    region_cur.execute("SELECT 'null' AS city_id, id AS region_id, country_id FROM regions WHERE regions.name LIKE '%%%s%%' LIMIT 10"
+                       .format(request.args["input_text"]))
     # location_objects.extend("SELECT id AS region_id, country_id FROM regions WHERE regions.name LIKE ")]
     return make_response(jsonify(location_objects), HTTPStatus.OK)
+
+
+

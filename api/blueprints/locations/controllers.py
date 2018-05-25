@@ -6,6 +6,7 @@ from api.apiutils import *
 
 locations = Blueprint('location', __name__)
 
+
 @locations.route("/ping")
 @require_apikey
 def test():
@@ -32,7 +33,7 @@ def get_city(city_id):
 
 @locations.route("/autocomplete", methods=["GET"])
 @require_apikey
-def autocomplete(input_text):
+def autocomplete():
     # TODO: Have fancier queries. For now, we will just take advantage of regex.
     # First, get relevant cities.
     conn = mysql.get_db()

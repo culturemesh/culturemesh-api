@@ -672,6 +672,26 @@ paths:
           description: Ok
         '405':
           description: Invalid input
+    put:
+      tags:
+        - posts
+      summary: Update a post.
+      description: ''
+      operationId: updatePost
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: post
+          description: The post specification.
+          required: true
+          schema:
+            $ref: '#/definitions/NewPost'
+      responses:
+        '200':
+          description: Ok
+        '405':
+          description: Invalid input
 
 
   '/post/{postId}/reply':
@@ -701,30 +721,6 @@ paths:
           description: Ok
         '405':
           description: Invalid input
-
-  /post/update:
-    put:
-      tags:
-        - posts
-      summary: Update a post.
-      description: ''
-      operationId: updatePost
-      consumes:
-        - application/json
-      parameters:
-        - in: body
-          name: post
-          description: The post specification.
-          required: true
-          schema:
-            $ref: '#/definitions/NewPost'
-      responses:
-        '200':
-          description: Ok
-        '405':
-          description: Invalid input
-
-  /post/<postId>/update_reply:
     put:
       tags:
         - posts
@@ -745,6 +741,7 @@ paths:
           description: Ok
         '405':
           description: Invalid input
+
 
   '/event/{eventId}':
     get:
@@ -828,8 +825,6 @@ paths:
           description: Ok
         '405':
           description: Invalid input
-
-  /event/update:
     put:
       tags:
         - events

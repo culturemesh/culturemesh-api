@@ -30,7 +30,7 @@ def get_city(city_id):
     return get_by_id("cities", city_id)
 
 
-@locations.route("/autocomplete/<input_text>", methods=["GET"])
+@locations.route("/autocomplete/", methods=["GET"])
 @require_apikey
 def autocomplete(input_text):
     # TODO: Have fancier queries. For now, we will just take advantage of regex.
@@ -38,7 +38,8 @@ def autocomplete(input_text):
     conn = mysql.get_db()
     location_objects = []
     city_cur = conn.cursor()
-    city_cur.execute("SELECT id AS city_id, region_id, country_id FROM cities WHERE cities.name LIKE %% %s %% LIMIT 100", (input_text,))
+    city_cur.execute("SELECT id AS city_id, region_id, country_id FROM cities WHERE cities.name LIKE %% %s %% LIMIT 100",
+                     (request.args["input_text"],))
     location_objects.extend(city_cur.fetchall())
     city_cur.close()
     if len(location_objects) == 100:

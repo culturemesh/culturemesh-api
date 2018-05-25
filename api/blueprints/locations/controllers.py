@@ -35,7 +35,6 @@ def get_city(city_id):
 @require_apikey
 def autocomplete():
     # TODO: Have fancier queries. For now, we will just take advantage of regex, which functions as a "contains"
-
     # First, get relevant cities.
     conn = mysql.get_db()
     location_objects = []

@@ -142,10 +142,10 @@ def execute_post_by_table(request, content_fields, table_name):
     query = "INSERT INTO %s (%s) " % (table_name, ','.join(content_fields))
     query += " values ("
     for _ in content_fields:
-        query += "%s,"
-    if query[-1] == ",":
-        query = query[:-1] + ")"
-    query += ";"
+        query += "%s, "
+    if query[-2] == ",":
+        query = query[:-2]
+    query += ");"
 
     args = []
     for col in content_fields:

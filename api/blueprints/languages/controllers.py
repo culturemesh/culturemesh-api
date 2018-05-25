@@ -29,15 +29,15 @@ def get_language_autocomplete():
     #       work with autocomplete.
     query = "SELECT * \
              FROM languages \
-             WHERE name REGEXP %s \
+             WHERE languages.name REGEXP %s \
              ORDER BY num_speakers DESC \
-             LIMIT 20" % input_text
+             LIMIT 20"
 
-    cursor.execute(query)
+    cursor.execute(query, (input_text,))
     langs = cursor.fetchall()
     if len(langs) == 0:
-      cursor.close()
-      return make_response(jsonify([]), HTTPStatus.OK)
+        cursor.close()
+        return make_response(jsonify([]), HTTPStatus.OK)
 
     langs = convert_objects(langs, cursor.description)
     cursor.close()

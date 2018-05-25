@@ -1,7 +1,5 @@
-from flask import Blueprint, jsonify, request, json, make_response
+from flask import Blueprint, request
 from api import require_apikey
-from http import HTTPStatus
-from api.extensions import mysql
 from api.apiutils import *
 
 locations = Blueprint('location', __name__)
@@ -35,20 +33,15 @@ def get_city(city_id):
 @require_apikey
 def autocomplete():
     # TODO: Have fancier queries. For now, we will just take advantage of regex, which functions as a "contains"
-    print("This shouldn't happen.....")
-    print("This shouldn't happen.....")
-    print("This shouldn't happen.....")
-    print("This shouldn't happen.....")
-    print("This shouldn't happen.....")
-    print("This shouldn't happen.....")
-    print("This shouldn't happen.....")
+    # TODO: Since we can't let pymysql put quotes for us (we need the %'s in between to have regex), we have to do
+    # a direct format. This is a SQL injection vulnerability.
     # First, get relevant cities.
-    print("This shouldn't happen.....")
+
     conn = mysql.get_db()
     location_objects = []
     city_cur = conn.cursor()
-    city_cur.execute("SELECT cities.name, id AS city_id, region_id, country_id FROM cities WHERE cities.name LIKE '%%{query}%%' LIMIT 100"
-                     ,( request.args["input_text"],))
+    city_cur.execute("SELECT cities.name, id AS city_id, region_id, country_id FROM cities WHERE cities.name LIKE '%%%s%%' LIMIT 100"
+                     % request.args["input_text"])
     location_objects.extend(convert_objects(city_cur.fetchall(), city_cur.description))
     if len(location_objects) == 100:  # If we already have 100 results, which is plenty, let's just return those.
         return make_response(jsonify(location_objects), HTTPStatus.OK)

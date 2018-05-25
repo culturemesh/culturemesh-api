@@ -35,6 +35,13 @@ def get_city(city_id):
 @require_apikey
 def autocomplete():
     # TODO: Have fancier queries. For now, we will just take advantage of regex, which functions as a "contains"
+    print("This shouldn't happen.....")
+    print("This shouldn't happen.....")
+    print("This shouldn't happen.....")
+    print("This shouldn't happen.....")
+    print("This shouldn't happen.....")
+    print("This shouldn't happen.....")
+    print("This shouldn't happen.....")
     # First, get relevant cities.
     print("This shouldn't happen.....")
     conn = mysql.get_db()

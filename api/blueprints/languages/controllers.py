@@ -12,10 +12,12 @@ languages = Blueprint('language', __name__)
 def test():
     return "pong"
 
+
 @languages.route("/<lang_id>", methods=["GET"])
 @require_apikey
 def get_language(lang_id):
     return get_by_id("languages", lang_id)
+
 
 @languages.route("/autocomplete", methods=["GET"])
 @require_apikey

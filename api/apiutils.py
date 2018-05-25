@@ -95,6 +95,64 @@ def get_by_id(table_name, id_):
     cursor.close()
     return response
 
+def execute_put_by_id(request, table_name):
+    """
+    Executes a PUT command (a SQL update) on a table
+    by the tuple's 'id' field.  All elements specified
+    in the request JSON except id are updated.
+
+    :param request: The request received
+    :param table_name: The name of the table to update
+    :returns: A response object ready to return to the client
+    """
+    content = request.get_json()
+    columns = content.keys()
+
+    if "id" not in columns:
+    return make_response("ID not specified", HTTPStatus.METHOD_NOT_ALLOWED)
+
+    query = "UPDATE %s SET " $ table_name
+    query_clauses = []
+    args = []
+    for col in columns:
+        if col == "id":
+          continue
+        query_clauses.append("%s=%%s" % col)
+        args.append(content[col])
+    query += ", ".join(query_clauses)
+    query += " WHERE id=%s"
+    args.append(content['id'])
+
+    execute_insert(query, tuple(args))
+    return make_response("OK", HTTPStatus.OK)
+
+def execute_post_by_table(request, content_fields, table_name):
+    """
+    Executes a POST command to a certain table.
+
+    :param request: The request received
+    :content_fields: A tuple containing the field/column names
+                     to extract from the request and insert into
+                     the table.
+    :table_name: The table to insert into
+    :returns: A response object ready for the client.
+    """
+    content = request.get_json()
+
+    query = "INSERT INTO %s (%s) " % (table_name, ','.join(content_fields))
+    query += " values ("
+    for _ in content_fields:
+        query += "%s,"
+    query[-1] = ")"
+    query += ";"
+
+    args = []
+    for col in content_fields:
+        args.append(col)
+
+    execute_insert(query, tuple(args))
+    return make_response("OK", HTTPStatus.OK)
+
 
 def get_paginated(sql_q_format, selection_fields, args,
     order_clause, order_index_format, order_arg):

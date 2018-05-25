@@ -31,28 +31,33 @@ def get_post_replies(post_id):
                           order_index_format="post_replies.id <= %s",
                           order_arg="max_id")
 
-@posts.route("/new", methods=["POST"])
+@posts.route("/new", methods=["POST", "PUT"])
 @require_apikey
 def make_new_post():
-    content = request.get_json()
-    query = "INSERT INTO posts \
-             (id_user, \
-              id_network, \
-              post_text, \
-              vid_link, \
-              img_link) \
-             values \
-             (%s, \
-              %s, \
-              %s, \
-              %s, \
-              %s);"
+    if request.method == "POST"
 
-    args = (content['id_user'],
-            content['id_network'],
-            content['post_text'],
-            content['vid_link'],
-            content['img_link'],)
+      # POST
+      content_fields = ['id_user', 'id_network', \
+                        'post_text', 'vid_link', \
+                        'img_link']
 
-    execute_insert(query, args)
-    return make_response("OK", HTTPStatus.OK)
+      return execute_post_by_table(request, content_fields, "posts")
+    else:
+
+      # PUT
+      return execute_put_by_id(request, "posts")
+
+@posts.route("/<post_id>/reply", methods=["POST", "PUT"])
+@require_apikey
+def make_new_post_reply():
+    if request.method == "POST":
+      # POST
+      content_fields = ['id_parent', 'id_user', \
+                        'id_network', 'reply_text']
+
+      return execute_post_by_table(request, content_fields, "post_replies")
+    else:
+
+      # PUT
+      return execute_put_by_id(request, "post_replies")
+

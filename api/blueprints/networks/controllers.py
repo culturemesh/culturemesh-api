@@ -112,34 +112,13 @@ def get_network_user_count(network_id):
 @networks.route("/new", methods=["POST"])
 @require_apikey
 def make_new_network():
-    content = request.get_json()
-    query = "INSERT INTO networks \
-             (city_cur, id_city_cur, \
-              region_cur, id_region_cur, \
-              country_cur, id_country_cur, \
-              city_origin, id_city_origin, \
-              region_origin, id_region_origin, \
-              country_origin, id_country_origin, \
-              language_origin, id_language_origin, \
-              network_class) \
-             values \
-             (%s, %s, \
-              %s, %s, \
-              %s, %s, \
-              %s, %s, \
-              %s, %s, \
-              %s, %s, \
-              %s, %s, \
-              %s);"
+    content_fields = ['city_cur', 'id_city_cur', \
+                'region_cur', 'id_region_cur', \
+                'country_cur', 'id_country_cur', \
+                'city_origin', 'id_city_origin', \
+                'region_origin', 'id_region_origin', \
+                'country_origin', 'id_country_origin', \
+                'language_origin', 'id_language_origin', \
+                'network_class']
 
-    args = (content['city_cur'], content['id_city_cur'],
-            content['region_cur'], content['id_region_cur'],
-            content['country_cur'], content['id_country_cur'],
-            content['city_origin'], content['id_city_origin'],
-            content['region_origin'], content['id_region_origin'],
-            content['country_origin'], content['id_country_origin'],
-            content['language_origin'], content['id_language_origin'],
-            content['network_class'])
-
-    execute_insert(query, args)
-    return make_response("OK", HTTPStatus.OK)
+    return execute_post_by_table(request, content_fields, "networks")

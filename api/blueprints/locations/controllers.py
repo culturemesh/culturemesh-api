@@ -39,7 +39,7 @@ def autocomplete():
     conn = mysql.get_db()
     location_objects = []
     city_cur = conn.cursor()
-    city_cur.execute("SELECT id AS city_id, region_id, country_id FROM cities WHERE cities.name LIKE '%%\%s\%%' LIMIT 100",
+    city_cur.execute("SELECT id AS city_id, region_id, country_id FROM cities WHERE cities.name LIKE '%%'%s'%%' LIMIT 100",
                      request.args["input_text"])
     location_objects.extend(city_cur.fetchall())
     city_cur.close()

@@ -109,7 +109,7 @@ def execute_put_by_id(request, table_name):
     columns = content.keys()
 
     if "id" not in columns:
-    return make_response("ID not specified", HTTPStatus.METHOD_NOT_ALLOWED)
+        return make_response("ID not specified", HTTPStatus.METHOD_NOT_ALLOWED)
 
     query = "UPDATE %s SET " $ table_name
     query_clauses = []
@@ -123,8 +123,8 @@ def execute_put_by_id(request, table_name):
     query += " WHERE id=%s"
     args.append(content['id'])
 
-    execute_insert(query, tuple(args))
-    return make_response("OK", HTTPStatus.OK)
+    #execute_insert(query, tuple(args))
+    return make_response(query % tuple(args), HTTPStatus.OK)
 
 def execute_post_by_table(request, content_fields, table_name):
     """
@@ -150,8 +150,8 @@ def execute_post_by_table(request, content_fields, table_name):
     for col in content_fields:
         args.append(col)
 
-    execute_insert(query, tuple(args))
-    return make_response("OK", HTTPStatus.OK)
+    #execute_insert(query, tuple(args))
+    return make_response(query % tuple(args), HTTPStatus.OK)
 
 
 def get_paginated(sql_q_format, selection_fields, args,

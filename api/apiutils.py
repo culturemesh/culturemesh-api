@@ -2,6 +2,7 @@ from flask import jsonify, make_response
 from api.extensions import mysql
 from http import HTTPStatus
 import hashlib
+from api.apiutils import valid_input_text
 
 """
 Contains utility routines for API controller logic. Mostly

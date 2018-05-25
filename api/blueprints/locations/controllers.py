@@ -35,12 +35,7 @@ def get_city(city_id):
 @require_apikey
 def autocomplete():
     # TODO: Have fancier queries. For now, we will just take advantage of regex, which functions as a "contains"
-    def valid_input_text(text):
-        """
-        Validates input text and makes sure it is SQL-Injection proof.
-        :param text: string of query text.
-        :return: true if valid (defined not sql-injection-prone), false otherwise.
-        """
+
     # First, get relevant cities.
     conn = mysql.get_db()
     location_objects = []

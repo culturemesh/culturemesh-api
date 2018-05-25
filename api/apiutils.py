@@ -123,8 +123,8 @@ def execute_put_by_id(request, table_name):
     query += " WHERE id=%s"
     args.append(content['id'])
 
-    #execute_insert(query, tuple(args))
-    return make_response(query % tuple(args), HTTPStatus.OK)
+    execute_insert(query, tuple(args))
+    return make_response("OK", HTTPStatus.OK)
 
 def execute_post_by_table(request, content_fields, table_name):
     """
@@ -149,9 +149,10 @@ def execute_post_by_table(request, content_fields, table_name):
 
     args = []
     for col in content_fields:
-        args.append(col)
+        args.append(content[col])
 
-    return make_response(query + str(tuple(args)), HTTPStatus.OK)
+    execute_insert(query, tuple(args))
+    return make_response("OK", HTTPStatus.OK)
 
 
 def get_paginated(sql_q_format, selection_fields, args,

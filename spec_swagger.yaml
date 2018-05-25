@@ -464,7 +464,7 @@ paths:
               $ref: '#/definitions/Event'
         '405':
           description: Invalid input
-  
+
   '/network/{networkId}/users':
     get:
       tags:
@@ -614,7 +614,7 @@ paths:
             $ref: '#/definitions/Post'
         '405':
           description: Invalid input
-  
+
   '/post/{postId}/replies':
     get:
       tags:
@@ -672,6 +672,28 @@ paths:
           description: Ok
         '405':
           description: Invalid input
+    put:
+      tags:
+        - posts
+      summary: Update a post.
+      description: ''
+      operationId: updatePost
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: post
+          description: The post specification.
+          required: true
+          schema:
+            $ref: '#/definitions/NewPost'
+      responses:
+        '200':
+          description: Ok
+        '405':
+          description: Invalid input
+
+
   '/post/{postId}/reply':
     post:
       tags:
@@ -693,12 +715,34 @@ paths:
           description: The post specification.
           required: true
           schema:
-            $ref: '#/definitions/PostReply'
+            $ref: '#/definitions/NewPostReply'
       responses:
         '200':
           description: Ok
         '405':
           description: Invalid input
+    put:
+      tags:
+        - posts
+      summary: Update a post reply.
+      description: ''
+      operationId: updatePostReply
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: post
+          description: The post specification.
+          required: true
+          schema:
+            $ref: '#/definitions/NewPostReply'
+      responses:
+        '200':
+          description: Ok
+        '405':
+          description: Invalid input
+
+
   '/event/{eventId}':
     get:
       tags:
@@ -722,6 +766,7 @@ paths:
             $ref: '#/definitions/Event'
         '405':
           description: Invalid input
+
   '/event/{eventId}/reg':
     get:
       tags:
@@ -758,11 +803,32 @@ paths:
               $ref: '#/definitions/EventRegistration'
         '405':
           description: Invalid input
-  /event:
+
+  /event/new:
     post:
       tags:
         - events
       summary: Create an event.
+      description: ''
+      operationId: newEvent
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: event
+          description: The event specification.
+          required: true
+          schema:
+            $ref: '#/definitions/NewEvent'
+      responses:
+        '200':
+          description: Ok
+        '405':
+          description: Invalid input
+    put:
+      tags:
+        - events
+      summary: Update an event.
       description: ''
       operationId: updateEvent
       consumes:
@@ -779,26 +845,7 @@ paths:
           description: Ok
         '405':
           description: Invalid input
-    put:
-      tags:
-        - events
-      summary: Update an event.
-      description: ''
-      operationId: createEvent
-      consumes:
-        - application/json
-      parameters:
-        - in: body
-          name: event
-          description: The event specification.
-          required: true
-          schema:
-            $ref: '#/definitions/Event'
-      responses:
-        '200':
-          description: Ok
-        '405':
-          description: Invalid input
+
   '/location/cities/{cityId}':
     get:
       tags:
@@ -996,9 +1043,9 @@ paths:
             items:
               $ref: '#/definitions/verify_account'
         '405':
-          description: Invalid input          
-          
-          
+          description: Invalid input
+
+
 definitions:
   NetworkFilter:
     type: object
@@ -1015,7 +1062,7 @@ definitions:
         type: array
         items:
           type: string
-  
+
   UserFilter:
     type: object
     properties:
@@ -1026,12 +1073,12 @@ definitions:
       from_location:
         type: array
         items:
-          $ref: '#/definitions/Location'    
+          $ref: '#/definitions/Location'
       languages:
         type: array
         items:
           type: string
-  
+
   User:
     type: object
     required:
@@ -1162,7 +1209,37 @@ definitions:
       join_date:
         type: string
         format: timestamp
-  
+
+  NewEvent:
+    description: The fields needed to create a new event.
+    type: object
+    required:
+      - id
+    properties:
+      id_network:
+        type: integer
+        format: int64
+      id_host:
+        type: integer
+        format: int64
+      event_date:
+        type: string
+        format: date-time
+      title:
+        type: string
+      address_1:
+        type: string
+      address_2:
+        type: string
+      country:
+        type: string
+      city:
+        type: string
+      region:
+        type: string
+      description:
+        type: string
+
   Event:
     type: object
     required:
@@ -1171,10 +1248,10 @@ definitions:
       id:
         type: integer
         format: int64
-      network_id:
+      id_network:
         type: integer
         format: int64
-      host_id:
+      id_host:
         type: integer
         format: int64
       date_created:
@@ -1189,11 +1266,15 @@ definitions:
         type: string
       address_2:
         type: string
-      location:
-        $ref: '#/definitions/Location'
+      country:
+        type: string
+      city:
+        type: string
+      region:
+        type: string
       description:
         type: string
-  
+
   EventRegistration:
     type: object
     required:
@@ -1267,14 +1348,14 @@ definitions:
       id:
         type: integer
         format: int64
-      parent_id:
+      id_parent:
         type: integer
         format: int64
         description: The ID of the parent post (or post reply?)
-      user_id:
+      id_user:
         type: integer
         format: int64
-      network_id:
+      id_network:
         type: integer
         format: int64
       reply_date:
@@ -1282,6 +1363,24 @@ definitions:
         format: timestamp
       reply_text:
         type: string
+
+  NewPostReply:
+    description: Fields needed to make a new post reply
+    type: object
+    properties:
+      id_parent:
+        type: integer
+        format: int64
+        description: The ID of the parent post (or post reply?)
+      id_user:
+        type: integer
+        format: int64
+      id_network:
+        type: integer
+        format: int64
+      reply_text:
+        type: string
+
   Location:
     type: object
     required:

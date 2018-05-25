@@ -62,45 +62,7 @@ def handle_users_get(request):
     users_cursor.close()
     return make_response(jsonify(users_obj), HTTPStatus.OK)
 
-def handle_users_post(request):
-    content = request.get_json()
-    query = "INSERT INTO users \
-             (username, first_name, last_name, email, password, role, act_code) \
-             values \
-             (%s, %s, %s, %s, %s, %s, %s);"
 
-    args = (content['username'],
-            content['first_name'],
-            content['last_name'],
-            content['email'],
-            content['password'], # TODO: hash and salt
-            content['role'],
-            content['act_code'])
-
-    execute_insert(query, args)
-    return make_response("OK", HTTPStatus.OK)
-
-def handle_users_put(request):
-    content = request.get_json()
-    columns = content.keys()
-
-    if "id" not in columns:
-      return make_response("ID not specified", HTTPStatus.METHOD_NOT_ALLOWED)
-
-    query = "UPDATE users SET "
-    query_clauses = []
-    args = []
-    for col in columns:
-      if col == "id":
-        continue
-      query_clauses.append("%s=%%s" % col)
-      args.append(content[col])
-    query += ", ".join(query_clauses)
-    query += " WHERE id=%s"
-    args.append(content['id'])
-
-    execute_insert(query, tuple(args))
-    return make_response("OK", HTTPStatus.OK)
 
 @users.route("/users", methods=["GET", "POST", "PUT"])
 @require_apikey
@@ -108,9 +70,14 @@ def users_query():
     if request.method == 'GET':
       return handle_users_get(request)
     elif request.method == 'POST':
-      return handle_users_post(request)
+      content_fields = ['username', 'first_name', \
+                'last_name', 'email', \
+                'password', 'role', \
+                'act_code'] # TODO: hash and salt
+
+      return execute_post_by_table(request, content_fields, "users")
     else:
-      return handle_users_put(request)
+      return execute_put_by_id(request, "users")
 
 
 @users.route("/<user_id>", methods=["GET"])

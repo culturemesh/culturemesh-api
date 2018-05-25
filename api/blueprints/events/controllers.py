@@ -27,3 +27,21 @@ def get_event_registration(event_id):
                           order_clause="ORDER BY date_registered DESC",
                           order_index_format="date_registered <= %s",
                           order_arg="max_registration_date")
+
+@events.route("/new", methods=["POST", "PUT"])
+@require_apikey
+def make_new_event():
+    if request.method == 'POST':
+
+      # POST
+      content_fields = ['id_network', 'id_host', \
+                'event_date', 'title', \
+                'address_1', 'address_2', \
+                'country', 'city', \
+                'region', 'description']
+
+      return execute_post_by_table(request, content_fields, "events")
+    else:
+
+      # PUT
+      return execute_put_by_id(request, "events")

@@ -35,8 +35,8 @@ def get_city(city_id):
 @require_apikey
 def autocomplete():
     # TODO: Have fancier queries. For now, we will just take advantage of regex, which functions as a "contains"
-    if not valid_input_text(request.args["input_text"]):
-        return make_response("Must have valid input_text parameter", HTTPStatus.METHOD_NOT_ALLOWED)
+    """if not valid_input_text(request.args["input_text"]):
+        return make_response("Must have valid input_text parameter", HTTPStatus.METHOD_NOT_ALLOWED)"""
     # First, get relevant cities.
     conn = mysql.get_db()
     location_objects = []

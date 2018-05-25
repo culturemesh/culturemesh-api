@@ -41,9 +41,8 @@ def autocomplete():
     city_cur = conn.cursor()
     city_cur.execute("SELECT id AS city_id, region_id, country_id FROM cities WHERE cities.name LIKE '%%%s%%' LIMIT 100"
                      .format(request.args["input_text"]))
-    location_objects.extend(city_cur.fetchall())
-    city_cur.close()
+    location_objects.extend(convert_objects(city_cur.fetchall(), city_cur.description))
     if len(location_objects) == 100:
-        return make_response(jsonify(convert_objects(location_objects)), HTTPStatus.OK)
+        return make_response(jsonify(location_objects), HTTPStatus.OK)
     # location_objects.extend("SELECT id AS region_id, country_id FROM regions WHERE regions.name LIKE ")]
     return make_response(jsonify(location_objects), HTTPStatus.OK)

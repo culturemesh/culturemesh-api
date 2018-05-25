@@ -111,7 +111,7 @@ def execute_put_by_id(request, table_name):
     if "id" not in columns:
         return make_response("ID not specified", HTTPStatus.METHOD_NOT_ALLOWED)
 
-    query = "UPDATE %s SET " $ table_name
+    query = "UPDATE %s SET " % table_name
     query_clauses = []
     args = []
     for col in columns:

@@ -21,7 +21,8 @@ def get_language(lang_id):
 @require_apikey
 def get_language_autocomplete():
     input_text = request.args['input_text']
-
+    if input_text is None:
+        return make_response("Must have valid input_text field", HTTPStatus.METHOD_NOT_ALLOWED)
     connection = mysql.get_db()
     cursor = connection.cursor()
 

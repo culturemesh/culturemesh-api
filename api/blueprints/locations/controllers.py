@@ -30,7 +30,7 @@ def get_city(city_id):
     return get_by_id("cities", city_id)
 
 
-@locations.route("/autocomplete/", methods=["GET"])
+@locations.route("/autocomplete", methods=["GET"])
 @require_apikey
 def autocomplete(input_text):
     # TODO: Have fancier queries. For now, we will just take advantage of regex.

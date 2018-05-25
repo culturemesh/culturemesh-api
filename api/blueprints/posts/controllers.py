@@ -34,7 +34,7 @@ def get_post_replies(post_id):
 @posts.route("/new", methods=["POST", "PUT"])
 @require_apikey
 def make_new_post():
-    if request.method == "POST"
+    if request.method == "POST":
 
       # POST
       content_fields = ['id_user', 'id_network', \

@@ -151,7 +151,6 @@ def execute_post_by_table(request, content_fields, table_name):
     for col in content_fields:
         args.append(col)
 
-    #execute_insert(query, tuple(args))
     return make_response(query + str(tuple(args)), HTTPStatus.OK)
 
 

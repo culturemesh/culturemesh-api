@@ -52,7 +52,7 @@ def autocomplete():
     if len(location_objects) == 100:
         return make_response(jsonify(location_objects), HTTPStatus.OK)
     country_cur = conn.cursor()
-    country_cur.execute("SELECT countries.name, 'null' AS city_id, 'null' AS region_id, id AS country_id FROM countries WHERE countries.name LIKE REGEXP %s LIMIT 100"
+    country_cur.execute("SELECT countries.name, 'null' AS city_id, 'null' AS region_id, id AS country_id FROM countries WHERE countries.name REGEXP %s LIMIT 100"
                         , (request.args["input_text"],))
     location_objects.extend(convert_objects(country_cur.fetchall(), country_cur.description))
     return make_response(jsonify(location_objects), HTTPStatus.OK)

@@ -252,3 +252,6 @@ def get_paginated_objects(sql_q_format, selection_fields, args,
     return items
 
 
+
+def valid_input_text(**kwargs):
+    return True

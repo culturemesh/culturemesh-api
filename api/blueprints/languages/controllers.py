@@ -27,11 +27,7 @@ def get_language_autocomplete():
 
     # TODO: this is entirely unsafe, need better way to
     #       work with autocomplete.
-    query = "SELECT * \
-             FROM languages \
-             WHERE languages.name REGEXP %s \
-             ORDER BY num_speakers DESC \
-             LIMIT 20"
+    query = "SELECT * FROM languages WHERE languages.name REGEXP %s ORDER BY num_speakers DESC LIMIT 20;"
 
     cursor.execute(query, (input_text,))
     langs = cursor.fetchall()

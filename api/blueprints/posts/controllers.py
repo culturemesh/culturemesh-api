@@ -49,7 +49,7 @@ def make_new_post():
 
 @posts.route("/<post_id>/reply", methods=["POST", "PUT"])
 @require_apikey
-def make_new_post_reply():
+def make_new_post_reply(post_id):
     if request.method == "POST":
       # POST
       content_fields = ['id_parent', 'id_user', \

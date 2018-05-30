@@ -12,32 +12,31 @@ languages = Blueprint('language', __name__)
 def test():
     return "pong"
 
+
 @languages.route("/<lang_id>", methods=["GET"])
 @require_apikey
 def get_language(lang_id):
     return get_by_id("languages", lang_id)
 
-@languages.route("/language/autocomplete", methods=["GET"])
+
+@languages.route("/autocomplete", methods=["GET"])
 @require_apikey
 def get_language_autocomplete():
     input_text = request.args['input_text']
-
+    if input_text is None:
+        return make_response("Must have valid input_text field", HTTPStatus.METHOD_NOT_ALLOWED)
     connection = mysql.get_db()
     cursor = connection.cursor()
 
     # TODO: this is entirely unsafe, need better way to
     #       work with autocomplete.
-    query = "SELECT * \
-             FROM languages \
-             WHERE name REGEXP %s \
-             ORDER BY num_speakers DESC \
-             LIMIT 20" % input_text
+    query = "SELECT * FROM languages WHERE languages.name REGEXP %s ORDER BY num_speakers DESC LIMIT 20;"
 
-    cursor.execute(query)
+    cursor.execute(query, (input_text,))
     langs = cursor.fetchall()
     if len(langs) == 0:
-      cursor.close()
-      return make_response(jsonify([]), HTTPStatus.OK)
+        cursor.close()
+        return make_response(jsonify([]), HTTPStatus.OK)
 
     langs = convert_objects(langs, cursor.description)
     cursor.close()

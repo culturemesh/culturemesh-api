@@ -168,6 +168,8 @@ def get_paginated(sql_q_format, selection_fields, args,
 
     NOTE: the only thing here not provided by the user is args.
 
+    We call get_paginated_objects.
+
     :param sql_q_format: A partial SQL query with zero or more %s
     :param selection_fields: A list of the values to be substituted into sql_q_format
     :param args: The query parameters (request.args)
@@ -177,22 +179,39 @@ def get_paginated(sql_q_format, selection_fields, args,
     :param order_arg: The query param on which order is based for pagination
     :returns: A response object ready to return to the client
     """
+    """
+        Utility function for getting paginated results from a
+        database.
+
+        See OneNote documentation for Pagination mechanics.
+
+        NOTE: only works if the WHERE class of the SQL statement
+              matches a single id.
+
+        NOTE: the only thing here not provided by the user is args.
+
+        :param sql_q_format: A partial SQL query with zero or more %s
+        :param selection_fields: A list of the values to be substituted into sql_q_format
+        :param args: The query parameters (request.args)
+        :param order_clause: The SQL part that dictates order on the final results
+        :param order_index_format: The partial SQL query to be used for pagination
+                                    ordering, of the form "FIELD <= %s"
+        :param order_arg: The query param on which order is based for pagination
+        :returns: A response object ready to return to the client
+        """
     conn = mysql.get_db()
     count = int(args.get("count", 100))
     cursor = conn.cursor()
     if order_arg in args:
-      order_arg_val = args[order_arg]
-      sql_q_format += " AND " + order_index_format
-      cursor.execute(sql_q_format + order_clause,
-                    (*selection_fields, order_arg_val))
+        order_arg_val = args[order_arg]
+        sql_q_format += " AND " + order_index_format
+        cursor.execute(sql_q_format + order_clause, (*selection_fields, order_arg_val))
     else:
-      cursor.execute(sql_q_format + order_clause,
-                    (*selection_fields,))
-
+        cursor.execute(sql_q_format + order_clause, (*selection_fields,))
     items = cursor.fetchmany(count)
     if len(items) == 0:
-      cursor.close()
-      return make_response(jsonify([]), HTTPStatus.OK)
+        cursor.close()
+        return []
     items = convert_objects(items, cursor.description)
     cursor.close()
     return make_response(jsonify(items), HTTPStatus.OK)

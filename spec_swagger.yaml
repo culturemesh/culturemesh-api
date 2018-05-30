@@ -1400,7 +1400,8 @@ definitions:
       city_id:
         type: integer
         format: int64
-
+      name:
+        type: string
   City:
     type: object
     required:
@@ -1513,7 +1514,5 @@ definitions:
         type: integer
         format: smallint
         description: Not sure what this is.
-
   verify_account:
     type: integer
-

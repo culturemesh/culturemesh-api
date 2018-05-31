@@ -591,6 +591,7 @@ paths:
           description: OK
         '405':
           description: Invalid input
+
   '/post/{postId}':
     get:
       tags:
@@ -651,6 +652,33 @@ paths:
           description: Post does not exist.
         '405':
           description: Invalid input
+
+  '/post/{postId}/reply_count':
+    get:
+      tags:
+        - posts
+      summary: Get the number of replies for a post
+      operationId: getPostReplyCount
+      produces:
+        - application/json
+      parameters:
+        - name: postId
+          in: path
+          description: ID of post to get reply count for
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              reply_count:
+                type: integer
+                format: int64
+                example: 12
+
   /post/new:
     post:
       tags:
@@ -730,6 +758,12 @@ paths:
       consumes:
         - application/json
       parameters:
+        - name: postId
+          in: path
+          description: ID of post to update
+          required: true
+          type: integer
+          format: int64
         - in: body
           name: post
           description: The post specification.

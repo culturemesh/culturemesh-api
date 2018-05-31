@@ -31,6 +31,15 @@ def get_post_replies(post_id):
                           order_index_format="post_replies.id <= %s",
                           order_arg="max_id")
 
+@posts.route("/<post_id>/reply_count", methods=["GET"])
+@require_apikey
+def get_post_reply_count(post_id):
+    query = "SELECT count(*) \
+             as reply_count \
+             from post_replies \
+             where id_parent=%s"
+    return execute_single_tuple_query(query, (post_id,))
+
 @posts.route("/new", methods=["POST", "PUT"])
 @require_apikey
 def make_new_post():

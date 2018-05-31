@@ -152,7 +152,7 @@ def get_paginated(sql_q_format, selection_fields, args,
     items = cursor.fetchmany(count)
     if len(items) == 0:
         cursor.close()
-        return []
+        return make_response(jsonify([]), HTTPStatus.OK)
     items = convert_objects(items, cursor.description)
     cursor.close()
     return make_response(jsonify(items), HTTPStatus.OK)

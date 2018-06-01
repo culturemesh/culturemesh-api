@@ -96,7 +96,7 @@ def get_user_networks(user_id):
                           WHERE network_registration.id_user=%s",
                           selection_fields=[user_id],
                           args=request.args,
-                          order_clause="ORDER BY id_network DESC",
+                          order_clause="ORDER BY join_date DESC",
                           order_index_format="join_date <= %s",
                           order_arg="max_registration_date")
 

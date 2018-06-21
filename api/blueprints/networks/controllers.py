@@ -15,7 +15,7 @@ def test():
 @networks.route("/networks", methods=["GET"])
 @require_apikey
 def get_networks():
-    # Validate that we have valid input data (we need a near_location.
+    # Validate that we have valid input data (we need a near_location).
     if "near_location" not in request.args:
         return make_response("No near_location specified", HTTPStatus.METHOD_NOT_ALLOWED)
     near_ids = request.args["near_location"].split(",")
@@ -42,7 +42,7 @@ def get_networks():
                              order_index_format="id <= %s",
                              order_arg="max_id")
     else:
-        make_response("No location/language query parameter", HTTPStatus.METHOD_NOT_ALLOWED)
+        return make_response("No location/language query parameter", HTTPStatus.METHOD_NOT_ALLOWED)
 
 
 

@@ -300,7 +300,7 @@ paths:
       tags:
         - networks
       summary: Get a list of all networks.
-      description: ''
+      description: 'Notice: if you are querying for an null parameter, pass -1 instead. '
       operationId: getNetworks
       consumes:
         - application/json

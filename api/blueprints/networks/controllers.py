@@ -35,7 +35,7 @@ def get_networks():
                              order_arg="max_id")
     elif "language" in request.args:
         near_ids.append(request.args["language"])
-        return get_paginated(mysql_string_start + "AND language=%s",
+        return get_paginated(mysql_string_start + "AND language_origin=%s",
                              selection_fields=near_ids,
                              args=request.args,
                              order_clause="ORDER BY id DESC",

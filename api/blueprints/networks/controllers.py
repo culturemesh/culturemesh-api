@@ -15,7 +15,7 @@ def test():
 @networks.route("/networks", methods=["GET"])
 @require_apikey
 def get_networks():
-    # Validate that we have valid input data (we need a near_location.
+    # Validate that we have valid input data (we need a near_location).
     if "near_location" not in request.args:
         return make_response("No near_location specified", HTTPStatus.METHOD_NOT_ALLOWED)
     near_ids = request.args["near_location"].split(",")
@@ -35,14 +35,14 @@ def get_networks():
                              order_arg="max_id")
     elif "language" in request.args:
         near_ids.append(request.args["language"])
-        return get_paginated(mysql_string_start + "AND language=%s",
+        return get_paginated(mysql_string_start + "AND language_origin=%s",
                              selection_fields=near_ids,
                              args=request.args,
                              order_clause="ORDER BY id DESC",
                              order_index_format="id <= %s",
                              order_arg="max_id")
     else:
-        make_response("No location/language query parameter", HTTPStatus.METHOD_NOT_ALLOWED)
+        return make_response("No location/language query parameter", HTTPStatus.METHOD_NOT_ALLOWED)
 
 
 

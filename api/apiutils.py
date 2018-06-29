@@ -106,6 +106,9 @@ def execute_put_by_id(request, table_name):
     :returns: A response object ready to return to the client
     """
     content = request.get_json()
+    if not content:
+        content = request.form
+
     columns = content.keys()
 
     if "id" not in columns:
@@ -138,6 +141,8 @@ def execute_post_by_table(request, content_fields, table_name):
     :returns: A response object ready for the client.
     """
     content = request.get_json()
+    if not content:
+        content = request.form
 
     query = "INSERT INTO %s (%s) " % (table_name, ','.join(content_fields))
     query += " values ("

@@ -22,50 +22,6 @@ tags:
 schemes:
   - https
 paths:
-  /users:
-    get:
-      tags:
-        - users
-      summary: Get users.
-      description: ''
-      operationId: getUsers
-      produces:
-        - application/json
-      parameters:
-        - in: query
-          name: count
-          type: integer
-          description: |
-            The number of results to return.  Between 1 and 100.
-        - in: query
-          name: max_id
-          type: integer
-          description: |
-            The maximum ID, inclusive, to return data for.
-        - in: query
-          name: near_location
-          type: string
-          description: |
-            A comma-separated list of country_id, region_id, and city_id, in that order.
-        - in: query
-          name: from_location
-          type: string
-          description: |
-             A comma-separated list of country_id, region_id, and city_id, in that order.
-        - in: query
-          name: language
-          type: string
-          description: |
-             Name of language.
-      responses:
-        '200':
-          description: A list of users matching filter.
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/User'
-        '405':
-          description: Invalid input
   '/user/{userId}':
     get:
       tags:
@@ -256,7 +212,51 @@ paths:
           description: OK
         '405':
           description: Invalid input
-  /user:
+  /user/users:
+    get:
+      tags:
+        - users
+      summary: Get users.
+      description: ''
+      operationId: getUsers
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: count
+          type: integer
+          description: |
+            The number of results to return.  Between 1 and 100.
+        - in: query
+          name: max_id
+          type: integer
+          description: |
+            The maximum ID, inclusive, to return data for.
+        - in: query
+          name: near_location
+          type: string
+          description: |
+            A comma-separated list of country_id, region_id, and city_id, in that order.
+        - in: query
+          name: from_location
+          type: string
+          description: |
+             A comma-separated list of country_id, region_id, and city_id, in that order.
+        - in: query
+          name: language
+          type: string
+          description: |
+             Name of language.
+
+      responses:
+        '200':
+          description: A list of users matching filter.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        '405':
+          description: Invalid input
     post:
       tags:
         - users
@@ -296,6 +296,7 @@ paths:
       responses:
         '200':
           description: OK
+
   /networks:
     get:
       tags:

@@ -103,6 +103,7 @@ def get_networks():
             return make_response("Invalid network parameters. Could not make a new network.",
                                  HTTPStatus.METHOD_NOT_ALLOWED)
     else:
+        # Just return the response object, since it is not empty.
         return response
 
 

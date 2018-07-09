@@ -33,6 +33,9 @@ def make_new_network_request():
         index += 1
     index = 0
     if "from_location" in request.args:
+        # To avoid a key error in execute_post_by_table, we need to set the other parmas to null
+        req.form['id_language_origin'] = 'null'
+        req.form['language_origin'] = 'null'
         from_ids = request.args['from_location'].split(',')
         for singular, plural in zip(['city', 'region', 'country'], ['cities', 'regions', 'countries']):
             req.form['id_' + singular + '_origin'] = from_ids[index]
@@ -43,8 +46,11 @@ def make_new_network_request():
         elif near_ids[1] != -1:
             req.form['network_class'] = 'rc'
         else:
-            request.args['network_class'] = 'co'
+            req.form['network_class'] = 'co'
     elif "language" in request.args:
+        for singular, plural in zip(['city', 'region', 'country'], ['cities', 'regions', 'countries']):
+            req.form['id_' + singular + '_cur'] = 'null'
+            req.form[singular + '_cur'] = 'null'
         req.form['id_language_origin'] = request.args['language']
         req.form['language_origin'] = get_area_name(conn, 'id', 'languages', request.args['language'])
         req.form['network_class'] = '_l'

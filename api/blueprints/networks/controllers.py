@@ -21,6 +21,7 @@ def make_new_network_request():
     is an ImmutableDict.
     """
     req = {}
+    print("please update. please...")
     req.form = {}
     conn = mysql.get_db()
     near_ids = request.args['near_location'].split()

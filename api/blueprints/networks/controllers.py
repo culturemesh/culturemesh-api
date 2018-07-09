@@ -39,7 +39,7 @@ def make_new_network_request():
         from_ids = request.args['from_location'].split(',')
         for singular, plural in zip(['city', 'region', 'country'], ['cities', 'regions', 'countries']):
             req.form['id_' + singular + '_origin'] = from_ids[index]
-            req.form[singular + '_origin'] = get_area_name(conn, 'name', plural, from_ids[index])
+            req.form[singular + '_origin'] = get_area_name(conn, 'id', plural, from_ids[index])
             index += 1
         if near_ids[0] != -1:
             req.form['network_class'] = 'cc'
@@ -63,19 +63,19 @@ def make_new_network_request():
     return req
 
 
-def get_area_name(db_connection, column_name, table_name, id):
+def get_area_name(db_connection, column_name, table_name, item_id):
     """
     Fetches name from DB table given id. I also use this for languages.
     :param db_connection: Database connection (use mysql.get_db())
     :param column_name: used for column identifier
     :param table_name:
-    :param id: id, -1 if supposed to be "null"
+    :param item_id: id, -1 if supposed to be "null"
     :return: name of area.
     """
-    if id == -1:
+    if id == str(-1):
         return "null"
     cursor = db_connection.cursor()
-    cursor.execute("SELECT name FROM " + table_name + " WHERE id=%s", id)
+    cursor.execute("SELECT name FROM " + table_name + " WHERE id=%s", item_id)
     cursor.close()
     return cursor.fetchone()
 
@@ -116,15 +116,13 @@ def get_networks():
         #try:
 
         make_new_network(make_new_network_request())
-        return make_response("fishsh")
-        return make_response("this happened???")
+        return make_response(get_networks())
         """except (AttributeError, ValueError, IndexError) as e:
             print(str(e))
             return make_response("Invalid network parameters. Could not make a new network.",
                                  HTTPStatus.METHOD_NOT_ALLOWED)"""
     else:
         # Just return the response object, since it is not empty.
-        return make_response("TODO: Remove this")
         return response
 
 

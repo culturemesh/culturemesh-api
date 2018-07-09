@@ -115,6 +115,7 @@ def get_networks():
                                  HTTPStatus.METHOD_NOT_ALLOWED)"""
     else:
         # Just return the response object, since it is not empty.
+        return make_response("TODO: Remove this")
         return response
 
 

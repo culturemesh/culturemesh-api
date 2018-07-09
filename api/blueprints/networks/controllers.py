@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, json, make_response
+from flask import Blueprint, jsonify, request, redirect, url_for
 from api import require_apikey
 from http import HTTPStatus
 from api.extensions import mysql
@@ -10,6 +10,27 @@ networks = Blueprint('network', __name__)
 @require_apikey
 def test():
     return "pong"
+
+
+def make_new_network_request(req):
+    """
+    This will transform a GET /networks query to a POST /new network query.
+    :param req: The request object that we can update.
+    :return: The updated request object.
+    """
+    near_ids = request.args['near_location'].split()
+    request.args['id_city_cur'] = near_ids[0]
+    request.args['id_region_cur'] = near_ids[1]
+    request.args['id_country_cur'] = near_ids[2]
+    if "from_location" in request.args:
+        from_ids = request.args['from_location'].split()
+        request.args['id_city_origin'] = from_ids[0]
+        request.args['id_region_origin'] = from_ids[1]
+        request.args['id_region_']
+    conn =  mysql.get_db()
+    cursor = conn.get_cursor()
+    cursor.execute("S")
+    request.args['city_cur'] =
 
 
 @networks.route("/networks", methods=["GET"])
@@ -33,12 +54,9 @@ def get_networks():
                              order_clause="ORDER BY id DESC",
                              order_index_format="id <= %s",
                              order_arg="max_id")
-        if response.get_json() == jsonify([]):
-            return make_response(jsonify({"param": "oooh I can do stuff with this check."}))
-        return response
     elif "language" in request.args:
         near_ids.append(request.args["language"])
-        return get_paginated(mysql_string_start + "AND language_origin=%s",
+        response = get_paginated(mysql_string_start + "AND language_origin=%s",
                              selection_fields=near_ids,
                              args=request.args,
                              order_clause="ORDER BY id DESC",
@@ -46,7 +64,15 @@ def get_networks():
                              order_arg="max_id")
     else:
         return make_response("No location/language query parameter", HTTPStatus.METHOD_NOT_ALLOWED)
-
+    if response.get_json() == jsonify([]):
+        # The network doesn't exist. So, let's make it!
+        try:
+            new_request = make_new_network_request(request.args)
+            return redirect(url_for('new'))
+        except AttributeError:
+            return make_response("Invalid network parameters.", HTTPStatus.METHOD_NOT_ALLOWED)
+    else:
+        return response
 
 
 @networks.route("/<network_id>", methods=["GET"])
@@ -125,3 +151,4 @@ def make_new_network():
                 'network_class']
 
     return execute_post_by_table(request, content_fields, "networks")
+

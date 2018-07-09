@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request, redirect, url_for
 from api import require_apikey
+import traceback
 from http import HTTPStatus
 from api.extensions import mysql
 from api.apiutils import *
@@ -107,6 +108,7 @@ def get_networks():
             make_new_network(make_new_network_request())
             return make_response("this happened???")
         except (AttributeError, ValueError, IndexError) as e:
+            print(traceback.format_exc())
             return make_response("Invalid network parameters. Could not make a new network.",
                                  HTTPStatus.METHOD_NOT_ALLOWED)
     else:

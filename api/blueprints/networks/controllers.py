@@ -108,7 +108,7 @@ def get_networks():
             make_new_network(make_new_network_request())
             return make_response("this happened???")
         except (AttributeError, ValueError, IndexError) as e:
-            print(traceback.format_exc())
+            print(str(e))
             return make_response("Invalid network parameters. Could not make a new network.",
                                  HTTPStatus.METHOD_NOT_ALLOWED)
     else:

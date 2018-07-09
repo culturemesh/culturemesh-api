@@ -105,8 +105,9 @@ def get_networks():
     if response.get_json() == jsonify([]) or response.get_json() == []:
         # The network doesn't exist. So, let's make it!
         #try:
-        apples = 3
+
         make_new_network(make_new_network_request())
+        return make_response("fishsh")
         return make_response("this happened???")
         """except (AttributeError, ValueError, IndexError) as e:
             print(str(e))

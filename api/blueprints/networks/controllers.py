@@ -103,7 +103,7 @@ def get_networks():
             return make_response("Invalid network parameters. Could not make a new network.",
                                  HTTPStatus.METHOD_NOT_ALLOWED)
     else:
-        return make_response("In here???")
+        return response
 
 
 @networks.route("/<network_id>", methods=["GET"])

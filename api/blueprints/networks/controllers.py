@@ -33,7 +33,9 @@ def get_networks():
                              order_clause="ORDER BY id DESC",
                              order_index_format="id <= %s",
                              order_arg="max_id")
-        return make_response(jsonify(response))
+        if not response.data:
+            return make_response(jsonify({"param": "oooh I can do stuff with this check."}))
+        return response
     elif "language" in request.args:
         near_ids.append(request.args["language"])
         return get_paginated(mysql_string_start + "AND language_origin=%s",

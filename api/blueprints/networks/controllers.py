@@ -20,7 +20,8 @@ def make_new_network_request():
     :return: The updated request object. Notice this is just a dictionary, since the actual request object
     is an ImmutableDict.
     """
-    req = {'form': {}}
+    req = {}
+    req.form = {}
     conn = mysql.get_db()
     near_ids = request.args['near_location'].split()
     index = 0

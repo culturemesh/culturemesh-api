@@ -33,7 +33,7 @@ def get_networks():
                              order_clause="ORDER BY id DESC",
                              order_index_format="id <= %s",
                              order_arg="max_id")
-        if response.get_json() == jsonify([]) or response.data is None:
+        if response.data == [] or response.data == jsonify([]):
             return make_response(jsonify({"param": "oooh I can do stuff with this check."}))
         return response
     elif "language" in request.args:

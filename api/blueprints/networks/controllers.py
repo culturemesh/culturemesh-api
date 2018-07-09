@@ -14,23 +14,52 @@ def test():
 
 def make_new_network_request(req):
     """
-    This will transform a GET /networks query to a POST /new network query.
+    This will transform a GET /networks query to a POST /new network query by including necessary request.args.
     :param req: The request object that we can update.
     :return: The updated request object.
     """
+    conn = mysql.get_db()
     near_ids = request.args['near_location'].split()
-    request.args['id_city_cur'] = near_ids[0]
-    request.args['id_region_cur'] = near_ids[1]
-    request.args['id_country_cur'] = near_ids[2]
+    index = 0
+    for singular, plural in zip(['city','region','country'],['cities','regions','countries']):
+        request.args['id_' + singular + '_cur'] = near_ids[index]
+        request.args[singular + '_cur'] = get_area_name(conn, 'name', plural, near_ids[index])
+        index += 1
+    index = 0
     if "from_location" in request.args:
         from_ids = request.args['from_location'].split()
-        request.args['id_city_origin'] = from_ids[0]
-        request.args['id_region_origin'] = from_ids[1]
-        request.args['id_region_']
-    conn =  mysql.get_db()
-    cursor = conn.get_cursor()
-    cursor.execute("S")
-    request.args['city_cur'] =
+        for singular, plural in zip(['city', 'region', 'country'], ['cities', 'regions', 'countries']):
+            request.args['id_' + singular + '_origin'] = from_ids[index]
+            request.args[singular + '_origin'] = get_area_name(conn, 'name', plural, from_ids[index])
+            index += 1
+        if near_ids[0] != -1:
+            request.args['network_class'] = 'cc'
+        elif near_ids[1] != -1:
+            request.args['network_class'] = 'rc'
+        else:
+            request.args['network_class'] = 'co'
+    elif "language" in request.args:
+        request.args['id_language_origin'] = request.args['language']
+        request.args['language_origin'] = get_area_name(conn, 'id', 'languages', request.args['language'])
+        request.args['network_class'] = '_l'
+    return request
+
+
+def get_area_name(db_connection, column_name, table_name, id):
+    """
+    Fetches name from DB table given id. I also use this for languages.
+    :param db_connection: Database connection (use mysql.get_db())
+    :param column_name: used for column identifier
+    :param table_name:
+    :param id: id, -1 if supposed to be "null"
+    :return: name of area.
+    """
+    if id == -1:
+        return "null"
+    cursor = db_connection.get_cursor()
+    cursor.execute("SELECT 'name' FROM " + table_name + " WHERE id=%s", id)
+    cursor.close()
+    return cursor.fetchone()[0]
 
 
 @networks.route("/networks", methods=["GET"])
@@ -67,10 +96,11 @@ def get_networks():
     if response.get_json() == jsonify([]):
         # The network doesn't exist. So, let's make it!
         try:
-            new_request = make_new_network_request(request.args)
+            make_new_network_request(request.args)
             return redirect(url_for('new'))
-        except AttributeError:
-            return make_response("Invalid network parameters.", HTTPStatus.METHOD_NOT_ALLOWED)
+        except (AttributeError, ValueError, IndexError) as e:
+            return make_response("Invalid network parameters. Could not make a new network.",
+                                 HTTPStatus.METHOD_NOT_ALLOWED)
     else:
         return response
 

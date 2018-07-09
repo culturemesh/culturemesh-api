@@ -33,7 +33,8 @@ def get_networks():
                              order_clause="ORDER BY id DESC",
                              order_index_format="id <= %s",
                              order_arg="max_id")
-        print(response)
+        print("response object")
+        print(dict(response))
         return response
     elif "language" in request.args:
         near_ids.append(request.args["language"])

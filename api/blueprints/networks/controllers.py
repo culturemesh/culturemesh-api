@@ -12,37 +12,45 @@ def test():
     return "pong"
 
 
-def make_new_network_request(req):
+def make_new_network_request():
     """
     This will transform a GET /networks query to a POST /new network query by including necessary request.args.
     :param req: The request object that we can update.
-    :return: The updated request object.
+    :return: The updated request object. Notice this is just a dictionary, since the actual request object
+    is an ImmutableDict.
     """
+    req = {}
     conn = mysql.get_db()
     near_ids = request.args['near_location'].split()
     index = 0
     for singular, plural in zip(['city','region','country'],['cities','regions','countries']):
-        request.args['id_' + singular + '_cur'] = near_ids[index]
-        request.args[singular + '_cur'] = get_area_name(conn, 'name', plural, near_ids[index])
+        req.form['id_' + singular + '_cur'] = near_ids[index]
+        req.form[singular + '_cur'] = get_area_name(conn, 'name', plural, near_ids[index])
         index += 1
     index = 0
     if "from_location" in request.args:
         from_ids = request.args['from_location'].split()
         for singular, plural in zip(['city', 'region', 'country'], ['cities', 'regions', 'countries']):
-            request.args['id_' + singular + '_origin'] = from_ids[index]
-            request.args[singular + '_origin'] = get_area_name(conn, 'name', plural, from_ids[index])
+            req.form['id_' + singular + '_origin'] = from_ids[index]
+            req.form[singular + '_origin'] = get_area_name(conn, 'name', plural, from_ids[index])
             index += 1
         if near_ids[0] != -1:
-            request.args['network_class'] = 'cc'
+            req.form['network_class'] = 'cc'
         elif near_ids[1] != -1:
-            request.args['network_class'] = 'rc'
+            req.form['network_class'] = 'rc'
         else:
             request.args['network_class'] = 'co'
     elif "language" in request.args:
-        request.args['id_language_origin'] = request.args['language']
-        request.args['language_origin'] = get_area_name(conn, 'id', 'languages', request.args['language'])
-        request.args['network_class'] = '_l'
-    return request
+        req.form['id_language_origin'] = request.args['language']
+        req.form['language_origin'] = get_area_name(conn, 'id', 'languages', request.args['language'])
+        req.form['network_class'] = '_l'
+    # To avoid an error, we will make a pseudo function that returns none so that execute_post_by_table will use the
+    # function dictionary instead.
+
+    def get_json():
+        return None
+    req.get_json = get_json
+    return req
 
 
 def get_area_name(db_connection, column_name, table_name, id):
@@ -96,8 +104,7 @@ def get_networks():
     if response.get_json() == jsonify([]) or response.get_json() == []:
         # The network doesn't exist. So, let's make it!
         try:
-            make_new_network_request(request.args)
-            make_new_network()
+            make_new_network(make_new_network_request())
             return make_response("this happened???")
         except (AttributeError, ValueError, IndexError) as e:
             return make_response("Invalid network parameters. Could not make a new network.",
@@ -177,14 +184,16 @@ def get_network_user_count(network_id):
 
 @networks.route("/new", methods=["POST"])
 @require_apikey
-def make_new_network():
+def make_new_network(internal_req):
     content_fields = ['city_cur', 'id_city_cur', \
-                'region_cur', 'id_region_cur', \
-                'country_cur', 'id_country_cur', \
-                'city_origin', 'id_city_origin', \
-                'region_origin', 'id_region_origin', \
-                'country_origin', 'id_country_origin', \
-                'language_origin', 'id_language_origin', \
-                'network_class']
+                      'region_cur', 'id_region_cur', \
+                      'country_cur', 'id_country_cur', \
+                      'city_origin', 'id_city_origin', \
+                      'region_origin', 'id_region_origin', \
+                      'country_origin', 'id_country_origin', \
+                      'language_origin', 'id_language_origin', \
+                      'network_class']
+    if internal_req is not None:
+        return execute_post_by_table(internal_req, content_fields, "networks")
     return execute_post_by_table(request, content_fields, "networks")
 

@@ -49,8 +49,8 @@ def make_new_network_request():
             req.form['network_class'] = 'co'
     elif "language" in request.args:
         for singular, plural in zip(['city', 'region', 'country'], ['cities', 'regions', 'countries']):
-            req.form['id_' + singular + '_cur'] = 'null'
-            req.form[singular + '_cur'] = 'null'
+            req.form['id_' + singular + '_origin'] = 'null'
+            req.form[singular + '_origin'] = 'null'
         req.form['id_language_origin'] = request.args['language']
         req.form['language_origin'] = get_area_name(conn, 'id', 'languages', request.args['language'])
         req.form['network_class'] = '_l'

@@ -20,6 +20,7 @@ def make_new_network_request():
     :return: The updated request object. Notice this is just a dictionary, since the actual request object
     is an ImmutableDict.
     """
+    # this makes req an arbitrary object so I can add attributes (like form and get_json) to it.
     req = type('', (), {})()
     print("please update. please...")
     req.form = {}
@@ -67,7 +68,7 @@ def get_area_name(db_connection, column_name, table_name, id):
     """
     if id == -1:
         return "null"
-    cursor = db_connection.get_cursor()
+    cursor = db_connection.cursor()
     cursor.execute("SELECT 'name' FROM " + table_name + " WHERE id=%s", id)
     cursor.close()
     return cursor.fetchone()[0]

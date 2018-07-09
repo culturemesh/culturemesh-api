@@ -93,7 +93,7 @@ def get_networks():
                              order_arg="max_id")
     else:
         return make_response("No location/language query parameter", HTTPStatus.METHOD_NOT_ALLOWED)
-    if response.get_json() == jsonify([]):
+    if response.get_json() == jsonify([]) or response.get_json() == []:
         # The network doesn't exist. So, let's make it!
         try:
             make_new_network_request(request.args)

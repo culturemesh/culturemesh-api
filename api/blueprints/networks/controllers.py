@@ -25,15 +25,15 @@ def make_new_network_request():
     print("please update. please...")
     req.form = {}
     conn = mysql.get_db()
-    near_ids = request.args['near_location'].split()
+    near_ids = request.args['near_location'].split(',')
     index = 0
-    for singular, plural in zip(['city','region','country'],['cities','regions','countries']):
+    for singular, plural in zip(['city', 'region', 'country'], ['cities', 'regions', 'countries']):
         req.form['id_' + singular + '_cur'] = near_ids[index]
         req.form[singular + '_cur'] = get_area_name(conn, 'name', plural, near_ids[index])
         index += 1
     index = 0
     if "from_location" in request.args:
-        from_ids = request.args['from_location'].split()
+        from_ids = request.args['from_location'].split(',')
         for singular, plural in zip(['city', 'region', 'country'], ['cities', 'regions', 'countries']):
             req.form['id_' + singular + '_origin'] = from_ids[index]
             req.form[singular + '_origin'] = get_area_name(conn, 'name', plural, from_ids[index])

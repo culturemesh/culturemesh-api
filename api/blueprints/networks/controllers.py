@@ -33,9 +33,7 @@ def get_networks():
                              order_clause="ORDER BY id DESC",
                              order_index_format="id <= %s",
                              order_arg="max_id")
-        print("response object")
-        print(dict(response))
-        return response
+        return make_response(dict(response))
     elif "language" in request.args:
         near_ids.append(request.args["language"])
         return get_paginated(mysql_string_start + "AND language_origin=%s",

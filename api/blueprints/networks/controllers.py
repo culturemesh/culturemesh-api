@@ -104,13 +104,13 @@ def get_networks():
         return make_response("No location/language query parameter", HTTPStatus.METHOD_NOT_ALLOWED)
     if response.get_json() == jsonify([]) or response.get_json() == []:
         # The network doesn't exist. So, let's make it!
-        try:
-            make_new_network(make_new_network_request())
-            return make_response("this happened???")
-        except (AttributeError, ValueError, IndexError) as e:
+        #try:
+        make_new_network(make_new_network_request())
+        return make_response("this happened???")
+        """except (AttributeError, ValueError, IndexError) as e:
             print(str(e))
             return make_response("Invalid network parameters. Could not make a new network.",
-                                 HTTPStatus.METHOD_NOT_ALLOWED)
+                                 HTTPStatus.METHOD_NOT_ALLOWED)"""
     else:
         # Just return the response object, since it is not empty.
         return response

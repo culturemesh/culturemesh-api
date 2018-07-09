@@ -97,7 +97,8 @@ def get_networks():
         # The network doesn't exist. So, let's make it!
         try:
             make_new_network_request(request.args)
-            return redirect(url_for('new'))
+            make_new_network()
+            return get_networks()
         except (AttributeError, ValueError, IndexError) as e:
             return make_response("Invalid network parameters. Could not make a new network.",
                                  HTTPStatus.METHOD_NOT_ALLOWED)
@@ -123,6 +124,7 @@ def get_network_posts(network_id):
                          order_index_format="id <= %s",
                          order_arg="max_id")
 
+
 @networks.route("/<network_id>/post_count", methods=["GET"])
 @require_apikey
 def get_network_post_count(network_id):
@@ -131,6 +133,7 @@ def get_network_post_count(network_id):
              from posts \
              where id_network=%s"
     return execute_single_tuple_query(query, (network_id,))
+
 
 @networks.route("/<network_id>/events", methods=["GET"])
 @require_apikey
@@ -159,6 +162,7 @@ def get_network_users(network_id):
                           order_index_format="join_date <= %s",
                           order_arg="max_registration_date")
 
+
 @networks.route("/<network_id>/user_count", methods=["GET"])
 @require_apikey
 def get_network_user_count(network_id):
@@ -167,6 +171,7 @@ def get_network_user_count(network_id):
              from network_registration \
              where id_network=%s"
     return execute_single_tuple_query(query, (network_id,))
+
 
 @networks.route("/new", methods=["POST"])
 @require_apikey
@@ -179,6 +184,5 @@ def make_new_network():
                 'country_origin', 'id_country_origin', \
                 'language_origin', 'id_language_origin', \
                 'network_class']
-
     return execute_post_by_table(request, content_fields, "networks")
 

@@ -45,7 +45,6 @@ def get_networks():
         return make_response("No location/language query parameter", HTTPStatus.METHOD_NOT_ALLOWED)
 
 
-
 @networks.route("/<network_id>", methods=["GET"])
 @require_apikey
 def get_network(network_id):
@@ -63,6 +62,7 @@ def get_network_posts(network_id):
                          order_clause="ORDER BY id DESC",
                          order_index_format="id <= %s",
                          order_arg="max_id")
+
 
 @networks.route("/<network_id>/post_count", methods=["GET"])
 @require_apikey

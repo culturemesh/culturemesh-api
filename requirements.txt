@@ -10,3 +10,4 @@ MarkupSafe==1.0
 PyMySQL==0.8.0
 virtualenv==15.2.0
 Werkzeug==0.14.1
+Flask-Login==0.4.1

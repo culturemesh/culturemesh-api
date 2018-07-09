@@ -69,9 +69,9 @@ def get_area_name(db_connection, column_name, table_name, id):
     if id == -1:
         return "null"
     cursor = db_connection.cursor()
-    cursor.execute("SELECT 'name' FROM " + table_name + " WHERE id=%s", id)
+    cursor.execute("SELECT name FROM " + table_name + " WHERE id=%s", id)
     cursor.close()
-    return cursor.fetchone()[0]
+    return cursor.fetchone()
 
 
 @networks.route("/networks", methods=["GET"])

@@ -25,7 +25,7 @@ def make_new_network_request():
     index = 0
     for singular, plural in zip(['country', 'region', 'city'], ['countries', 'regions', 'cities']):
         req.form['id_' + singular + '_cur'] = near_ids[index]
-        req.form[singular + '_cur'] = get_area_name(conn, 'id', plural, near_ids[index])
+        req.form[singular + '_cur'] = get_column_value(conn, 'name', 'id', plural, near_ids[index])
         index += 1
     index = 0
     if "from_location" in request.args:
@@ -35,7 +35,7 @@ def make_new_network_request():
         from_ids = request.args['from_location'].split(',')
         for singular, plural in zip(['country', 'region', 'city'], ['countries', 'regions', 'cities']):
             req.form['id_' + singular + '_origin'] = from_ids[index]
-            req.form[singular + '_origin'] = get_area_name(conn, 'id', plural, from_ids[index])
+            req.form[singular + '_origin'] = get_column_value(conn, 'name', 'id', plural, from_ids[index])
             index += 1
         if near_ids[0] != -1:
             req.form['network_class'] = 'cc'
@@ -47,8 +47,8 @@ def make_new_network_request():
         for singular, plural in zip(['country', 'region', 'city'], ['countries', 'regions', 'cities']):
             req.form['id_' + singular + '_origin'] = 'null'
             req.form[singular + '_origin'] = 'null'
-        req.form['id_language_origin'] = request.args['language']
-        req.form['language_origin'] = get_area_name(conn, 'id', 'languages', request.args['language'])
+        req.form['id_language_origin'] = get_column_value(conn, 'id', 'name', 'languages', request.args['language'])
+        req.form['language_origin'] = request.args['language']
         req.form['network_class'] = '_l'
     # To avoid an error, we will make a pseudo function that returns none so that execute_post_by_table will use the
     # function dictionary instead.
@@ -59,11 +59,12 @@ def make_new_network_request():
     return req
 
 
-def get_area_name(db_connection, column_name, table_name, item_id):
+def get_column_value(db_connection, desired_column, query_column, table_name, item_id):
     """
     Fetches name from DB table given id. I also use this for languages.
     :param db_connection: Database connection (use mysql.get_db())
-    :param column_name: used for column identifier
+    :param desired_column: column you want to find out
+    :param query_column: column you already know that you can use to query
     :param table_name:
     :param item_id: id, -1 if supposed to be "null"
     :return: name of area.
@@ -71,7 +72,7 @@ def get_area_name(db_connection, column_name, table_name, item_id):
     if id == str(-1):
         return "null"
     cursor = db_connection.cursor()
-    cursor.execute("SELECT name FROM " + table_name + " WHERE " + column_name + "=%s", item_id)
+    cursor.execute("SELECT " + desired_column + " FROM " + table_name + " WHERE " + query_column + "=%s", item_id)
     cursor.close()
     return cursor.fetchone()
 

@@ -90,8 +90,8 @@ def get_networks():
     # Need to check if querying a location or language network. That changes our queries.
     if "from_location" in request.args:
         near_ids.extend(request.args["from_location"].split(","))
-        return get_paginated(mysql_string_start + "AND id_city_origin=%s AND id_region_origin=%s \
-                             AND id_country_origin=%s",
+        return get_paginated(mysql_string_start + "AND id_country_origin=%s AND id_region_origin=%s \
+                             AND id_city_origin=%s",
                              selection_fields=near_ids,
                              args=request.args,
                              order_clause="ORDER BY id DESC",

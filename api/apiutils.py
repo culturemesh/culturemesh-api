@@ -13,6 +13,7 @@ BUF_SIZE = 2 << ((10 * 1) + 4)  # 16 KB
 MAX_SIZE = 2 << ((10 * 2) + 1)  # 2 MB
 ALLOWED_EXTENSIONS = {'gif', 'png', 'jpg'}
 
+
 def convert_objects(tuple_arr, description):
     """
     A DB cursor returns an array of tuples, without attribute names.

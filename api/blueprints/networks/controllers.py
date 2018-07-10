@@ -121,6 +121,7 @@ def get_networks():
                                  HTTPStatus.METHOD_NOT_ALLOWED)"""
     #else:
         # Just return the response object, since it is not empty.
+    return make_response(jsonify(response_obj.get_json()))
     return response_obj
 
 

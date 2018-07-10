@@ -107,20 +107,21 @@ def get_networks():
                              order_arg="max_id")
     else:
         return make_response("No location/language query parameter", HTTPStatus.METHOD_NOT_ALLOWED)
-    if len(response_obj.get_json()) == 0:
+    """if len(response_obj.get_json()) == 0:
+        
         # The network doesn't exist. So, let's make it!
         #try:
 
         make_new_network(make_new_network_request())
         return make_response("updated source code")
         return make_response("I think the network is made....")
-        """except (AttributeError, ValueError, IndexError) as e:
+        except (AttributeError, ValueError, IndexError) as e:
             print(str(e))
             return make_response("Invalid network parameters. Could not make a new network.",
                                  HTTPStatus.METHOD_NOT_ALLOWED)"""
-    else:
+    #else:
         # Just return the response object, since it is not empty.
-        return response_obj
+    return response_obj
 
 
 @networks.route("/<network_id>", methods=["GET"])

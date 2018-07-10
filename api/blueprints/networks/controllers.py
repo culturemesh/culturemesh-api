@@ -18,12 +18,11 @@ def make_new_network_request():
     """
     # this makes req an arbitrary object so I can add attributes (like form and get_json) to it.
     req = type('', (), {})()
-    print("please update. please...")
     req.form = {}
     conn = mysql.get_db()
     near_ids = request.args['near_location'].split(',')
     index = 0
-    for singular, plural in zip(['city', 'region', 'country'], ['cities', 'regions', 'countries']):
+    for singular, plural in zip(['country', 'region', 'city'], ['countries', 'regions', 'cities']):
         req.form['id_' + singular + '_cur'] = near_ids[index]
         req.form[singular + '_cur'] = get_area_name(conn, 'id', plural, near_ids[index])
         index += 1
@@ -33,7 +32,7 @@ def make_new_network_request():
         req.form['id_language_origin'] = 'null'
         req.form['language_origin'] = 'null'
         from_ids = request.args['from_location'].split(',')
-        for singular, plural in zip(['city', 'region', 'country'], ['cities', 'regions', 'countries']):
+        for singular, plural in zip(['country', 'region', 'city'], ['countries', 'regions', 'cities']):
             req.form['id_' + singular + '_origin'] = from_ids[index]
             req.form[singular + '_origin'] = get_area_name(conn, 'id', plural, from_ids[index])
             index += 1
@@ -44,7 +43,7 @@ def make_new_network_request():
         else:
             req.form['network_class'] = 'co'
     elif "language" in request.args:
-        for singular, plural in zip(['city', 'region', 'country'], ['cities', 'regions', 'countries']):
+        for singular, plural in zip(['country', 'region', 'city'], ['countries', 'regions', 'cities']):
             req.form['id_' + singular + '_origin'] = 'null'
             req.form[singular + '_origin'] = 'null'
         req.form['id_language_origin'] = request.args['language']

@@ -115,7 +115,7 @@ def get_networks():
         # The network doesn't exist. So, let's make it!
         #try:
 
-        make_new_network(make_new_network_request())
+        return make_new_network(make_new_network_request())
         return make_response("I think the network is made....")
         """except (AttributeError, ValueError, IndexError) as e:
             print(str(e))

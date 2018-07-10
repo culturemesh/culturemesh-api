@@ -161,7 +161,7 @@ def execute_post_by_table(request, content_fields, table_name):
     print("POST QUERY TEXT")
     print(query)
     execute_insert(query, tuple(args))
-    return make_response("OK", HTTPStatus.OK)
+    return make_response(query, HTTPStatus.OK)
 
 
 def get_paginated(sql_q_format, selection_fields, args,

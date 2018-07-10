@@ -1,8 +1,5 @@
-from flask import Blueprint, jsonify, request, redirect, url_for
+from flask import Blueprint, request
 from api import require_apikey
-import traceback
-from http import HTTPStatus
-from api.extensions import mysql
 from api.apiutils import *
 
 networks = Blueprint('network', __name__)
@@ -16,7 +13,6 @@ def test():
 def make_new_network_request():
     """
     This will transform a GET /networks query to a POST /new network query by including necessary request.args.
-    :param req: The request object that we can update.
     :return: The updated request object. Notice this is just a dictionary, since the actual request object
     is an ImmutableDict.
     """
@@ -29,7 +25,7 @@ def make_new_network_request():
     index = 0
     for singular, plural in zip(['city', 'region', 'country'], ['cities', 'regions', 'countries']):
         req.form['id_' + singular + '_cur'] = near_ids[index]
-        req.form[singular + '_cur'] = get_area_name(conn, 'name', plural, near_ids[index])
+        req.form[singular + '_cur'] = get_area_name(conn, 'id', plural, near_ids[index])
         index += 1
     index = 0
     if "from_location" in request.args:
@@ -75,7 +71,7 @@ def get_area_name(db_connection, column_name, table_name, item_id):
     if id == str(-1):
         return "null"
     cursor = db_connection.cursor()
-    cursor.execute("SELECT name FROM " + table_name + " WHERE id=%s", item_id)
+    cursor.execute("SELECT name FROM " + table_name + " WHERE " + column_name + "=%s", item_id)
     cursor.close()
     return cursor.fetchone()
 
@@ -91,11 +87,10 @@ def get_networks():
     mysql_string_start = "SELECT * \
                           FROM networks \
                           WHERE id_country_cur=%s AND id_region_cur=%s AND id_city_cur=%s"
-    response_obj= {}
     # Need to check if querying a location or language network. That changes our queries.
     if "from_location" in request.args:
         near_ids.extend(request.args["from_location"].split(","))
-        respons_obj = get_paginated(mysql_string_start + "AND id_country_origin=%s AND id_region_origin=%s \
+        response_obj = get_paginated(mysql_string_start + "AND id_country_origin=%s AND id_region_origin=%s \
                              AND id_city_origin=%s",
                              selection_fields=near_ids,
                              args=request.args,
@@ -124,7 +119,7 @@ def get_networks():
                                  HTTPStatus.METHOD_NOT_ALLOWED)"""
     else:
         # Just return the response object, since it is not empty.
-        return response
+        return response_obj
 
 
 @networks.route("/<network_id>", methods=["GET"])

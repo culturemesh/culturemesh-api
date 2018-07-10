@@ -1616,11 +1616,11 @@ definitions:
   Language:
     type: object
     required:
-      - lang_id
+      - id
     description: |
       A language.
     properties:
-      lang_id:
+      id:
         type: integer
         format: bigint20
       name:

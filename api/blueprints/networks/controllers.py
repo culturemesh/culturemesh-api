@@ -91,10 +91,11 @@ def get_networks():
     mysql_string_start = "SELECT * \
                           FROM networks \
                           WHERE id_country_cur=%s AND id_region_cur=%s AND id_city_cur=%s"
+    response_obj= {}
     # Need to check if querying a location or language network. That changes our queries.
     if "from_location" in request.args:
         near_ids.extend(request.args["from_location"].split(","))
-        response = get_paginated(mysql_string_start + "AND id_country_origin=%s AND id_region_origin=%s \
+        respons_obj = get_paginated(mysql_string_start + "AND id_country_origin=%s AND id_region_origin=%s \
                              AND id_city_origin=%s",
                              selection_fields=near_ids,
                              args=request.args,
@@ -103,7 +104,7 @@ def get_networks():
                              order_arg="max_id")
     elif "language" in request.args:
         near_ids.append(request.args["language"])
-        response = get_paginated(mysql_string_start + "AND language_origin=%s",
+        response_obj = get_paginated(mysql_string_start + "AND language_origin=%s",
                              selection_fields=near_ids,
                              args=request.args,
                              order_clause="ORDER BY id DESC",
@@ -111,7 +112,7 @@ def get_networks():
                              order_arg="max_id")
     else:
         return make_response("No location/language query parameter", HTTPStatus.METHOD_NOT_ALLOWED)
-    if response.get_json() == jsonify([]) or response.get_json() == []:
+    if response_obj.get_json() == jsonify([]) or response_obj.get_json() == []:
         # The network doesn't exist. So, let's make it!
         #try:
 

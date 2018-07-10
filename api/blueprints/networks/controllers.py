@@ -80,7 +80,7 @@ def get_area_name(db_connection, column_name, table_name, item_id):
 def get_networks():
     # Validate that we have valid input data (we need a near_location).
     if "near_location" not in request.args:
-        return make_response("No near_location specified", HTTPStatus.METHOD_NOT_ALLOWED)
+        return make_response("No near_location specifieds", HTTPStatus.METHOD_NOT_ALLOWED)
     near_ids = request.args["near_location"].split(",")
     # All requests will start with the same query and query for near_location.
     mysql_string_start = "SELECT * \

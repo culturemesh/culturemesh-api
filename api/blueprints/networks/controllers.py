@@ -1,6 +1,7 @@
 from flask import Blueprint, request
 from api import require_apikey
 from api.apiutils import *
+from pymysql.err import IntegrityError
 
 networks = Blueprint('network', __name__)
 
@@ -111,7 +112,7 @@ def get_networks():
         try:
             make_new_network(make_new_network_request())
             return get_networks()
-        except (AttributeError, ValueError, IndexError) as e:
+        except (AttributeError, ValueError, IndexError, IntegrityError) as e:
             return make_response("Invalid network parameters. Could not make a new network.",
                                  HTTPStatus.METHOD_NOT_ALLOWED)
     else:

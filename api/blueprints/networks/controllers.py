@@ -115,7 +115,6 @@ def get_networks():
         # The network doesn't exist. So, let's make it!
         #try:
 
-        make_new_network(make_new_network_request())
         return make_response("I think the network is made....")
         """except (AttributeError, ValueError, IndexError) as e:
             print(str(e))
@@ -195,7 +194,7 @@ def get_network_user_count(network_id):
 
 @networks.route("/new", methods=["POST"])
 @require_apikey
-def make_new_network(internal_req):
+def make_new_network():
     content_fields = ['city_cur', 'id_city_cur', \
                       'region_cur', 'id_region_cur', \
                       'country_cur', 'id_country_cur', \
@@ -204,7 +203,5 @@ def make_new_network(internal_req):
                       'country_origin', 'id_country_origin', \
                       'language_origin', 'id_language_origin', \
                       'network_class']
-    if internal_req is not None:
-        return execute_post_by_table(internal_req, content_fields, "networks")
     return execute_post_by_table(request, content_fields, "networks")
 

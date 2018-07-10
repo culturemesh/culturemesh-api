@@ -79,7 +79,7 @@ def get_column_value(db_connection, desired_column, query_column, table_name, it
 
 @networks.route("/networks", methods=["GET"])
 @require_apikey
-def get_networks():
+def get_networks(func_counter=0):
     # Validate that we have valid input data (we need a near_location).
     if "near_location" not in request.args:
         return make_response("No near_location specified", HTTPStatus.METHOD_NOT_ALLOWED)
@@ -112,7 +112,10 @@ def get_networks():
         # The network doesn't exist. So, let's make it!
         try:
             make_new_network(make_new_network_request())
-            return get_networks()
+            func_counter += 1
+            if func_counter < 2:
+                # We need to avoid a stack overflow error if our make_new_network messes up.
+                return get_networks(func_counter)
         except (AttributeError, ValueError, IndexError, IntegrityError) as e:
             return make_response("Invalid network parameters. Could not make a new network.",
                                  HTTPStatus.METHOD_NOT_ALLOWED)

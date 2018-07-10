@@ -80,34 +80,6 @@ def get_area_name(db_connection, column_name, table_name, item_id):
 def get_networks():
     # Validate that we have valid input data (we need a near_location).
     if "near_location" not in request.args:
-        return make_response("No near_location specifieds", HTTPStatus.METHOD_NOT_ALLOWED)
-    near_ids = request.args["near_location"].split(",")
-    # All requests will start with the same query and query for near_location.
-    mysql_string_start = "SELECT * \
-                          FROM networks \
-                          WHERE id_country_cur=%s AND id_region_cur=%s AND id_city_cur=%s"
-    # Need to check if querying a location or language network. That changes our queries.
-    if "from_location" in request.args:
-        near_ids.extend(request.args["from_location"].split(","))
-        return get_paginated(mysql_string_start + "AND id_country_origin=%s AND id_region_origin=%s \
-                             AND id_city_origin=%s",
-                             selection_fields=near_ids,
-                             args=request.args,
-                             order_clause="ORDER BY id DESC",
-                             order_index_format="id <= %s",
-                             order_arg="max_id")
-    elif "language" in request.args:
-        near_ids.append(request.args["language"])
-        return get_paginated(mysql_string_start + "AND language=%s",
-                             selection_fields=near_ids,
-                             args=request.args,
-                             order_clause="ORDER BY id DESC",
-                             order_index_format="id <= %s",
-                             order_arg="max_id")
-    else:
-        return make_response("No location/language query parameter", HTTPStatus.METHOD_NOT_ALLOWED)
-    """# Validate that we have valid input data (we need a near_location).
-    if "near_location" not in request.args:
         return make_response("No near_location specified", HTTPStatus.METHOD_NOT_ALLOWED)
     near_ids = request.args["near_location"].split(",")
     # All requests will start with the same query and query for near_location.
@@ -135,21 +107,16 @@ def get_networks():
     else:
         return make_response("No location/language query parameter", HTTPStatus.METHOD_NOT_ALLOWED)
     if len(response_obj.get_json()) == 0:
-        
         # The network doesn't exist. So, let's make it!
-        #try:
-
-        make_new_network(make_new_network_request())
-        return make_response("updated source code")
-        return make_response("I think the network is made....")
+        try:
+            make_new_network(make_new_network_request())
+            return get_networks()
         except (AttributeError, ValueError, IndexError) as e:
-            print(str(e))
             return make_response("Invalid network parameters. Could not make a new network.",
-                                 HTTPStatus.METHOD_NOT_ALLOWED)"""
-    #else:
+                                 HTTPStatus.METHOD_NOT_ALLOWED)
+    else:
         # Just return the response object, since it is not empty.
-    return make_response(jsonify(response_obj.get_json()))
-    return response_obj
+        return response_obj
 
 
 @networks.route("/<network_id>", methods=["GET"])

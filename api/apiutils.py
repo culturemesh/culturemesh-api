@@ -159,9 +159,6 @@ def execute_post_by_table(request, content_fields, table_name):
     args = []
     for col in content_fields:
         args.append(content[col])
-    print("POST QUERY TEXT")
-    print(query)
-    print(str(jsonify(content)))
     execute_insert(query, tuple(args))
     return make_response(query, HTTPStatus.OK)
 

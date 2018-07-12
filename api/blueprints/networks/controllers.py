@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, abort
 from api import require_apikey
 from api.apiutils import *
 from pymysql.err import IntegrityError
@@ -66,7 +66,7 @@ def get_column_value(db_connection, desired_column, query_column, table_name, it
     :param desired_column: column you want to find out
     :param query_column: column you already know that you can use to query
     :param table_name:
-    :param item_id: id, -1 if supposed to be "null"
+    :param item_id: value corresponding to query_column, -1 if supposed to be "null"
     :return: name of area.
     """
     if id == str(-1):
@@ -117,8 +117,7 @@ def get_networks(func_counter=0):
                 # We need to avoid a stack overflow error if our make_new_network messes up.
                 return get_networks(func_counter)
         except (AttributeError, ValueError, IndexError, IntegrityError) as e:
-            return make_response("Invalid network parameters. Could not make a new network.",
-                                 HTTPStatus.METHOD_NOT_ALLOWED)
+            abort(HTTPStatus.BAD_REQUEST)
     else:
         # Just return the response object, since it is not empty.
         return response_obj

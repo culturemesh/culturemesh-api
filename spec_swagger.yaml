@@ -538,7 +538,7 @@ paths:
       tags:
         - networks
       summary: Create a new network.
-      description: ''
+      description: 'Note: if an id is null, pass -1 instead.'
       operationId: createNetwork
       consumes:
         - application/json
@@ -1004,7 +1004,6 @@ paths:
           format: int64
       description: |
         Uploads image to server. Must pass file in enctype multipart-formdata with key being 'file' and value being the file itself. Acceptable file types are .png, .jpg, and .gif. The file must also be < 2MB.
-
       responses:
         '200':
 
@@ -1617,11 +1616,11 @@ definitions:
   Language:
     type: object
     required:
-      - lang_id
+      - id
     description: |
       A language.
     properties:
-      lang_id:
+      id:
         type: integer
         format: bigint20
       name:

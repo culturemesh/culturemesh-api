@@ -31,6 +31,7 @@ def get_post_replies(post_id):
                           order_index_format="post_replies.id <= %s",
                           order_arg="max_id")
 
+
 @posts.route("/<post_id>/reply_count", methods=["GET"])
 @require_apikey
 def get_post_reply_count(post_id):
@@ -39,6 +40,7 @@ def get_post_reply_count(post_id):
              from post_replies \
              where id_parent=%s"
     return execute_single_tuple_query(query, (post_id,))
+
 
 @posts.route("/new", methods=["POST", "PUT"])
 @require_apikey
@@ -52,9 +54,9 @@ def make_new_post():
 
       return execute_post_by_table(request, content_fields, "posts")
     else:
-
       # PUT
       return execute_put_by_id(request, "posts")
+
 
 @posts.route("/<post_id>/reply", methods=["POST", "PUT"])
 @require_apikey

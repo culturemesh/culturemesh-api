@@ -13,6 +13,7 @@ BUF_SIZE = 2 << ((10 * 1) + 4)  # 16 KB
 MAX_SIZE = 2 << ((10 * 2) + 1)  # 2 MB
 ALLOWED_EXTENSIONS = {'gif', 'png', 'jpg'}
 
+
 def convert_objects(tuple_arr, description):
     """
     A DB cursor returns an array of tuples, without attribute names.
@@ -63,6 +64,7 @@ def execute_single_tuple_query(sql_q_format, args):
     cursor.close()
     return response
 
+
 def execute_insert(sql_q_format, args):
     """
     Executes an insert statement.
@@ -74,6 +76,7 @@ def execute_insert(sql_q_format, args):
     cursor = connection.cursor()
     cursor.execute(sql_q_format, args)
     connection.commit()
+
 
 def get_by_id(table_name, id_):
     """
@@ -129,6 +132,7 @@ def execute_put_by_id(request, table_name):
     execute_insert(query, tuple(args))
     return make_response("OK", HTTPStatus.OK)
 
+
 def execute_post_by_table(request, content_fields, table_name):
     """
     Executes a POST command to a certain table.
@@ -155,9 +159,8 @@ def execute_post_by_table(request, content_fields, table_name):
     args = []
     for col in content_fields:
         args.append(content[col])
-
     execute_insert(query, tuple(args))
-    return make_response("OK", HTTPStatus.OK)
+    return make_response(query, HTTPStatus.OK)
 
 
 def get_paginated(sql_q_format, selection_fields, args,

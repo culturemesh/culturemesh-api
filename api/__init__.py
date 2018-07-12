@@ -1,8 +1,8 @@
 from flask import Flask
 from .decorators import require_apikey
 from .credentials import sql
-from .extensions import mysql
-from flask_login import LoginManager
+from .extensions import mysql, login_manager
+
 
 api = Flask(__name__)
 # Add MYSQL Database settings from super safe credentials file off of Version Control.
@@ -11,7 +11,6 @@ for setting in sql:
 mysql.init_app(api)
 
 # Set up LoginManager instance.
-login_manager = LoginManager()
 login_manager.init_app(api)
 
 # Register API submodules (aka blueprints)

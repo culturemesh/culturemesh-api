@@ -26,12 +26,15 @@ def verify_account(email_or_username, password):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.get(user_id)
+    return User(user_id)
 
 
 class User(UserMixin):
     """
     This user class is used by Flask Login to validate users.
     """
-    def get_id(self):
-        
+    def __init__(self, user_id):
+        self.id = user_id
+
+
+

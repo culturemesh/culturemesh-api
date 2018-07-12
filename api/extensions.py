@@ -5,15 +5,6 @@ For  more information, check out
 https://stackoverflow.com/questions/28784849/how-to-fix-circular-import-in-flask-project-using-blueprints-mysql-w-o-sqlalchem#28784938
 """
 from flaskext.mysql import MySQL
+from flask_login import LoginManager
+login_manager = LoginManager()
 mysql = MySQL()
-
-
-#TODO: See if we should make this.
-def executeSQLQuery(query):
-    print("Try this!")
-    conn = mysql.get_db()
-    cursor = conn.cursor()
-    cursor.execute(query)
-    cursor.commit()
-    conn.commit()
-    return cursor.fetchall()

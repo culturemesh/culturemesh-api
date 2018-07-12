@@ -33,3 +33,5 @@ class User(UserMixin):
     """
     This user class is used by Flask Login to validate users.
     """
+    def get_id(self):
+        

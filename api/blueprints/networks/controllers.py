@@ -13,7 +13,8 @@ def test():
 
 def make_new_network_request():
     """
-    This will transform a GET /networks query to a POST /new network query by including necessary request.args.
+    This will transform a GET /networks query to a POST /new network query by producing a "request" object with
+     the necessary request.args values for a "POST networks/new" request. Yeah, sorry it's kinda hacksy.
     :return: The updated request object. Notice this is just a dictionary, since the actual request object
     is an ImmutableDict.
     """
@@ -52,7 +53,10 @@ def make_new_network_request():
         req.form['network_class'] = '_l'
     # To avoid an error, we will make a pseudo function that returns none so that execute_post_by_table will use the
     # function dictionary instead.
-
+    else:
+        # This shouldn't happen: the route should handle the input params.
+        abort(HTTPStatus.BAD_REQUEST)
+        
     def get_json():
         return None
     req.get_json = get_json

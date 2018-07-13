@@ -23,11 +23,13 @@ def verify_password(username_or_token, password):
     if not user:
         # try to authenticate with username/password
         user_obj = get_user_by_username(username_or_token)
-        if not user_obj:
+        if user_obj is not None:
             # Yay! we have a user! Let's convert it to a fancy User.
             user = User(user_obj)
-            if not user.verify_password(password):
+            if user.verify_password(password) is not None:
                 return False
+        else:
+            return False
     g.user = user
     return True
 

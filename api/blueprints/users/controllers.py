@@ -18,8 +18,8 @@ Controller for all user endpoints. Check the Swagger spec for more information o
 def test():
     return "pong"
 
-def handle_users_get(request):
 
+def handle_users_get(request):
     if "near_location" not in request.args:
         return make_response("No near location", HTTPStatus.METHOD_NOT_ALLOWED)
     count = int(request.args.get("count", 100))
@@ -64,6 +64,7 @@ def handle_users_get(request):
 
 
 
+
 @users.route("/users", methods=["GET", "POST", "PUT"])
 @require_apikey
 def users_query():
@@ -74,6 +75,11 @@ def users_query():
                 'last_name', 'email', \
                 'password', 'role', \
                 'act_code'] # TODO: hash and salt
+      # Make another pseudo request object (yeah, kinda hacksy)
+      req_obj.forms = {}
+      source_obj
+      if
+      req_obj.forms['username'] = request.
 
       return execute_post_by_table(request, content_fields, "users")
     else:

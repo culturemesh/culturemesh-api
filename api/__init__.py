@@ -1,7 +1,7 @@
 from flask import Flask
 from .decorators import require_apikey
 from .credentials import sql
-from .extensions import mysql, login_manager
+from .extensions import mysql
 
 
 api = Flask(__name__)
@@ -10,8 +10,6 @@ for setting in sql:
     api.config[setting] = sql[setting]
 mysql.init_app(api)
 
-# Set up LoginManager instance.
-login_manager.init_app(api)
 
 # Register API submodules (aka blueprints)
 

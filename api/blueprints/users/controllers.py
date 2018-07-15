@@ -66,12 +66,12 @@ def handle_users_get(request):
 
 def validate_new_user(form, content_fields):
     """
-    Validates form data for a valid new user with a unique username.
+    Validates form data for a valid new user with a unique email.
     :param form: json of request
     :param content_fields: list of required fields.
     :return: true if has necessary fields and username is unique, false otherwise
     """
-    if not validate_request_body(form, content_fields) or get_user_by_username(form['username']) is None:
+    if not validate_request_body(form, content_fields) or get_user_by_email(form['email']) is not None:
         return False
     return True
 
@@ -196,18 +196,18 @@ def add_user_to_network(user_id, network_id):
     return make_response("OK", HTTPStatus.OK)
 
 
-def get_user_by_username(username):
+def get_user_by_email(email):
     """
     Checks database and returns object representing user with that username.
-    :param username: username of CultureMesh account (string)
+    :param email: email of CultureMesh account (string)
     :return: user_obj from db or None if no corresponding found.
     """
     connection = mysql.get_db()
     cursor = connection.cursor()
     # Note table_name is never supplied by a client, so we do not
     # need to escape it.
-    query = "SELECT * FROM users WHERE username=%s"
-    cursor.execute(query, (username,))
+    query = "SELECT * FROM users WHERE email=%s"
+    cursor.execute(query, (email,))
     user_db_tuple = cursor.fetchone()
     if user_db_tuple is None:
         return None

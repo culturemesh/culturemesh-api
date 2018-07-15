@@ -4,7 +4,7 @@ from flask_httpauth import HTTPBasicAuth
 from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
 
-from api.blueprints.users.controllers import get_user_by_id, get_user_by_username
+from api.blueprints.users.controllers import get_user_by_id, get_user_by_email
 from api.credentials import secret_key
 
 accounts = Blueprint('account', __name__)
@@ -22,7 +22,7 @@ def verify_password(username_or_token, password):
     user = User.verify_auth_token(username_or_token)
     if not user:
         # try to authenticate with username/password
-        user_obj = get_user_by_username(username_or_token)
+        user_obj = get_user_by_email(username_or_token)
         if user_obj is not None:
             # Yay! we have a user! Let's convert it to a fancy User.
             user = User(user_obj)
@@ -34,7 +34,6 @@ def verify_password(username_or_token, password):
         user = User(user)
     g.user = user
     return True
-
 
 
 @accounts.route('/token')
@@ -54,7 +53,7 @@ class User:
         """
         self.id = user_obj['id']
         self.password_hash = user_obj['password']
-        self.username = user_obj['username']
+        self.username = user_obj['email'] # strangely enough, users sign in with their email instead of username.
 
     @staticmethod
     def hash_password(password):

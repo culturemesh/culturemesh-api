@@ -15,7 +15,7 @@ This Token Authentication approach draws heavy inspiration from
 https://blog.miguelgrinberg.com/post/restful-authentication-with-flask
 """
 
-
+@accounts
 @auth.verify_password
 def verify_password(username_or_token, password):
     # first try to authenticate by token
@@ -34,6 +34,7 @@ def verify_password(username_or_token, password):
     return True
 
 
+
 @accounts.route('/token')
 @auth.login_required
 def get_auth_token():
@@ -49,6 +50,8 @@ class User:
         """
             Instantiates user based on user_name and hashed password
         """
+        print("User object:")
+        print(str(user_obj))
         self.id = user_obj.id
         self.password_hash = user_obj.password
         self.username = user_obj.username

@@ -82,7 +82,7 @@ def users_query():
         print("Printing password request")
         password = str(req_obj.forms['password'])
         password.encode('utf-8')
-        req_obj.forms['password'] = md5().update(password.encode('utf-8')).hexdigest()
+        req_obj.forms['password'] = md5(password.encode('utf-8')).hexdigest()
         # We need to have get_json() return None so execute_post_by_table will use req_obj.form
 
         def get_json():

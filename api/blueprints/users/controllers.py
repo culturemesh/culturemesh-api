@@ -64,6 +64,18 @@ def handle_users_get(request):
     return make_response(jsonify(users_obj), HTTPStatus.OK)
 
 
+def validate_new_user(form, content_fields):
+    """
+    Validates form data for a valid new user with a unique username.
+    :param form: json of request
+    :param content_fields: list of required fields.
+    :return: true if has necessary fields and username is unique, false otherwise
+    """
+    if not validate_request_body(form, content_fields) or get_user_by_username(form['username']) is None:
+        return False
+    return True
+
+
 @users.route("/users", methods=["GET", "POST", "PUT"])
 @require_apikey
 def users_query():
@@ -75,18 +87,23 @@ def users_query():
                           'password', 'role', \
                           'act_code']
         # TODO: validate that username/email doesn't already exist.
+
         # Make another pseudo request object (yeah, kinda hacksy)
         req_obj = type('', (), {})()
         req_obj.form = request.get_json()
-        # We now need to convert the user password into a hash.
-        password = str(req_obj.form['password'])
-        req_obj.form['password'] = md5(password.encode('utf-8')).hexdigest()
-        # We need to have get_json() return None so execute_post_by_table will use req_obj.form
+        if validate_new_user(req_obj.form, content_fields):
+            # We now need to convert the user password into a hash.
+            password = str(req_obj.form['password'])
+            req_obj.form['password'] = md5(password.encode('utf-8')).hexdigest()
+            # We need to have get_json() return None so execute_post_by_table will use req_obj.form
 
-        def get_json():
-            return None
-        req_obj.get_json = get_json
-        return execute_post_by_table(req_obj, content_fields, "users")
+            def get_json():
+                return None
+
+            req_obj.get_json = get_json
+            return execute_post_by_table(req_obj, content_fields, "users")
+        else:
+            return make_response("Username already taken or invalid params", HTTPStatus.BAD_REQUEST)
     else:
         return execute_put_by_id(request, "users")
 
@@ -177,3 +194,45 @@ def add_user_to_network(user_id, network_id):
         return make_response("User already subscribed", HTTPStatus.METHOD_NOT_ALLOWED)
     connection.commit()
     return make_response("OK", HTTPStatus.OK)
+
+
+def get_user_by_username(username):
+    """
+    Checks database and returns object representing user with that username.
+    :param username: username of CultureMesh account (string)
+    :return: user_obj from db or None if no corresponding found.
+    """
+    connection = mysql.get_db()
+    cursor = connection.cursor()
+    # Note table_name is never supplied by a client, so we do not
+    # need to escape it.
+    query = "SELECT * FROM users WHERE username=%s"
+    cursor.execute(query, (username,))
+    user_db_tuple = cursor.fetchone()
+    if user_db_tuple is None:
+        return None
+    user = convert_objects([user_db_tuple], cursor.description)[0]
+    cursor.close()
+    return user
+
+
+def get_user_by_id(id):
+    """
+    Checks database and returns object representing user with that id.
+    :param id: id of CultureMesh account (string)
+    :return: user_obj from db or None if no corresponding found.
+    """
+    connection = mysql.get_db()
+    cursor = connection.cursor()
+    # Note table_name is never supplied by a client, so we do not
+    # need to escape it.
+    query = "SELECT * FROM users WHERE id=%s"
+    cursor.execute(query, (id,))
+    user_db_tuple = cursor.fetchone()
+    if user_db_tuple is None:
+        return None
+    user = convert_objects([user_db_tuple], cursor.description)[0]
+    cursor.close()
+    return user
+
+

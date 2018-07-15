@@ -1,11 +1,11 @@
 from flask import Blueprint, jsonify, g
 from hashlib import md5
-from api.apiutils import convert_objects
 from flask_httpauth import HTTPBasicAuth
 from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
+
+from api.blueprints.users.controllers import get_user_by_id, get_user_by_username
 from api.credentials import secret_key
-from api.extensions import mysql
 
 accounts = Blueprint('account', __name__)
 
@@ -14,6 +14,7 @@ auth = HTTPBasicAuth()
 This Token Authentication approach draws heavy inspiration from
 https://blog.miguelgrinberg.com/post/restful-authentication-with-flask
 """
+
 
 @auth.verify_password
 def verify_password(username_or_token, password):
@@ -78,44 +79,4 @@ class User:
         except BadSignature:
             return None  # invalid token
         return get_user_by_id(data["id"])
-
-
-def get_user_by_username(username):
-    """
-    Checks database and returns object representing user with that username.
-    :param username: username of CultureMesh account (string)
-    :return: user_obj from db or None if no corresponding found.
-    """
-    connection = mysql.get_db()
-    cursor = connection.cursor()
-    # Note table_name is never supplied by a client, so we do not
-    # need to escape it.
-    query = "SELECT * FROM users WHERE username=%s"
-    cursor.execute(query, (username,))
-    user_db_tuple = cursor.fetchone()
-    if user_db_tuple is None:
-        return None
-    user = convert_objects([user_db_tuple], cursor.description)[0]
-    cursor.close()
-    return user
-
-
-def get_user_by_id(id):
-    """
-    Checks database and returns object representing user with that id.
-    :param id: id of CultureMesh account (string)
-    :return: user_obj from db or None if no corresponding found.
-    """
-    connection = mysql.get_db()
-    cursor = connection.cursor()
-    # Note table_name is never supplied by a client, so we do not
-    # need to escape it.
-    query = "SELECT * FROM users WHERE id=%s"
-    cursor.execute(query, (id,))
-    user_db_tuple = cursor.fetchone()
-    if user_db_tuple is None:
-        return None
-    user = convert_objects([user_db_tuple], cursor.description)[0]
-    cursor.close()
-    return user
 

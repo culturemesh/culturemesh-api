@@ -294,3 +294,16 @@ def valid_file_type(file):
     :return: true if file is .png, .jpg, or .gif, false otherwise.
     """
     return file.filename.split(".")[-1] in ALLOWED_EXTENSIONS
+
+
+def validate_request_body(json, content_fields):
+    """
+    Validates that this request has the required fields.
+    :param json:
+    :param content_fields: list of necessary dict attributes.
+    :return: true if each field is contained, false otherwise.
+    """
+    for field in content_fields:
+        if json[field] is None:
+            return False
+    return True

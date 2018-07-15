@@ -25,7 +25,7 @@ def verify_password(username_or_token, password):
         if user_obj is not None:
             # Yay! we have a user! Let's convert it to a fancy User.
             user = User(user_obj)
-            if user.verify_password(password) is not None:
+            if not user.verify_password(password):
                 return False
         else:
             return False
@@ -58,7 +58,9 @@ class User:
         return md5(password.encode('utf-8')).hexdigest()
 
     def verify_password(self, password):
-        return self.hash_password(password) == self.password_hash
+        print("Password comp:")
+        print(self.hash_password(password) + " ?=? " + self.password_hash)
+        return self.hash_password(password) ==  self.password_hash
 
     def generate_auth_token(self, expiration=600):
         s = Serializer(secret_key, expires_in=expiration)

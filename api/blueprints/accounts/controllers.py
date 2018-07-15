@@ -55,7 +55,8 @@ class User:
 
     @staticmethod
     def hash_password(password):
-        return md5().update(password.encode('utf-8')).hexdigest()
+        password.encode('utf-8')
+        return md5().update(password).hexdigest()
 
     def verify_password(self, password):
         return self.hash_password(password) == self.password_hash

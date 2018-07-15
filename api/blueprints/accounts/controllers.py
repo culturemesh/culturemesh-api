@@ -15,7 +15,6 @@ This Token Authentication approach draws heavy inspiration from
 https://blog.miguelgrinberg.com/post/restful-authentication-with-flask
 """
 
-@accounts
 @auth.verify_password
 def verify_password(username_or_token, password):
     # first try to authenticate by token

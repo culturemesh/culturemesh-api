@@ -3,6 +3,7 @@ from http import HTTPStatus
 from api import require_apikey
 from api.extensions import mysql
 from api.apiutils import *
+from hashlib import md5
 from pymysql.err import IntegrityError
 
 users = Blueprint('user', __name__)
@@ -63,27 +64,29 @@ def handle_users_get(request):
     return make_response(jsonify(users_obj), HTTPStatus.OK)
 
 
-
-
 @users.route("/users", methods=["GET", "POST", "PUT"])
 @require_apikey
 def users_query():
     if request.method == 'GET':
-      return handle_users_get(request)
+        return handle_users_get(request)
     elif request.method == 'POST':
-      content_fields = ['username', 'first_name', \
-                'last_name', 'email', \
-                'password', 'role', \
-                'act_code'] # TODO: hash and salt
-      # Make another pseudo request object (yeah, kinda hacksy)
-      req_obj.forms = {}
-      source_obj
-      if
-      req_obj.forms['username'] = request.
+        content_fields = ['username', 'first_name', \
+                          'last_name', 'email', \
+                          'password', 'role', \
+                          'act_code']
+        # Make another pseudo request object (yeah, kinda hacksy)
+        req_obj = {}
+        req_obj.forms = request.get_json()
+        # We now need to convert the user password into a hash.
+        req_obj.forms['password'] = md5.update(req_obj.forms['password']).hexdigest()
+        # We need to have get_json() return None so execute_post_by_table will use req_obj.form
 
-      return execute_post_by_table(request, content_fields, "users")
+        def get_json():
+            return None
+        req_obj.get_json = get_json
+        return execute_post_by_table(req_obj, content_fields, "users")
     else:
-      return execute_put_by_id(request, "users")
+        return execute_put_by_id(request, "users")
 
 
 @users.route("/<user_id>", methods=["GET"])
@@ -100,11 +103,11 @@ def get_user_networks(user_id):
                           INNER JOIN networks \
                           ON networks.id = network_registration.id_network \
                           WHERE network_registration.id_user=%s",
-                          selection_fields=[user_id],
-                          args=request.args,
-                          order_clause="ORDER BY join_date DESC",
-                          order_index_format="join_date <= %s",
-                          order_arg="max_registration_date")
+                         selection_fields=[user_id],
+                         args=request.args,
+                         order_clause="ORDER BY join_date DESC",
+                         order_index_format="join_date <= %s",
+                         order_arg="max_registration_date")
 
 
 @users.route("/<user_id>/posts", methods=["GET"])
@@ -113,11 +116,11 @@ def get_user_posts(user_id):
     return get_paginated("SELECT * \
                           FROM posts \
                           WHERE id_user=%s",
-                          selection_fields=[user_id],
-                          args=request.args,
-                          order_clause="ORDER BY id DESC",
-                          order_index_format="id <= %s",
-                          order_arg="max_id")
+                         selection_fields=[user_id],
+                         args=request.args,
+                         order_clause="ORDER BY id DESC",
+                         order_index_format="id <= %s",
+                         order_arg="max_id")
 
 
 @users.route("/<user_id>/events", methods=["GET"])
@@ -129,11 +132,11 @@ def get_user_events(user_id):
                           INNER JOIN events \
                           ON events.id = event_registration.id_event \
                           WHERE event_registration.id_guest=%s AND event_registration.job=%s",
-                          selection_fields=[user_id, request.args["role"]],
-                          args=request.args,
-                          order_clause="ORDER BY id_event DESC",
-                          order_index_format="id <= %s",
-                          order_arg="max_id")
+                         selection_fields=[user_id, request.args["role"]],
+                         args=request.args,
+                         order_clause="ORDER BY id_event DESC",
+                         order_index_format="id <= %s",
+                         order_arg="max_id")
 
 
 @users.route("/<user_id>/addToEvent/<event_id>", methods=["POST"])
@@ -166,10 +169,9 @@ def add_user_to_network(user_id, network_id):
     network_registration_cursor = connection.cursor()
     try:
         network_registration_cursor.execute("INSERT INTO network_registration VALUES (%s, %s, CURRENT_TIMESTAMP)",
-                                        (str(user_id), str(network_id)))
+                                            (str(user_id), str(network_id)))
     except IntegrityError:
         connection.commit()
         return make_response("User already subscribed", HTTPStatus.METHOD_NOT_ALLOWED)
     connection.commit()
     return make_response("OK", HTTPStatus.OK)
-

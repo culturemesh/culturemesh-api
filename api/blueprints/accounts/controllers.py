@@ -29,6 +29,8 @@ def verify_password(username_or_token, password):
                 return False
         else:
             return False
+    else:
+        user = User(user)
     g.user = user
     return True
 

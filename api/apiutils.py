@@ -140,10 +140,10 @@ def execute_post_by_table(request, content_fields, table_name):
     Executes a POST command to a certain table.
 
     :param request: The request received
-    :content_fields: A tuple containing the field/column names
+    :param content_fields: A tuple containing the field/column names
                      to extract from the request and insert into
                      the table.
-    :table_name: The table to insert into
+    :param table_name: The table to insert into
     :returns: A response object ready for the client.
     """
     content = request.get_json()

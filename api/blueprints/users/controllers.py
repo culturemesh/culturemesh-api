@@ -77,12 +77,12 @@ def users_query():
         # TODO: validate that username/email doesn't already exist.
         # Make another pseudo request object (yeah, kinda hacksy)
         req_obj = type('', (), {})()
-        req_obj.forms = request.get_json()
+        req_obj.form = request.get_json()
         # We now need to convert the user password into a hash.
         print("Printing password request")
-        password = str(req_obj.forms['password'])
+        password = str(req_obj.form['password'])
         password.encode('utf-8')
-        req_obj.forms['password'] = md5(password.encode('utf-8')).hexdigest()
+        req_obj.form['password'] = md5(password.encode('utf-8')).hexdigest()
         # We need to have get_json() return None so execute_post_by_table will use req_obj.form
 
         def get_json():

@@ -75,7 +75,7 @@ class User:
             return None  # valid token, but expired
         except BadSignature:
             return None  # invalid token
-        return get_user_by_id("users", data["id"])
+        return get_user_by_id(data["id"])
 
 
 def get_user_by_username(username):

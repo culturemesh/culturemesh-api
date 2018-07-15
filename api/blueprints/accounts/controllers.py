@@ -49,11 +49,9 @@ class User:
         """
             Instantiates user based on user_name and hashed password
         """
-        print("User object:")
-        print(str(user_obj))
-        self.id = user_obj.id
-        self.password_hash = user_obj.password
-        self.username = user_obj.username
+        self.id = user_obj['id']
+        self.password_hash = user_obj['password']
+        self.username = user_obj['username']
 
     @staticmethod
     def hash_password(password):

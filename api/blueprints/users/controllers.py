@@ -80,7 +80,7 @@ def users_query():
         req_obj.forms = request.get_json()
         # We now need to convert the user password into a hash.
         print("Printing password request")
-        password = req_obj.forms['password']
+        password = str(req_obj.forms['password'])
         password.encode('utf-8')
         req_obj.forms['password'] = md5().update(password.encode('utf-8')).hexdigest()
         # We need to have get_json() return None so execute_post_by_table will use req_obj.form

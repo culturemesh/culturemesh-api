@@ -71,9 +71,8 @@ def validate_new_user(form, content_fields):
     :param content_fields: list of required fields.
     :return: true if has necessary fields and username is unique, false otherwise
     """
-    if not validate_request_body(form, content_fields) or get_user_by_email(form['email']) is not None:
-        return False
-    return True
+    return validate_request_body(form, content_fields) and get_user_by_email(form['email']) is None and \
+           get_user_by_username(form['email']) is None
 
 
 @users.route("/users", methods=["GET", "POST", "PUT"])
@@ -89,6 +88,7 @@ def users_query():
         # TODO: validate that username/email doesn't already exist.
 
         # Make another pseudo request object (yeah, kinda hacksy)
+        # First, we make a generic object so we can set attributes (via .form as opposed to ['form'])
         req_obj = type('', (), {})()
         req_obj.form = request.get_json()
         if validate_new_user(req_obj.form, content_fields):
@@ -96,11 +96,7 @@ def users_query():
             password = str(req_obj.form['password'])
             req_obj.form['password'] = md5(password.encode('utf-8')).hexdigest()
             # We need to have get_json() return None so execute_post_by_table will use req_obj.form
-
-            def get_json():
-                return None
-
-            req_obj.get_json = get_json
+            req_obj.get_json = lambda: None
             return execute_post_by_table(req_obj, content_fields, "users")
         else:
             return make_response("Username already taken or invalid params", HTTPStatus.BAD_REQUEST)
@@ -204,8 +200,6 @@ def get_user_by_email(email):
     """
     connection = mysql.get_db()
     cursor = connection.cursor()
-    # Note table_name is never supplied by a client, so we do not
-    # need to escape it.
     query = "SELECT * FROM users WHERE email=%s"
     cursor.execute(query, (email,))
     user_db_tuple = cursor.fetchone()
@@ -236,3 +230,19 @@ def get_user_by_id(id):
     return user
 
 
+def get_user_by_username(username):
+    """
+    Checks database and returns object representing user with that id.
+    :param username: id of CultureMesh account (string)
+    :return: user_obj from db or None if no corresponding found.
+    """
+    connection = mysql.get_db()
+    cursor = connection.cursor()
+    query = "SELECT * FROM users WHERE username=%s"
+    cursor.execute(query, (username,))
+    user_db_tuple = cursor.fetchone()
+    if user_db_tuple is None:
+        return None
+    user = convert_objects([user_db_tuple], cursor.description)[0]
+    cursor.close()
+    return user

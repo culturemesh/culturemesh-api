@@ -72,7 +72,7 @@ def validate_new_user(form, content_fields):
     :return: true if has necessary fields and username is unique, false otherwise
     """
     return validate_request_body(form, content_fields) and get_user_by_email(form['email']) is None and \
-           get_user_by_username(form['email']) is None
+           get_user_by_username(form['username']) is None
 
 
 @users.route("/users", methods=["GET", "POST", "PUT"])

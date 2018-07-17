@@ -1012,23 +1012,23 @@ paths:
           description: Invalid file type.
         '413':
           description: File too large (>= 2MB)
-  '/verify_account/{email_or_username}/{password}':
+  '/token':
     get:
       tags:
         - accounts
-      summary: Verify that username/email and password match. Return -1 if there is no match
-      description: Verify that username/email and password match. Return -1 if there is no match
+      summary: Get user token.
+      description: Gets user token that can be passed in place of email/password combo for @auth.login_required() routes. Lasts for 600 seconds. To pass user/password credentials, try running "curl -u <email>:<password> <rest_of_command>"
       operationId: verify_account
       produces:
         - application/json
       parameters:
-        - name: email_or_username
-          in: path
-          description: Email or username for login.
+        - name: email
+          in: header
+          description: Email or token for login.
           required: true
           type: string
         - name: password
-          in: path
+          in: header
           description: Password for login.
           required: true
           type: string

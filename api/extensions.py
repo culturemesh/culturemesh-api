@@ -6,14 +6,3 @@ https://stackoverflow.com/questions/28784849/how-to-fix-circular-import-in-flask
 """
 from flaskext.mysql import MySQL
 mysql = MySQL()
-
-
-#TODO: See if we should make this.
-def executeSQLQuery(query):
-    print("Try this!")
-    conn = mysql.get_db()
-    cursor = conn.cursor()
-    cursor.execute(query)
-    cursor.commit()
-    conn.commit()
-    return cursor.fetchall()

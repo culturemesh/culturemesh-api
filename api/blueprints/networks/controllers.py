@@ -126,7 +126,6 @@ def get_networks(func_counter=0):
         # Just return the response object, since it is not empty.
         return response_obj
 
-
 @networks.route("/<network_id>", methods=["GET"])
 @require_apikey
 def get_network(network_id):

@@ -3,11 +3,13 @@ from .decorators import require_apikey
 from .credentials import sql
 from .extensions import mysql
 
+
 api = Flask(__name__)
 # Add MYSQL Database settings from super safe credentials file off of Version Control.
 for setting in sql:
     api.config[setting] = sql[setting]
 mysql.init_app(api)
+
 
 # Register API submodules (aka blueprints)
 

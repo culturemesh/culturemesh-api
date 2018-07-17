@@ -48,6 +48,7 @@ def make_response_from_single_tuple(cursor):
     status = HTTPStatus.METHOD_NOT_ALLOWED if obj is None else HTTPStatus.OK
     return make_response(jsonify(obj), status)
 
+
 def execute_single_tuple_query(sql_q_format, args):
     """
     Returns a single tuple of results from a SQL query
@@ -98,6 +99,7 @@ def get_by_id(table_name, id_):
     cursor.close()
     return response
 
+
 def execute_put_by_id(request, table_name):
     """
     Executes a PUT command (a SQL update) on a table
@@ -138,10 +140,10 @@ def execute_post_by_table(request, content_fields, table_name):
     Executes a POST command to a certain table.
 
     :param request: The request received
-    :content_fields: A tuple containing the field/column names
+    :param content_fields: A tuple containing the field/column names
                      to extract from the request and insert into
                      the table.
-    :table_name: The table to insert into
+    :param table_name: The table to insert into
     :returns: A response object ready for the client.
     """
     content = request.get_json()
@@ -291,3 +293,16 @@ def valid_file_type(file):
     :return: true if file is .png, .jpg, or .gif, false otherwise.
     """
     return file.filename.split(".")[-1] in ALLOWED_EXTENSIONS
+
+
+def validate_request_body(json, content_fields):
+    """
+    Validates that this request has the required fields.
+    :param json:
+    :param content_fields: list of necessary dict attributes.
+    :return: true if each field is contained, false otherwise.
+    """
+    for field in content_fields:
+        if field not in json or json[field] is None:
+            return False
+    return True

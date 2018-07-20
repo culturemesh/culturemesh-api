@@ -60,8 +60,10 @@ def handle_users_get(request):
     users_cursor = connection.cursor()
     users_cursor.execute("SELECT * FROM users WHERE id IN %s", (tuple(user_ids),))
     users_obj = convert_objects(users_cursor.fetchall(), users_cursor.description)
-    # TODO: remove password field
+    # remove password field
+    users_obj.pop('password', None)
     users_cursor.close()
+
     return make_response(jsonify(users_obj), HTTPStatus.OK)
 
 
@@ -86,12 +88,11 @@ def users_query():
                           'last_name', 'email', \
                           'password', 'role', \
                           'act_code']
-        # TODO: validate that username/email doesn't already exist.
-
         # Make another pseudo request object (yeah, kinda hacksy)
         # First, we make a generic object so we can set attributes (via .form as opposed to ['form'])
         req_obj = type('', (), {})()
         req_obj.form = request.get_json()
+        # validate that username/email doesn't already exist.
         if validate_new_user(req_obj.form, content_fields):
             # We now need to convert the user password into a hash.
             password = str(req_obj.form['password'])

@@ -265,5 +265,5 @@ def user_email_get_endpoint():
     user = get_user_by_email(request.args["email"])
     if user is None:
         return make_response("No user found", HTTPStatus.NOT_FOUND)
-    return make_response(user["id"])
+    return make_response(str(user["id"]))
 

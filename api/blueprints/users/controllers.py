@@ -60,6 +60,7 @@ def handle_users_get(request):
     users_cursor = connection.cursor()
     users_cursor.execute("SELECT * FROM users WHERE id IN %s", (tuple(user_ids),))
     users_obj = convert_objects(users_cursor.fetchall(), users_cursor.description)
+    # TODO: remove password field
     users_cursor.close()
     return make_response(jsonify(users_obj), HTTPStatus.OK)
 
@@ -254,3 +255,15 @@ def get_user_by_username(username):
     user = convert_objects([user_db_tuple], cursor.description)[0]
     cursor.close()
     return user
+
+
+@users.route("/user/email", methods=["GET"])
+@require_apikey
+def user_email_get_endpoint():
+    if "email" not in request.args:
+        return make_response("No email parameter", HTTPStatus.METHOD_NOT_ALLOWED)
+    user = get_user_by_email(request.args["email"])
+    if user is None:
+        return make_response("No user found", HTTPStatus.NOT_FOUND)
+    return make_response(user["id"])
+

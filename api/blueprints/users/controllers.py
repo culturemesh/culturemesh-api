@@ -257,7 +257,7 @@ def get_user_by_username(username):
     return user
 
 
-@users.route("/user/email", methods=["GET"])
+@users.route("/email", methods=["GET"])
 @require_apikey
 def user_email_get_endpoint():
     if "email" not in request.args:

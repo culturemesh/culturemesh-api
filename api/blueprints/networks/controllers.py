@@ -113,14 +113,14 @@ def get_networks(func_counter=0):
           "No near_location specified", HTTPStatus.METHOD_NOT_ALLOWED
         )
 
-    location_ids = []
+    selection_fields = []
 
     # All requests will start with the same query and query for near_location.
     my_sql_string_start, near_location_ids = get_near_location_sql_string_start(
       request.args["near_location"]
     )
 
-    location_ids.extend(near_location_ids)
+    selection_fields.extend(near_location_ids)
 
     # Need to check if querying a location or language network.
     # That changes our queries.
@@ -128,21 +128,21 @@ def get_networks(func_counter=0):
         my_sql_string_end, from_location_ids = get_from_location_sql_string_end(
            request.args["from_location"]
         )
-        location_ids.extend(from_location_ids)
+        selection_fields.extend(from_location_ids)
         response_obj = get_paginated(
           my_sql_string_start + my_sql_string_end,
-          selection_fields=location_ids,
+          selection_fields=selection_fields,
           args=request.args,
           order_clause="ORDER BY id DESC",
           order_index_format="id <= %s",
           order_arg="max_id"
         )
     elif "language" in request.args:
-        location_ids.append(request.args["language"])
+        selection_fields.append(request.args["language"])
         my_sql_string_end = "AND language_origin=%s"
         response_obj = get_paginated(
           my_sql_string_start + my_sql_string_end,
-          selection_fields=location_ids,
+          selection_fields=selection_fields,
           args=request.args,
           order_clause="ORDER BY id DESC",
           order_index_format="id <= %s",

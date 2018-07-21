@@ -25,26 +25,29 @@ def get_near_location_sql_string_start(near_location):
 
     # If country id null?
     if country_id == "-1" or country_id.lower() == "null":
-        sql_string_start += "WHERE id_country_cur is %s "
-        country_id = "NULL"
+        sql_string_start += "WHERE id_country_cur is NULL "
+        country_id = None
     else:
         sql_string_start += "WHERE id_country_cur=%s "
 
      # If region id null?
     if region_id == "-1" or region_id.lower() == "null":
-        sql_string_start += "AND id_region_cur is %s "
-        region_id = "NULL"
+        sql_string_start += "AND id_region_cur is NULL "
+        region_id = None
     else:
         sql_string_start += "AND id_region_cur=%s "
 
      # If city id null?
     if city_id == "-1" or city_id.lower() == "null":
-        sql_string_start += "AND id_city_cur is %s "
-        city_id = "NULL"
+        sql_string_start += "AND id_city_cur is NULL "
+        city_id = None
     else:
         sql_string_start += "AND id_city_cur=%s "
 
-    return (sql_string_start, [country_id, region_id, city_id])
+    ids_to_return = [
+        id_ for id_ in [country_id, region_id, city_id] if id_
+    ]
+    return (sql_string_start, ids_to_return)
 
 def get_from_location_sql_string_end(from_location):
     """Returns the second half of the SQL query string to use
@@ -64,25 +67,26 @@ def get_from_location_sql_string_end(from_location):
 
     # If country id null?
     if country_id == "-1" or country_id.lower() == "null":
-        sql_string_end += "AND id_country_origin is %s "
-        country_id = "NULL"
+        sql_string_end += "AND id_country_origin is NULL "
+        country_id = None
     else:
         sql_string_end += "AND id_country_origin=%s "
 
      # If region id null?
     if region_id == "-1" or region_id.lower() == "null":
-        sql_string_end += "AND id_region_origin is %s "
-        region_id = "NULL"
+        sql_string_end += "AND id_region_origin is NULL "
+        region_id = None
     else:
         sql_string_end += "AND id_region_origin=%s "
 
      # If city id null?
     if city_id == "-1" or city_id.lower() == "null":
-        sql_string_end += "AND id_city_origin is %s "
-        city_id = "NULL"
+        sql_string_end += "AND id_city_origin is NULL "
+        city_id = None
     else:
         sql_string_end += "AND id_city_origin=%s "
 
-    return (sql_string_end, [country_id, region_id, city_id])
-
-
+    ids_to_return = [
+        id_ for id_ in [country_id, region_id, city_id] if id_
+    ]
+    return (sql_string_end, ids_to_return)

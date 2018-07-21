@@ -130,7 +130,7 @@ def get_networks(func_counter=0):
         )
         location_ids.extend(from_location_ids)
         response_obj = get_paginated(
-          mysql_string_start + my_sql_string_end,
+          my_sql_string_start + my_sql_string_end,
           selection_fields=location_ids,
           args=request.args,
           order_clause="ORDER BY id DESC",
@@ -141,7 +141,7 @@ def get_networks(func_counter=0):
         location_ids.append(request.args["language"])
         my_sql_string_end = "AND language_origin=%s"
         response_obj = get_paginated(
-          mysql_string_start + my_sql_string_end,
+          my_sql_string_start + my_sql_string_end,
           selection_fields=location_ids,
           args=request.args,
           order_clause="ORDER BY id DESC",

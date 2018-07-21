@@ -3,7 +3,8 @@ from api import require_apikey
 from api.apiutils import *
 from pymysql.err import IntegrityError
 
-from api.blueprints.networks.utils import get_from_location_sql_string_end
+from api.blueprints.networks.utils import get_from_location_sql_string_end, \
+  get_near_location_sql_string_start
 
 networks = Blueprint('network', __name__)
 

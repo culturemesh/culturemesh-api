@@ -32,24 +32,26 @@ def make_new_network_request():
     req.form = {}
     conn = mysql.get_db()
     near_ids = request.args['near_location'].split(',')
-    index = 0
-    for singular, plural in zip(['country', 'region', 'city'], ['countries', 'regions', 'cities']):
-        req.form['id_' + singular + '_cur'] = near_ids[index]
-        req.form[singular + '_cur'] = get_column_value(conn, 'name', 'id', plural, near_ids[index])
-        index += 1
-    index = 0
+
+    for singular, plural, near_id in \
+      zip(['country', 'region', 'city'], ['countries', 'regions', 'cities'], near_ids):
+        req.form['id_%s_cur' % singular] = near_id
+        req.form['%s_cur' % singular] = get_column_value(
+          conn, 'name', 'id', plural, near_id
+        )
+
     if "from_location" in request.args:
         # To avoid a key error in execute_post_by_table, we need to set the
-        # other parmas to null
+        # other parameters to null
         req.form['id_language_origin'] = 'null'
         req.form['language_origin'] = 'null'
         from_ids = request.args['from_location'].split(',')
-        for singular, plural in zip(['country', 'region', 'city'], ['countries', 'regions', 'cities']):
-            req.form['id_' + singular + '_origin'] = from_ids[index]
-            req.form[singular + '_origin'] = get_column_value(
-              conn, 'name', 'id', plural, from_ids[index]
+        for singular, plural, from_id in \
+          zip(['country', 'region', 'city'], ['countries', 'regions', 'cities'], from_ids):
+            req.form['id_%s_origin' % singular] = from_id
+            req.form['%s_origin' % singular] = get_column_value(
+              conn, 'name', 'id', plural, from_id
             )
-            index += 1
         if near_ids[0] != -1:
             req.form['network_class'] = 'cc'
         elif near_ids[1] != -1:
@@ -58,8 +60,8 @@ def make_new_network_request():
             req.form['network_class'] = 'co'
     elif "language" in request.args:
         for singular, plural in zip(['country', 'region', 'city'], ['countries', 'regions', 'cities']):
-            req.form['id_' + singular + '_origin'] = 'null'
-            req.form[singular + '_origin'] = 'null'
+            req.form['id_%s_origin' % singular] = 'null'
+            req.form['%s_origin' % singular] = 'null'
         req.form['id_language_origin'] = get_column_value(
           conn, 'id', 'name', 'languages', request.args['language']
         )
@@ -93,7 +95,7 @@ def get_column_value(db_connection,
       "null"
     :return: name of area.
     """
-    if id == str(-1):
+    if item_id == str(-1) or str(item_id).lower() == 'null' or not item_id:
         return "null"
     cursor = db_connection.cursor()
     cursor.execute(

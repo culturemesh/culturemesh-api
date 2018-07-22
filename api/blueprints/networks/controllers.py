@@ -13,7 +13,6 @@ networks = Blueprint('network', __name__)
 def test():
     return "pong"
 
-
 def make_new_network_request():
     """
     This will transform a GET /networks query to a POST /new network query by
@@ -31,23 +30,22 @@ def make_new_network_request():
     req = type('', (), {})()
     req.form = {}
     conn = mysql.get_db()
-    near_ids = request.args['near_location'].split(',')
 
-    for singular, plural, near_id in \
-      zip(['country', 'region', 'city'], ['countries', 'regions', 'cities'], near_ids):
+    near_ids = request.args['near_location'].split(',')
+    singulars = ['country', 'region', 'city']
+    plurals = ['countries', 'regions', 'cities']
+
+    for singular, plural, near_id in zip(singulars, plurals, near_ids):
         req.form['id_%s_cur' % singular] = near_id
         req.form['%s_cur' % singular] = get_column_value(
           conn, 'name', 'id', plural, near_id
         )
 
     if "from_location" in request.args:
-        # To avoid a key error in execute_post_by_table, we need to set the
-        # other parameters to null
         req.form['id_language_origin'] = 'null'
         req.form['language_origin'] = 'null'
         from_ids = request.args['from_location'].split(',')
-        for singular, plural, from_id in \
-          zip(['country', 'region', 'city'], ['countries', 'regions', 'cities'], from_ids):
+        for singular, plural, from_id in zip(singulars, plurals, from_ids):
             req.form['id_%s_origin' % singular] = from_id
             req.form['%s_origin' % singular] = get_column_value(
               conn, 'name', 'id', plural, from_id
@@ -59,7 +57,7 @@ def make_new_network_request():
         else:
             req.form['network_class'] = 'co'
     elif "language" in request.args:
-        for singular, plural in zip(['country', 'region', 'city'], ['countries', 'regions', 'cities']):
+        for singular in singulars:
             req.form['id_%s_origin' % singular] = 'null'
             req.form['%s_origin' % singular] = 'null'
         req.form['id_language_origin'] = get_column_value(
@@ -67,6 +65,7 @@ def make_new_network_request():
         )
         req.form['language_origin'] = request.args['language']
         req.form['network_class'] = '_l'
+
     # To avoid an error, we will make a pseudo function that returns none so
     # that execute_post_by_table will use the
     # function dictionary instead.
@@ -239,15 +238,16 @@ def get_network_user_count(network_id):
 @networks.route("/new", methods=["POST"])
 @require_apikey
 def make_new_network(internal_req=None):
-    content_fields = ['city_cur', 'id_city_cur', \
-                      'region_cur', 'id_region_cur', \
-                      'country_cur', 'id_country_cur', \
-                      'city_origin', 'id_city_origin', \
-                      'region_origin', 'id_region_origin', \
-                      'country_origin', 'id_country_origin', \
-                      'language_origin', 'id_language_origin', \
-                      'network_class']
-    if internal_req is not None:
-        return execute_post_by_table(internal_req, content_fields, "networks")
+    content_fields = [
+      'city_cur', 'id_city_cur', 'region_cur', 'id_region_cur', \
+      'country_cur', 'id_country_cur', 'city_origin', 'id_city_origin', \
+      'region_origin', 'id_region_origin', 'country_origin', \
+      'id_country_origin', 'language_origin', 'id_language_origin', \
+      'network_class'
+    ]
+
+    if internal_req:
+      request = internal_req
+
     return execute_post_by_table(request, content_fields, "networks")
 

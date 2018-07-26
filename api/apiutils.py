@@ -306,6 +306,7 @@ def validate_request_body(json, content_fields):
     :return: true if each field is contained, false otherwise.
     """
     for field in content_fields:
+
         if field not in json or json[field] is None:
             return False
     return True

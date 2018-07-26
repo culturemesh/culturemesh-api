@@ -45,7 +45,9 @@ def verify_password(username_or_email_or_token, password):
 @auth.login_required
 def get_auth_token():
     token = g.user.generate_auth_token()
-    return jsonify({'token': token.decode('ascii'), 'user': g.user})
+    return_dict = vars(g.user)
+    return_dict['token'] = token.decode('ascii')
+    return jsonify(return_dict)
 
 
 class User:
@@ -60,6 +62,13 @@ class User:
         self.password_hash = user_obj['password']
         self.email = user_obj['email']
         self.username = user_obj['username']
+        self.about_me = user_obj['about_me']
+        self.first_name = user_obj['first_name']
+        self.last_name = user_obj['last_name']
+        self.role = user_obj['role']
+        self.last_login = user_obj['last_login'] # TODO: possibly update this field?
+        self.gender = user_obj['gender']
+        self.img_link = user_obj['img_link']
 
     @staticmethod
     def hash_password(password):

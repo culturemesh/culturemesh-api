@@ -317,12 +317,15 @@ def generate_sql_query_with_is_null(ids, column_fields):
     This function generates our SQL queries based on whether each column is supposed to be null or equal some non-null id.
     :param ids: list of ids
     :param column_fields: list of column fields in corresponding order to ids.
-    :return: condition part of SQL query of format <field1=%s> AND ... AND <fieldn IS NULL>
+    :return: {condition part of SQL query of format <field1=%s> AND ... AND <fieldn IS NULL> and remaining ids that aren't -1}
     """
     condition = ""
+    remaining_ids = []
     for field_id, field in zip(ids, column_fields):
         if field_id == -1:
-            condition += field + " IS NULL AND"
+            condition += field + " IS NULL AND "
+
         else:
-            condition += field + "=%s"
-    return condition[:-2]  # cutoff last "AND"
+            condition += field + "=%s AND "
+            remaining_ids.append(field_id)
+    return {'condition': condition[:-5], 'ids': remaining_ids}  # cutoff last " AND "

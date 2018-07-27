@@ -5,6 +5,7 @@ from pymysql.err import IntegrityError
 
 networks = Blueprint('network', __name__)
 
+
 @networks.route("/ping")
 @require_apikey
 def test():
@@ -89,15 +90,16 @@ def get_networks(func_counter=0):
         return make_response("No near_location specified", HTTPStatus.METHOD_NOT_ALLOWED)
     near_ids = request.args["near_location"].split(",")
     # All requests will start with the same query and query for near_location.
-    mysql_string_start = "SELECT * FROM networks WHERE " + \
-                         generate_sql_query_with_is_null(near_ids, ["id_country_cur", "id_region_cur", "id_city_cur"])
+    null_result = generate_sql_query_with_is_null(near_ids, ["id_country_cur", "id_region_cur", "id_city_cur"])
+    mysql_string_start = "SELECT * FROM networks WHERE " + null_result['condition']
+    near_ids = null_result['ids']
     # Need to check if querying a location or language network. That changes our queries.
     if "from_location" in request.args:
-        from_ids = request.args["from_location"].split(",")
+        from_null_result = generate_sql_query_with_is_null(request.args["from_location"].split(","),
+                                                           ["id_country_origin", "id_region_origin", "id_city_origin"])
+        from_ids = from_null_result['ids']
         near_ids.extend(from_ids)
-        response_obj = get_paginated(mysql_string_start +
-                                     generate_sql_query_with_is_null(from_ids, ["id_country_origin", "id_region_origin",
-                                                                                "id_city_origin"]),
+        response_obj = get_paginated(mysql_string_start + from_null_result['condition'],
                              selection_fields=near_ids,
                              args=request.args,
                              order_clause="ORDER BY id DESC",

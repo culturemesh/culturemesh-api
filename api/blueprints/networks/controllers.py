@@ -89,14 +89,15 @@ def get_networks(func_counter=0):
         return make_response("No near_location specified", HTTPStatus.METHOD_NOT_ALLOWED)
     near_ids = request.args["near_location"].split(",")
     # All requests will start with the same query and query for near_location.
-    mysql_string_start = "SELECT * \
-                          FROM networks \
-                          WHERE id_country_cur=%s AND id_region_cur=%s AND id_city_cur=%s"
+    mysql_string_start = "SELECT * FROM networks WHERE " + \
+                         generate_sql_query_with_is_null(near_ids, ["id_country_cur", "id_region_cur", "id_city_cur"])
     # Need to check if querying a location or language network. That changes our queries.
     if "from_location" in request.args:
-        near_ids.extend(request.args["from_location"].split(","))
-        response_obj = get_paginated(mysql_string_start + "AND id_country_origin=%s AND id_region_origin=%s \
-                             AND id_city_origin=%s",
+        from_ids = request.args["from_location"].split(",")
+        near_ids.extend(from_ids)
+        response_obj = get_paginated(mysql_string_start +
+                                     generate_sql_query_with_is_null(from_ids, ["id_country_origin", "id_region_origin",
+                                                                                "id_city_origin"]),
                              selection_fields=near_ids,
                              args=request.args,
                              order_clause="ORDER BY id DESC",
@@ -125,6 +126,7 @@ def get_networks(func_counter=0):
     else:
         # Just return the response object, since it is not empty.
         return response_obj
+
 
 @networks.route("/<network_id>", methods=["GET"])
 @require_apikey

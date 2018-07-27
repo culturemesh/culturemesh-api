@@ -309,3 +309,20 @@ def validate_request_body(json, content_fields):
         if field not in json or json[field] is None:
             return False
     return True
+
+
+def generate_sql_query_with_is_null(ids, column_fields):
+    """
+    For ease of use on client requests, NULL ids (such as those in locations) are represented as -1.
+    This function generates our SQL queries based on whether each column is supposed to be null or equal some non-null id.
+    :param ids: list of ids
+    :param column_fields: list of column fields in corresponding order to ids.
+    :return: condition part of SQL query of format <field1=%s> AND ... AND <fieldn IS NULL>
+    """
+    condition = ""
+    for field_id, field in zip(ids, column_fields):
+        if field_id == -1:
+            condition += field + " IS NULL AND"
+        else:
+            condition += field + "=%s"
+    return condition[:-2]  # cutoff last "AND"

@@ -1036,8 +1036,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/TokenObject'
-        '405':
-          description: Invalid input
+        '401':
+          description: Unauthorized
 
 
 definitions:

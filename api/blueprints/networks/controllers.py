@@ -116,6 +116,7 @@ def get_networks(func_counter=0):
     else:
         return make_response("No location/language query parameter", HTTPStatus.METHOD_NOT_ALLOWED)
     if len(response_obj.get_json()) == 0:
+        print("TRYING TO MAKE NETWORK")
         # The network doesn't exist. So, let's make it!
         try:
             make_new_network(make_new_network_request())
@@ -124,6 +125,7 @@ def get_networks(func_counter=0):
                 # We need to avoid a stack overflow error if our make_new_network messes up.
                 return get_networks(func_counter)
         except (AttributeError, ValueError, IndexError, IntegrityError) as e:
+            print(str(e))
             abort(HTTPStatus.BAD_REQUEST)
     else:
         # Just return the response object, since it is not empty.

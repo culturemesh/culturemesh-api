@@ -99,7 +99,7 @@ def get_networks(func_counter=0):
                                                            ["id_country_origin", "id_region_origin", "id_city_origin"])
         from_ids = from_null_result['ids']
         near_ids.extend(from_ids)
-        response_obj = get_paginated(mysql_string_start + from_null_result['condition'],
+        response_obj = get_paginated(mysql_string_start + " AND " + from_null_result['condition'],
                              selection_fields=near_ids,
                              args=request.args,
                              order_clause="ORDER BY id DESC",

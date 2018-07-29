@@ -141,6 +141,9 @@ def execute_post_by_table(request, content_fields, table_name):
     """
     Executes a POST command to a certain table.
 
+    This function is smart enough to detect NULLs in content fields
+    to leverage default database schema values.
+
     :param request: The request received
     :param content_fields: A tuple containing the field/column names
                      to extract from the request and insert into
@@ -148,20 +151,35 @@ def execute_post_by_table(request, content_fields, table_name):
     :param table_name: The table to insert into
     :returns: A response object ready for the client.
     """
+
     content = request.get_json()
     if not content:
         content = request.form
 
-    query = "INSERT INTO %s (%s) " % (table_name, ','.join(content_fields))
+    # Sanitize content fields.  If we 'null' or 'NULL' or '-1' for any
+    # of the fields, we exclude them from the post_by_table since they will
+    # automatically default to NULL.  We also only keep content fields
+    # that are actually in the form.
+    non_null_content_fields = []
+    for content_field in content_fields:
+      if content_field in content and \
+                    content[content_field] and \
+                    str(content[content_field]) != "-1" and \
+                    str(content[content_field]).lower().strip() != 'null':
+        non_null_content_fields.append(content_field)
+
+    query = "INSERT INTO %s (%s) " % (
+        table_name, ','.join(non_null_content_fields)
+    )
     query += " values ("
-    for _ in content_fields:
+    for _ in non_null_content_fields:
         query += "%s, "
     if query[-2] == ",":
         query = query[:-2]
     query += ");"
 
     args = []
-    for col in content_fields:
+    for col in non_null_content_fields:
         args.append(content[col])
     execute_insert(query, tuple(args))
     return make_response(query, HTTPStatus.OK)

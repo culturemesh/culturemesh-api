@@ -125,7 +125,6 @@ def get_networks(func_counter=0):
     )
 
     selection_fields.extend(near_location_ids)
-    print("Starting networks query")
     # Need to check if querying a location or language network.
     # That changes our queries.
     if "from_location" in request.args:
@@ -157,7 +156,6 @@ def get_networks(func_counter=0):
           "No location/language query parameter", HTTPStatus.METHOD_NOT_ALLOWED
         )
     if len(response_obj.get_json()) == 0:
-        print("TRYING TO MAKE NETWORK")
         # The network doesn't exist. So, let's make it!
         try:
             make_new_network(make_new_network_request())
@@ -167,9 +165,8 @@ def get_networks(func_counter=0):
                 # if our make_new_network messes up.
                 return get_networks(func_counter)
             else:
-                return make_response("/netwrorks Internal Server Error", HTTPStatus.INTERNAL_SERVER_ERROR)
+                return make_response("/networks Internal Server Error", HTTPStatus.INTERNAL_SERVER_ERROR)
         except (AttributeError, ValueError, IndexError, IntegrityError) as e:
-            print(str(e))
             abort(HTTPStatus.BAD_REQUEST)
     else:
         # Just return the response object, since it is not empty.

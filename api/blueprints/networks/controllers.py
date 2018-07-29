@@ -31,9 +31,9 @@ def make_new_network_request():
         index += 1
     index = 0
     if "from_location" in request.args:
-        # To avoid a key error in execute_post_by_table, we need to set the other parmas to null
-        req.form['id_language_origin'] = 'null'
-        req.form['language_origin'] = 'null'
+        # To avoid a key error in execute_post_by_table, we need to set the other params to null
+        req.form['id_language_origin'] = None
+        req.form['language_origin'] = None
         from_ids = request.args['from_location'].split(',')
         for singular, plural in zip(['country', 'region', 'city'], ['countries', 'regions', 'cities']):
             req.form['id_' + singular + '_origin'] = from_ids[index]
@@ -47,8 +47,8 @@ def make_new_network_request():
             req.form['network_class'] = 'co'
     elif "language" in request.args:
         for singular, plural in zip(['country', 'region', 'city'], ['countries', 'regions', 'cities']):
-            req.form['id_' + singular + '_origin'] = 'null'
-            req.form[singular + '_origin'] = 'null'
+            req.form['id_' + singular + '_origin'] = None
+            req.form[singular + '_origin'] = None
         req.form['id_language_origin'] = get_column_value(conn, 'id', 'name', 'languages', request.args['language'])
         req.form['language_origin'] = request.args['language']
         req.form['network_class'] = '_l'
@@ -74,8 +74,8 @@ def get_column_value(db_connection, desired_column, query_column, table_name, it
     :param item_id: value corresponding to query_column, -1 if supposed to be "null"
     :return: name of area.
     """
-    if id == str(-1):
-        return "null"
+    if item_id == str(-1):
+        return None
     cursor = db_connection.cursor()
     cursor.execute("SELECT " + desired_column + " FROM " + table_name + " WHERE " + query_column + "=%s", item_id)
     cursor.close()

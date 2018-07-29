@@ -60,7 +60,10 @@ def handle_users_get(request):
     users_cursor = connection.cursor()
     users_cursor.execute("SELECT * FROM users WHERE id IN %s", (tuple(user_ids),))
     users_obj = convert_objects(users_cursor.fetchall(), users_cursor.description)
+    # remove password field
+    users_obj.pop('password', None)
     users_cursor.close()
+
     return make_response(jsonify(users_obj), HTTPStatus.OK)
 
 
@@ -85,12 +88,11 @@ def users_query():
                           'last_name', 'email', \
                           'password', 'role', \
                           'act_code']
-        # TODO: validate that username/email doesn't already exist.
-
         # Make another pseudo request object (yeah, kinda hacksy)
         # First, we make a generic object so we can set attributes (via .form as opposed to ['form'])
         req_obj = type('', (), {})()
         req_obj.form = request.get_json()
+        # validate that username/email doesn't already exist.
         if validate_new_user(req_obj.form, content_fields):
             # We now need to convert the user password into a hash.
             password = str(req_obj.form['password'])
@@ -101,6 +103,15 @@ def users_query():
         else:
             return make_response("Username already taken or invalid params", HTTPStatus.BAD_REQUEST)
     else:
+        # First, we make a generic object so we can set attributes (via .form as opposed to ['form'])
+        req_obj = type('', (), {})()
+        req_obj.form = request.get_json()
+        if 'password' in req_obj.form:
+            # We now need to convert the user password into a hash.
+            password = str(req_obj.form['password'])
+            req_obj.form['password'] = md5(password.encode('utf-8')).hexdigest()
+        # We need to have get_json() return None so execute_post_by_table will use req_obj.form
+        req_obj.get_json = lambda: None
         return execute_put_by_id(request, "users")
 
 
@@ -157,17 +168,18 @@ def get_user_events(user_id):
 @users.route("/<user_id>/addToEvent/<event_id>", methods=["POST"])
 @require_apikey
 def add_user_to_event(user_id, event_id):
-    # TODO: Test when adding events is in place.
     connection = mysql.get_db()
     # First, check that event and user are valid
     if not event_exists(event_id):
         return make_response("Invalid Event Id", HTTPStatus.METHOD_NOT_ALLOWED)
     if not user_exists(user_id):
         return make_response("Invalid User Id", HTTPStatus.METHOD_NOT_ALLOWED)
+    if "role" not in request.args or (request.args["role"] != "hosting" and request.args["role"] != "attending"):
+        return make_response("Invalid role parameter.", HTTPStatus.METHOD_NOT_ALLOWED)
     # Cool. Let's add that user.
     event_registration_cursor = connection.cursor()
     event_registration_cursor.execute("INSERT INTO event_registration VALUES (%s,%s,CURRENT_TIMESTAMP,host)",
-                                      (user_id, event_id))
+                                      (user_id, event_id, request.args["role"]))
     connection.commit()
     return make_response("OK", HTTPStatus.OK)
 
@@ -246,3 +258,5 @@ def get_user_by_username(username):
     user = convert_objects([user_db_tuple], cursor.description)[0]
     cursor.close()
     return user
+
+

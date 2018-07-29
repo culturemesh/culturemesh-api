@@ -46,6 +46,8 @@ def make_response_from_single_tuple(cursor):
     if obj is not None:
         obj = convert_objects([obj], cursor.description)[0]
     status = HTTPStatus.METHOD_NOT_ALLOWED if obj is None else HTTPStatus.OK
+    # remove password field, if there is one
+    obj.pop('password', None)
     return make_response(jsonify(obj), status)
 
 
@@ -321,6 +323,7 @@ def validate_request_body(json, content_fields):
     :return: true if each field is contained, false otherwise.
     """
     for field in content_fields:
+
         if field not in json or json[field] is None:
             return False
     return True

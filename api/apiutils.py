@@ -45,9 +45,9 @@ def make_response_from_single_tuple(cursor):
     obj = cursor.fetchone()
     if obj is not None:
         obj = convert_objects([obj], cursor.description)[0]
+        # remove password field, if there is one
+        obj.pop('password', None)
     status = HTTPStatus.METHOD_NOT_ALLOWED if obj is None else HTTPStatus.OK
-    # remove password field, if there is one
-    obj.pop('password', None)
     return make_response(jsonify(obj), status)
 
 

@@ -1,7 +1,5 @@
 from flask import Blueprint, request, g
-from http import HTTPStatus
 from api import require_apikey
-from api.extensions import mysql
 from api.apiutils import *
 from hashlib import md5
 from pymysql.err import IntegrityError
@@ -204,61 +202,14 @@ def add_user_to_network(user_id, network_id):
     return make_response("OK", HTTPStatus.OK)
 
 
-def get_user_by_email(email):
-    """
-    Checks database and returns object representing user with that username.
-    :param email: email of CultureMesh account (string)
-    :return: user_obj from db or None if no corresponding found.
-    """
+@users.route("/leaveNetwork/<network_id>")
+@auth.login_required
+def remove_user_from_network(network_id):
+    # Get user given token.
+    user_id = g.user.id
     connection = mysql.get_db()
     cursor = connection.cursor()
-    query = "SELECT * FROM users WHERE email=%s"
-    cursor.execute(query, (email,))
-    user_db_tuple = cursor.fetchone()
-    if user_db_tuple is None:
-        return None
-    user = convert_objects([user_db_tuple], cursor.description)[0]
+    cursor.execute("DELETE FROM network_registration WHERE id_user=%s AND id_network=%s", (user_id, network_id))
+    cursor.commit()
     cursor.close()
-    return user
-
-
-def get_user_by_id(id):
-    """
-    Checks database and returns object representing user with that id.
-    :param id: id of CultureMesh account (string)
-    :return: user_obj from db or None if no corresponding found.
-    """
-    connection = mysql.get_db()
-    cursor = connection.cursor()
-    # Note table_name is never supplied by a client, so we do not
-    # need to escape it.
-    query = "SELECT * FROM users WHERE id=%s"
-    cursor.execute(query, (id,))
-    user_db_tuple = cursor.fetchone()
-    if user_db_tuple is None:
-        return None
-    user = convert_objects([user_db_tuple], cursor.description)[0]
-    cursor.close()
-    return user
-
-
-def get_user_by_username(username):
-    """
-    Checks database and returns object representing user with that id.
-    :param username: id of CultureMesh account (string)
-    :return: user_obj from db or None if no corresponding found.
-    """
-    connection = mysql.get_db()
-    cursor = connection.cursor()
-    query = "SELECT * FROM users WHERE username=%s"
-    cursor.execute(query, (username,))
-    user_db_tuple = cursor.fetchone()
-    if user_db_tuple is None:
-        return None
-    user = convert_objects([user_db_tuple], cursor.description)[0]
-    cursor.close()
-    return user
-
-
-
-
+    return make_response("User " + user_id + " left network " + network_id, HTTPStatus.OK)

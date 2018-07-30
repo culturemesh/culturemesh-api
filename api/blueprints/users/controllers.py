@@ -1,10 +1,11 @@
-from flask import Blueprint, jsonify, request, json, make_response
+from flask import Blueprint, request, g
 from http import HTTPStatus
 from api import require_apikey
 from api.extensions import mysql
 from api.apiutils import *
 from hashlib import md5
 from pymysql.err import IntegrityError
+from api.blueprints.accounts.controllers import auth
 
 users = Blueprint('user', __name__)
 
@@ -152,7 +153,6 @@ def get_user_posts(user_id):
 @users.route("/<user_id>/events", methods=["GET"])
 @require_apikey
 def get_user_events(user_id):
-    # TODO: Test when there are events in existence.
     return get_paginated("SELECT events.* \
                           FROM event_registration \
                           INNER JOIN events \
@@ -258,5 +258,22 @@ def get_user_by_username(username):
     user = convert_objects([user_db_tuple], cursor.description)[0]
     cursor.close()
     return user
+
+
+@users.route("/leaveNetwork/<network_id>")
+@auth.login_required
+def remove_user_from_network(network_id):
+    """
+    :param network_id: Network to remove user from.
+    """
+    # Get user given token.
+    user_id = g.user.id
+    connection = mysql.get_db()
+    cursor = connection.cursor()
+    cursor.execute("DELETE FROM network_registration WHERE id_user=%s AND id_network=%s", (user_id, network_id))
+    cursor.commit()
+    cursor.close()
+    return make_response("User " + user_id + " left network " + network_id, HTTPStatus.OK)
+
 
 

@@ -4,6 +4,7 @@ from api.apiutils import *
 from hashlib import md5
 from pymysql.err import IntegrityError
 from api.blueprints.accounts.controllers import auth
+from api.blueprints.users.utils import *
 
 users = Blueprint('user', __name__)
 

@@ -260,20 +260,5 @@ def get_user_by_username(username):
     return user
 
 
-@users.route("/leaveNetwork/<network_id>")
-@auth.login_required
-def remove_user_from_network(network_id):
-    """
-    :param network_id: Network to remove user from.
-    """
-    # Get user given token.
-    user_id = g.user.id
-    connection = mysql.get_db()
-    cursor = connection.cursor()
-    cursor.execute("DELETE FROM network_registration WHERE id_user=%s AND id_network=%s", (user_id, network_id))
-    cursor.commit()
-    cursor.close()
-    return make_response("User " + user_id + " left network " + network_id, HTTPStatus.OK)
-
 
 

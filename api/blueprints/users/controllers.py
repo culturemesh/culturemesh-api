@@ -183,7 +183,7 @@ def add_user_to_event(user_id, event_id):
 
 
 @users.route("/joinNetwork/<network_id>", methods=["POST"])
-@auth.login_required()
+@auth.login_required
 def add_user_to_network(network_id):
     user_id = g.user.id
     if not network_exists(network_id):
@@ -200,7 +200,7 @@ def add_user_to_network(network_id):
     return make_response("OK", HTTPStatus.OK)
 
 
-@users.route("/leaveNetwork/<network_id>", methods=['DELETE'])
+@users.route("/leaveNetwork/<network_id>", methods=["DELETE"])
 @auth.login_required
 def remove_user_from_network(network_id):
     # Get user given token.

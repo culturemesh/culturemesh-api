@@ -4,7 +4,7 @@ from flask_httpauth import HTTPBasicAuth
 from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
 
-from api.blueprints.users.controllers import get_user_by_id, get_user_by_email, get_user_by_username
+from api.blueprints.users.utils import get_user_by_id, get_user_by_email, get_user_by_username
 from api.credentials import secret_key
 from api.config import AUTH_TOKEN_EXPIRATION_SECS
 

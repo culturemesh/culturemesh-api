@@ -8,10 +8,12 @@ from api.blueprints.networks.utils import get_from_location_sql_string_end, \
 
 networks = Blueprint('network', __name__)
 
+
 @networks.route("/ping")
 @require_apikey
 def test():
     return "pong"
+
 
 def make_new_network_request():
     """
@@ -42,8 +44,9 @@ def make_new_network_request():
         )
 
     if "from_location" in request.args:
-        req.form['id_language_origin'] = 'null'
-        req.form['language_origin'] = 'null'
+        # To avoid a key error in execute_post_by_table, we need to set the other params to null
+        req.form['id_language_origin'] = None
+        req.form['language_origin'] = None
         from_ids = request.args['from_location'].split(',')
         for singular, plural, from_id in zip(singulars, plurals, from_ids):
             req.form['id_%s_origin' % singular] = from_id
@@ -58,8 +61,8 @@ def make_new_network_request():
             req.form['network_class'] = 'co'
     elif "language" in request.args:
         for singular in singulars:
-            req.form['id_%s_origin' % singular] = 'null'
-            req.form['%s_origin' % singular] = 'null'
+            req.form['id_%s_origin' % singular] = None
+            req.form['%s_origin' % singular] = None
         req.form['id_language_origin'] = get_column_value(
           conn, 'id', 'name', 'languages', request.args['language']
         )
@@ -95,7 +98,7 @@ def get_column_value(db_connection,
     :return: name of area.
     """
     if item_id == str(-1) or str(item_id).lower() == 'null' or not item_id:
-        return "null"
+        return None
     cursor = db_connection.cursor()
     cursor.execute(
       "SELECT " + desired_column + " FROM " + table_name + " WHERE " + query_column + "=%s",
@@ -122,7 +125,6 @@ def get_networks(func_counter=0):
     )
 
     selection_fields.extend(near_location_ids)
-
     # Need to check if querying a location or language network.
     # That changes our queries.
     if "from_location" in request.args:
@@ -162,11 +164,14 @@ def get_networks(func_counter=0):
                 # We need to avoid a stack overflow error
                 # if our make_new_network messes up.
                 return get_networks(func_counter)
+            else:
+                return make_response("/networks Internal Server Error", HTTPStatus.INTERNAL_SERVER_ERROR)
         except (AttributeError, ValueError, IndexError, IntegrityError) as e:
             abort(HTTPStatus.BAD_REQUEST)
     else:
         # Just return the response object, since it is not empty.
         return response_obj
+
 
 @networks.route("/<network_id>", methods=["GET"])
 @require_apikey

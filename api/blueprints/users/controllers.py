@@ -182,12 +182,10 @@ def add_user_to_event(user_id, event_id):
     return make_response("OK", HTTPStatus.OK)
 
 
-@users.route("/<user_id>/addToNetwork/<network_id>", methods=["POST"])
+@users.route("/joinNetwork/<network_id>", methods=["POST"])
 @require_apikey
-def add_user_to_network(user_id, network_id):
-    # First, check that input is valid.
-    if not user_exists(user_id):
-        return make_response("Invalid User Id", HTTPStatus.METHOD_NOT_ALLOWED)
+def add_user_to_network(network_id):
+    user_id = g.user.id
     if not network_exists(network_id):
         return make_response("Invalid Network Id", HTTPStatus.METHOD_NOT_ALLOWED)
     connection = mysql.get_db()
@@ -212,4 +210,4 @@ def remove_user_from_network(network_id):
     cursor.execute("DELETE FROM network_registration WHERE id_user=%s AND id_network=%s", (user_id, network_id))
     cursor.close()
     connection.commit()
-    return make_response("User " + user_id + " left network " + network_id, HTTPStatus.OK)
+    return make_response("User " + str(user_id) + " left network " + str(network_id), HTTPStatus.OK)

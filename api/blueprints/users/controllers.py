@@ -210,6 +210,6 @@ def remove_user_from_network(network_id):
     connection = mysql.get_db()
     cursor = connection.cursor()
     cursor.execute("DELETE FROM network_registration WHERE id_user=%s AND id_network=%s", (user_id, network_id))
-    cursor.commit()
     cursor.close()
+    connection.commit()
     return make_response("User " + user_id + " left network " + network_id, HTTPStatus.OK)

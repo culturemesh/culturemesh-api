@@ -61,6 +61,7 @@ def handle_users_get(request):
     users_obj = convert_objects(users_cursor.fetchall(), users_cursor.description)
     # remove password field
     users_obj.pop('password', None)
+    users_obj.pop('email', None)
     users_cursor.close()
 
     return make_response(jsonify(users_obj), HTTPStatus.OK)
@@ -117,7 +118,7 @@ def users_query():
 @users.route("/<user_id>", methods=["GET"])
 @require_apikey
 def get_user(user_id):
-    return get_by_id("users", user_id)
+    return get_by_id("users", user_id, ["email", "password"])
 
 
 @users.route("/<user_id>/networks", methods=["GET"])

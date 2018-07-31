@@ -236,7 +236,7 @@ def generate_user_name():
         # Set username. It will be
         # [first letter of firstname][lastname without spaces/special charcters][a number to differentiate]
         user_name = ""
-        if 'first_name' in user and user['first_naeme'] is not None:
+        if 'first_name' in user and user['first_name'] is not None:
             user_name += user["first_name"][:1]
         if 'last_name' in user and user['last_name'] is not None:
             # https://stackoverflow.com/questions/5843518/remove-all-special-characters-punctuation-and-spaces-from-string

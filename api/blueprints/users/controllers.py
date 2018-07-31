@@ -220,35 +220,5 @@ def remove_user_from_network(network_id):
     return make_response("User " + str(user_id) + " left network " + str(network_id), HTTPStatus.OK)
 
 
-@users.route("/gen_user_names")
-def generate_user_name():
-    """
-    TODO: Comment this code out when we are done using it.
-    Generates user names for each user with a NULL username field.
-    """
-    connection = mysql.get_db()
-    cursor = connection.cursor()
-    cursor.execute("SELECT * FROM users WHERE username IS NULL")
-    users_obj = convert_objects(cursor.fetchall(), cursor.description)
-    cursor.close()
-    counter = random.randint(1, 101)
-    for user in users_obj:
-        # Set username. It will be
-        # [first letter of firstname][lastname without spaces/special charcters][a number to differentiate]
-        user_name = ""
-        if 'first_name' in user and user['first_name'] is not None:
-            user_name += user["first_name"][:1]
-        if 'last_name' in user and user['last_name'] is not None:
-            # https://stackoverflow.com/questions/5843518/remove-all-special-characters-punctuation-and-spaces-from-string
-            user_name += ''.join(e for e in user["last_name"] if e.isalnum())
-        user_name += str(counter)
-        counter += 1
-        put_cursor = connection.cursor()
-        put_cursor.execute("UPDATE users SET username=%s WHERE id=%s", (user_name, user['id']))
-        connection.commit()
-    return make_response("OK", HTTPStatus.OK)
-
-
-
 
 

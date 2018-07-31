@@ -246,6 +246,7 @@ def generate_user_name():
         put_cursor = connection.cursor()
         put_cursor.execute("UPDATE users SET username=%s WHERE id=%s", (user['username'], user['id']))
         connection.commit()
+    return make_response("OK", HTTPStatus.OK)
 
 
 

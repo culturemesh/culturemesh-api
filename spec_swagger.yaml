@@ -1192,9 +1192,12 @@ definitions:
       role:
         type: integer
         format: int32
-      act_code:
+      img_link:
         type: string
-        description: Not sure what this is.
+      about_me:
+        type: string
+      gender:
+        type: string
 
   Network:
     type: object

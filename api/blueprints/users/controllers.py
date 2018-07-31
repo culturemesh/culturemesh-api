@@ -88,7 +88,7 @@ def users_query():
                           'last_name', 'email', \
                           'password', 'role', \
                           'img_link', 'about_me',
-                          'gender', 'act_code']
+                          'gender']
         # Make another pseudo request object (yeah, kinda hacksy)
         # First, we make a generic object so we can set attributes (via .form as opposed to ['form'])
         req_obj = type('', (), {})()

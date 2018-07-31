@@ -228,7 +228,7 @@ def generate_user_name():
     """
     connection = mysql.get_db()
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM users WHERE username IS NONE")
+    cursor.execute("SELECT * FROM users WHERE username IS NULL")
     users_obj = convert_objects(cursor.fetchall(), cursor.description)
     cursor.close()
     counter = random.randint(1, 101)

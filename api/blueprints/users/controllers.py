@@ -231,7 +231,7 @@ def generate_user_name():
     cursor.execute("SELECT * FROM users WHERE username IS NONE")
     users_obj = convert_objects(cursor.fetchall(), cursor.description)
     cursor.close()
-    counter = random.randint(1,101)
+    counter = random.randint(1, 101)
     for user in users_obj:
         # Set username. It will be
         # [first letter of firstname][lastname without spaces/special charcters][a number to differentiate]
@@ -244,7 +244,7 @@ def generate_user_name():
         user_name += counter
         counter += 1
         put_cursor = connection.cursor()
-        put_cursor.execute("UPDATE users SET username=%s WHERE id=%s", (user['username']))
+        put_cursor.execute("UPDATE users SET username=%s WHERE id=%s", (user['username'], user['id']))
         connection.commit()
 
 

@@ -165,6 +165,7 @@ def execute_post_by_table(request, content_fields, table_name):
     non_null_content_fields = []
     for content_field in content_fields:
       if content_field in content and \
+                    content[content_field] is not None and \
                     str(content[content_field]) != "-1" and \
                     str(content[content_field]).lower().strip() != 'null':
         non_null_content_fields.append(content_field)

@@ -220,7 +220,7 @@ def remove_user_from_network(network_id):
     return make_response("User " + str(user_id) + " left network " + str(network_id), HTTPStatus.OK)
 
 
-# @users.route("/gen_user_names")
+@users.route("/gen_user_names")
 def generate_user_name():
     """
     TODO: Comment this code out when we are done using it.

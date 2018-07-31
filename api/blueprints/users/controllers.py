@@ -87,7 +87,8 @@ def users_query():
         content_fields = ['username', 'first_name', \
                           'last_name', 'email', \
                           'password', 'role', \
-                          'act_code']
+                          'img_link', 'about_me',
+                          'gender', 'act_code']
         # Make another pseudo request object (yeah, kinda hacksy)
         # First, we make a generic object so we can set attributes (via .form as opposed to ['form'])
         req_obj = type('', (), {})()

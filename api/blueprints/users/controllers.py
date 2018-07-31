@@ -241,7 +241,7 @@ def generate_user_name():
         if 'last_name' in user:
             # https://stackoverflow.com/questions/5843518/remove-all-special-characters-punctuation-and-spaces-from-string
             user_name += ''.join(e for e in user["last_name"] if e.isalnum())
-        user_name += counter
+        user_name += str(counter)
         counter += 1
         put_cursor = connection.cursor()
         put_cursor.execute("UPDATE users SET username=%s WHERE id=%s", (user['username'], user['id']))

@@ -184,7 +184,7 @@ def execute_post_by_table(request, content_fields, table_name):
     for col in non_null_content_fields:
         args.append(content[col])
     execute_insert(query, tuple(args))
-    return make_response(query, HTTPStatus.OK)
+    return make_response("OK", HTTPStatus.OK)
 
 
 def get_paginated(sql_q_format, selection_fields, args,

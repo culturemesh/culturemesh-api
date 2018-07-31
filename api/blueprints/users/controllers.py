@@ -4,6 +4,7 @@ from hashlib import md5
 from pymysql.err import IntegrityError
 from api.blueprints.accounts.controllers import auth
 from api.blueprints.users.utils import *
+import random
 
 users = Blueprint('user', __name__)
 
@@ -74,8 +75,12 @@ def validate_new_user(form, content_fields):
     :param content_fields: list of required fields.
     :return: true if has necessary fields and username is unique, false otherwise
     """
-    return validate_request_body(form, content_fields) and get_user_by_email(form['email']) is None and \
-           get_user_by_username(form['username']) is None
+    # image link is optional
+    content_fields.pop(content_fields.index("img_link"))
+    if not validate_request_body(form, content_fields):
+        return False
+    content_fields.append("img_link")
+    return get_user_by_email(form['email']) is None and get_user_by_username(form['username']) is None
 
 
 @users.route("/users", methods=["GET", "POST", "PUT"])
@@ -213,3 +218,36 @@ def remove_user_from_network(network_id):
     cursor.close()
     connection.commit()
     return make_response("User " + str(user_id) + " left network " + str(network_id), HTTPStatus.OK)
+
+
+# @users.route("/gen_user_names")
+def generate_user_name():
+    """
+    TODO: Comment this code out when we are done using it.
+    Generates user names for each user with a NULL username field.
+    """
+    connection = mysql.get_db()
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM users WHERE username IS NONE")
+    users_obj = convert_objects(cursor.fetchall(), cursor.description)
+    cursor.close()
+    counter = random.randint(1,101)
+    for user in users_obj:
+        # Set username. It will be
+        # [first letter of firstname][lastname without spaces/special charcters][a number to differentiate]
+        user_name = ""
+        if 'first_name' in user:
+            user_name += user["first_name"][:1]
+        if 'last_name' in user:
+            # https://stackoverflow.com/questions/5843518/remove-all-special-characters-punctuation-and-spaces-from-string
+            user_name += ''.join(e for e in user["last_name"] if e.isalnum())
+        user_name += counter
+        counter += 1
+        put_cursor = connection.cursor()
+        put_cursor.execute("UPDATE users SET username=%s WHERE id=%s", (user['username']))
+        connection.commit()
+
+
+
+
+

@@ -5,7 +5,6 @@ Utility module for querying users based on certain information.
 """
 
 
-
 def get_user_by_email(email):
     """
     Checks database and returns object representing user with that username.

@@ -317,7 +317,7 @@ paths:
         '200':
           description: OK
 
-  /networks:
+  /network/networks:
     get:
       tags:
         - networks
@@ -1005,7 +1005,7 @@ paths:
               $ref: '#/definitions/Language'
         '405':
           description: Invalid input
-  '/uploads/image':
+  '/upload/image':
     post:
       consumes:
         - "multipart/form-data"

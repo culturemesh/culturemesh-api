@@ -314,6 +314,10 @@ def valid_file_type(file):
     :param file: python file.
     :return: true if file is .png, .jpg, or .gif, false otherwise.
     """
+    print("FILENAME")
+    print(file.filename)
+    # TODO: see if filename check should be considered.
+    return True
     return file.filename.split(".")[-1] in ALLOWED_EXTENSIONS
 
 

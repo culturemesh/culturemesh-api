@@ -84,7 +84,7 @@ class User:
         :param password: password to hash.
         :return: True if password is valid, False otherwise.
         """
-        return constant_time.bytes_eq(bytes(self.hash_password(password)), bytes(self.password_hash))
+        return constant_time.bytes_eq(bytearray(self.hash_password(password), 'utf8'), bytes(self.password_hash), 'utf8')
 
     def generate_auth_token(self, expiration=AUTH_TOKEN_EXPIRATION_SECS):
         s = Serializer(secret_key, expires_in=expiration)

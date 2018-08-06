@@ -28,7 +28,7 @@ def convert_objects(tuple_arr, description):
     return obj_arr
 
 
-def make_response_from_single_tuple(cursor, cut_out_fields=["password", "email"]):
+def make_response_from_single_tuple(cursor, fields_to_omit=["password", "email"]):
     """
     Given a database cursor from which we expect only one result to be
     returned, extracts that tuple into an object and makes a response
@@ -40,13 +40,13 @@ def make_response_from_single_tuple(cursor, cut_out_fields=["password", "email"]
     NOTE: the cursor must be closed by the caller.
 
     :param cursor: A 'loaded' cursor
-    :param cut_out_fields: a list of fields to cut out.
+    :param fields_to_omit: a list of fields to cut out.
     :return: A response object ready to return to the client
     """
     obj = cursor.fetchone()
     if obj is not None:
         obj = convert_objects([obj], cursor.description)[0]
-        for field in cut_out_fields:
+        for field in fields_to_omit:
             obj.pop(field, None)
     status = HTTPStatus.METHOD_NOT_ALLOWED if obj is None else HTTPStatus.OK
     return make_response(jsonify(obj), status)
@@ -165,7 +165,7 @@ def execute_post_by_table(request, content_fields, table_name):
     non_null_content_fields = []
     for content_field in content_fields:
       if content_field in content and \
-                    content[content_field] is not None and \
+                    content[content_field] and \
                     str(content[content_field]) != "-1" and \
                     str(content[content_field]).lower().strip() != 'null':
         non_null_content_fields.append(content_field)

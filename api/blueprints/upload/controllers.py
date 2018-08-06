@@ -22,11 +22,11 @@ def upload_image():
     :return: The request will return the url
     """
     if request.files is None:
-        return make_response("No image in request body.", HTTPStatus.METHOD_NOT_ALLOWED)
+        return make_response("No image in request body.", HTTPStatus.BAD_REQUEST)
     # Fetch image binary
     file = request.files['file']
     if not valid_file_type(file):
-        return make_response("Invalid file format. Upload an image (.jpg, .png, or .gif)", HTTPStatus.METHOD_NOT_ALLOWED)
+        return make_response("Invalid file format. Upload an image (.jpg, .png, or .gif)", HTTPStatus.BAD_REQUEST)
     # We need to safeguard against mischievous file names.
     file_name = secure_filename(file.filename)
     # Now, let's hash this image to get the directory name.

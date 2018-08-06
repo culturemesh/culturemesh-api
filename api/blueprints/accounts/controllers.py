@@ -7,6 +7,7 @@ from itsdangerous import (TimedJSONWebSignatureSerializer
 from api.blueprints.users.controllers import get_user_by_id, get_user_by_email, get_user_by_username
 from api.credentials import secret_key
 from api.config import AUTH_TOKEN_EXPIRATION_SECS
+import time
 
 accounts = Blueprint('account', __name__)
 
@@ -47,6 +48,7 @@ def get_auth_token():
     token = g.user.generate_auth_token()
     return_dict = vars(g.user)
     return_dict['token'] = token.decode('ascii')
+    return_dict['token_expiration_epoch'] = int(time.time()) + AUTH_TOKEN_EXPIRATION_SECS 
     return jsonify(return_dict)
 
 

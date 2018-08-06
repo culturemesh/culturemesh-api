@@ -3,9 +3,8 @@ import os
 from api.credentials import host_path
 from flask import Blueprint, request, make_response
 from http import HTTPStatus
-from api import require_apikey
 from api.apiutils import hash_file, valid_file_type
-
+from api.blueprints.accounts.controllers import auth
 from werkzeug.utils import secure_filename
 
 upload = Blueprint('upload', __name__)
@@ -14,7 +13,7 @@ IMAGES_BASE = "https://www.culturemesh.com/user_images/"
 
 
 @upload.route("/image", methods=["POST"])
-@require_apikey
+@auth.login_required
 def upload_image():
     """
     This function uploads the image to the BlueHost filesystem. The request body should be multipart/formdata,

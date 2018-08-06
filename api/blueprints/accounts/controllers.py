@@ -6,6 +6,7 @@ from itsdangerous import (TimedJSONWebSignatureSerializer
 
 from api.blueprints.users.utils import get_user_by_id, get_user_by_email, get_user_by_username
 from api.credentials import secret_key
+from cryptography.hazmat.primitives import constant_time
 from api.config import AUTH_TOKEN_EXPIRATION_SECS
 import time
 
@@ -77,7 +78,13 @@ class User:
         return md5(password.encode('utf-8')).hexdigest()
 
     def verify_password(self, password):
-        return self.hash_password(password) == self.password_hash
+        """
+        We use a constant time comparison so attackers cannot differentiate between hashes that are close to the
+        actual hash (and thus take less time to compare) and hashes that are way off the mark.
+        :param password: password to hash.
+        :return: True if password is valid, False otherwise.
+        """
+        return constant_time.bytes_eq(bytes(self.hash_password(password)), bytes(self.password_hash))
 
     def generate_auth_token(self, expiration=AUTH_TOKEN_EXPIRATION_SECS):
         s = Serializer(secret_key, expires_in=expiration)

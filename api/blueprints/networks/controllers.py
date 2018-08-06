@@ -44,7 +44,7 @@ def make_new_network_request():
         )
 
     if "from_location" in request.args:
-        # To avoid a key error in execute_post_by_table, we need to set the other params to null
+        # To avoid a key error in execute_post_by_table, we need to set the other params to None
         req.form['id_language_origin'] = None
         req.form['language_origin'] = None
         from_ids = request.args['from_location'].split(',')

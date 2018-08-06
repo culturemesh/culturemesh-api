@@ -1,1 +1,1 @@
-AUTH_TOKEN_EXPIRATION_SECS = 60 ** 3 * 24 * 3  # Three days
+AUTH_TOKEN_EXPIRATION_SECS = 60 ** 2 * 24 * 3  # Three days

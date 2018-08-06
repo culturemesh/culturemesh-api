@@ -1,10 +1,10 @@
-from flask import Blueprint, jsonify, request, json, make_response
-from http import HTTPStatus
+from flask import Blueprint, request, g
 from api import require_apikey
-from api.extensions import mysql
-from api.apiutils import *
 from hashlib import md5
 from pymysql.err import IntegrityError
+from api.blueprints.accounts.controllers import auth
+from api.blueprints.users.utils import *
+import random
 
 users = Blueprint('user', __name__)
 
@@ -62,6 +62,7 @@ def handle_users_get(request):
     users_obj = convert_objects(users_cursor.fetchall(), users_cursor.description)
     # remove password field
     users_obj.pop('password', None)
+    users_obj.pop('email', None)
     users_cursor.close()
 
     return make_response(jsonify(users_obj), HTTPStatus.OK)
@@ -74,8 +75,12 @@ def validate_new_user(form, content_fields):
     :param content_fields: list of required fields.
     :return: true if has necessary fields and username is unique, false otherwise
     """
-    return validate_request_body(form, content_fields) and get_user_by_email(form['email']) is None and \
-           get_user_by_username(form['username']) is None
+    # image link is optional
+    content_fields.pop(content_fields.index("img_link"))
+    if not validate_request_body(form, content_fields):
+        return False
+    content_fields.append("img_link")
+    return get_user_by_email(form['email']) is None and get_user_by_username(form['username']) is None
 
 
 @users.route("/users", methods=["GET", "POST", "PUT"])
@@ -87,7 +92,8 @@ def users_query():
         content_fields = ['username', 'first_name', \
                           'last_name', 'email', \
                           'password', 'role', \
-                          'act_code']
+                          'img_link', 'about_me', \
+                          'gender']
         # Make another pseudo request object (yeah, kinda hacksy)
         # First, we make a generic object so we can set attributes (via .form as opposed to ['form'])
         req_obj = type('', (), {})()
@@ -118,7 +124,7 @@ def users_query():
 @users.route("/<user_id>", methods=["GET"])
 @require_apikey
 def get_user(user_id):
-    return get_by_id("users", user_id)
+    return get_by_id("users", user_id, ["email", "password"])
 
 
 @users.route("/<user_id>/networks", methods=["GET"])
@@ -152,7 +158,6 @@ def get_user_posts(user_id):
 @users.route("/<user_id>/events", methods=["GET"])
 @require_apikey
 def get_user_events(user_id):
-    # TODO: Test when there are events in existence.
     return get_paginated("SELECT events.* \
                           FROM event_registration \
                           INNER JOIN events \
@@ -184,12 +189,10 @@ def add_user_to_event(user_id, event_id):
     return make_response("OK", HTTPStatus.OK)
 
 
-@users.route("/<user_id>/addToNetwork/<network_id>", methods=["POST"])
-@require_apikey
-def add_user_to_network(user_id, network_id):
-    # First, check that input is valid.
-    if not user_exists(user_id):
-        return make_response("Invalid User Id", HTTPStatus.METHOD_NOT_ALLOWED)
+@users.route("/joinNetwork/<network_id>", methods=["POST"])
+@auth.login_required
+def add_user_to_network(network_id):
+    user_id = g.user.id
     if not network_exists(network_id):
         return make_response("Invalid Network Id", HTTPStatus.METHOD_NOT_ALLOWED)
     connection = mysql.get_db()
@@ -204,59 +207,18 @@ def add_user_to_network(user_id, network_id):
     return make_response("OK", HTTPStatus.OK)
 
 
-def get_user_by_email(email):
-    """
-    Checks database and returns object representing user with that username.
-    :param email: email of CultureMesh account (string)
-    :return: user_obj from db or None if no corresponding found.
-    """
+@users.route("/leaveNetwork/<network_id>", methods=["DELETE"])
+@auth.login_required
+def remove_user_from_network(network_id):
+    # Get user given token.
+    user_id = g.user.id
     connection = mysql.get_db()
     cursor = connection.cursor()
-    query = "SELECT * FROM users WHERE email=%s"
-    cursor.execute(query, (email,))
-    user_db_tuple = cursor.fetchone()
-    if user_db_tuple is None:
-        return None
-    user = convert_objects([user_db_tuple], cursor.description)[0]
+    cursor.execute("DELETE FROM network_registration WHERE id_user=%s AND id_network=%s", (user_id, network_id))
     cursor.close()
-    return user
+    connection.commit()
+    return make_response("User " + str(user_id) + " left network " + str(network_id), HTTPStatus.OK)
 
 
-def get_user_by_id(id):
-    """
-    Checks database and returns object representing user with that id.
-    :param id: id of CultureMesh account (string)
-    :return: user_obj from db or None if no corresponding found.
-    """
-    connection = mysql.get_db()
-    cursor = connection.cursor()
-    # Note table_name is never supplied by a client, so we do not
-    # need to escape it.
-    query = "SELECT * FROM users WHERE id=%s"
-    cursor.execute(query, (id,))
-    user_db_tuple = cursor.fetchone()
-    if user_db_tuple is None:
-        return None
-    user = convert_objects([user_db_tuple], cursor.description)[0]
-    cursor.close()
-    return user
-
-
-def get_user_by_username(username):
-    """
-    Checks database and returns object representing user with that id.
-    :param username: id of CultureMesh account (string)
-    :return: user_obj from db or None if no corresponding found.
-    """
-    connection = mysql.get_db()
-    cursor = connection.cursor()
-    query = "SELECT * FROM users WHERE username=%s"
-    cursor.execute(query, (username,))
-    user_db_tuple = cursor.fetchone()
-    if user_db_tuple is None:
-        return None
-    user = convert_objects([user_db_tuple], cursor.description)[0]
-    cursor.close()
-    return user
 
 

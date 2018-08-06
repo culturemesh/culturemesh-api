@@ -28,7 +28,7 @@ def convert_objects(tuple_arr, description):
     return obj_arr
 
 
-def make_response_from_single_tuple(cursor):
+def make_response_from_single_tuple(cursor, fields_to_omit=["password", "email"]):
     """
     Given a database cursor from which we expect only one result to be
     returned, extracts that tuple into an object and makes a response
@@ -40,16 +40,15 @@ def make_response_from_single_tuple(cursor):
     NOTE: the cursor must be closed by the caller.
 
     :param cursor: A 'loaded' cursor
+    :param fields_to_omit: a list of fields to cut out.
     :return: A response object ready to return to the client
     """
     obj = cursor.fetchone()
     if obj is not None:
         obj = convert_objects([obj], cursor.description)[0]
-        # remove password field, if there is one
-        obj.pop('password', None)
+        for field in fields_to_omit:
+            obj.pop(field, None)
     status = HTTPStatus.METHOD_NOT_ALLOWED if obj is None else HTTPStatus.OK
-    # remove password field, if there is one
-    obj.pop('password', None)
     return make_response(jsonify(obj), status)
 
 
@@ -83,13 +82,14 @@ def execute_insert(sql_q_format, args):
     connection.commit()
 
 
-def get_by_id(table_name, id_):
+def get_by_id(table_name, id_, cut_out_fields=[]):
     """
     Given a table name and an id to search for, queries the table
     and returns a response object ready to be returned to the client.
 
     :param table_name: The name of the table to query
     :param id_: The id of the object to fetch
+    :param cut_out_fields: a list of fields that should be removed for privacy reasons.
     :returns: A response object ready to return to the client.
     """
     connection = mysql.get_db()
@@ -99,7 +99,7 @@ def get_by_id(table_name, id_):
     # need to escape it.
     query = "SELECT * FROM `%s` WHERE id=%%s" % (table_name,)
     cursor.execute(query, (id_))
-    response = make_response_from_single_tuple(cursor)
+    response = make_response_from_single_tuple(cursor, cut_out_fields)
     cursor.close()
     return response
 
@@ -184,7 +184,7 @@ def execute_post_by_table(request, content_fields, table_name):
     for col in non_null_content_fields:
         args.append(content[col])
     execute_insert(query, tuple(args))
-    return make_response(query, HTTPStatus.OK)
+    return make_response("OK", HTTPStatus.OK)
 
 
 def get_paginated(sql_q_format, selection_fields, args,
@@ -314,6 +314,10 @@ def valid_file_type(file):
     :param file: python file.
     :return: true if file is .png, .jpg, or .gif, false otherwise.
     """
+    print("FILENAME")
+    print(file.filename)
+    # TODO: see if filename check should be considered.
+    return True
     return file.filename.split(".")[-1] in ALLOWED_EXTENSIONS
 
 

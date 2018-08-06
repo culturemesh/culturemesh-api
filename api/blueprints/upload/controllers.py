@@ -12,15 +12,6 @@ upload = Blueprint('upload', __name__)
 
 IMAGES_BASE = "https://www.culturemesh.com/user_images/"
 
-@upload.route("/ping")
-@require_apikey
-def test():
-    print(" THE REAL FLASK PATH  ")
-    print(os.path)
-    with open(host_path['image_uploads']+"file_write_test.txt", "w") as text_file:
-        text_file.write("Drew wrote with flask!!")
-    return "pong"
-
 
 @upload.route("/image", methods=["POST"])
 @require_apikey

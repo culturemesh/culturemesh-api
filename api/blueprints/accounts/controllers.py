@@ -48,7 +48,7 @@ def get_auth_token():
     token = g.user.generate_auth_token()
     return_dict = vars(g.user)
     return_dict['token'] = token.decode('ascii')
-    return_dict['token_expiration_epoch'] = int(time.time()) + AUTH_TOKEN_EXPIRATION_SECS
+    return_dict['token_expiration_epoch'] = int(time.time()) + AUTH_TOKEN_EXPIRATION_SECS 
     return jsonify(return_dict)
 
 

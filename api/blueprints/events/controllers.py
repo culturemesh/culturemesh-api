@@ -51,8 +51,13 @@ def make_new_event():
 @events.route("/userEventsForNetwork/<network_id>", methods=["GET"])
 @require_apikey
 @auth.login_required
-def user_events_for_network():
+def user_events_for_network(network_id):
     user_id = g.user.id
     return get_paginated("SELECT * \
                          FROM event_registration INNER JOIN events ON events.id = event_registration.id_event \
-                         WHERE id_guest=%s", user_id)
+                         WHERE (id_guest=%s OR id_host=%s) AND id_network=%s",
+                         selection_fields=[user_id, user_id, network_id],
+                         args= request.args,
+                         order_clause="ORDER BY id DESC",
+                         order_index_format="id <= %s",
+                         order_arg="id")

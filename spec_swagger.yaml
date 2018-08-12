@@ -1007,6 +1007,8 @@ paths:
           description: Invalid input
   '/upload/image':
     post:
+      security:
+          - basicAuth: []
       consumes:
         - "multipart/form-data"
       tags:

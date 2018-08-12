@@ -173,7 +173,6 @@ def get_user_events(user_id):
 @users.route("/<user_id>/addToEvent/<event_id>", methods=["POST"])
 @require_apikey
 def add_user_to_event(user_id, event_id):
-    connection = mysql.get_db()
     # First, check that event and user are valid
     if not event_exists(event_id):
         return make_response("Invalid Event Id", HTTPStatus.METHOD_NOT_ALLOWED)

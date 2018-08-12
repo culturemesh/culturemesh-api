@@ -1,5 +1,6 @@
 from api.apiutils import *
 from api.extensions import mysql
+import random
 """
 Utility module for querying users based on certain information.
 """
@@ -93,10 +94,10 @@ def add_user_to_event(user_id, event_id, role):
     Registers user to an event.
     :param user_id: id of user
     :param event_id: id of event
-    :param role: either "hosting" or "attending"
+    :param role: either "host" or "attend"
     """
     connection = mysql.get_db()
     event_registration_cursor = connection.cursor()
-    event_registration_cursor.execute("INSERT INTO event_registration VALUES (%s,%s,CURRENT_TIMESTAMP,%s)",
+    event_registration_cursor.execute("INSERT INTO event_registration VALUES (%s,%s,CURRENT_TIMESTAMP, %s)",
                                       (user_id, event_id, role))
     connection.commit()

@@ -94,7 +94,7 @@ def add_user_to_event(user_id, event_id, role):
     Registers user to an event.
     :param user_id: id of user
     :param event_id: id of event
-    :param role: either "host" or "attend"
+    :param role: either "host" or "guest"
     """
     connection = mysql.get_db()
     event_registration_cursor = connection.cursor()

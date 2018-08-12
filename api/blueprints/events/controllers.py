@@ -43,9 +43,10 @@ def make_new_event():
                 'address_1', 'address_2', \
                 'country', 'city', \
                 'region', 'description']
+        response = execute_post_by_table(request, content_fields, "events")
         # We also need to "register" them attending their own event.
         add_user_to_event(request.args["id_host"], request.args["id_network"], "host")
-        return execute_post_by_table(request, content_fields, "events")
+        return response
     else:
         # PUT
         return execute_put_by_id(request, "events")

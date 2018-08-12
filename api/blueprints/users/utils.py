@@ -87,3 +87,16 @@ def generate_user_name():
         connection.commit()
     return make_response("OK", HTTPStatus.OK)
 
+
+def add_user_to_event(user_id, event_id, role):
+    """
+    Registers user to an event.
+    :param user_id: id of user
+    :param event_id: id of event
+    :param role: either "hosting" or "attending"
+    """
+    connection = mysql.get_db()
+    event_registration_cursor = connection.cursor()
+    event_registration_cursor.execute("INSERT INTO event_registration VALUES (%s,%s,CURRENT_TIMESTAMP,%s)",
+                                      (user_id, event_id, role))
+    connection.commit()

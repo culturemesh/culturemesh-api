@@ -181,11 +181,7 @@ def add_user_to_event(user_id, event_id):
         return make_response("Invalid User Id", HTTPStatus.METHOD_NOT_ALLOWED)
     if "role" not in request.args or (request.args["role"] != "hosting" and request.args["role"] != "attending"):
         return make_response("Invalid role parameter.", HTTPStatus.METHOD_NOT_ALLOWED)
-    # Cool. Let's add that user.
-    event_registration_cursor = connection.cursor()
-    event_registration_cursor.execute("INSERT INTO event_registration VALUES (%s,%s,CURRENT_TIMESTAMP,host)",
-                                      (user_id, event_id, request.args["role"]))
-    connection.commit()
+    add_user_to_event(user_id, event_id, request.args["role"])
     return make_response("OK", HTTPStatus.OK)
 
 

@@ -2,6 +2,7 @@ from flask import Blueprint, request, g
 from api import require_apikey
 
 from api.blueprints.accounts.controllers import auth
+from api.blueprints.users.utils import add_user_to_event
 from api.apiutils import *
 
 events = Blueprint('event', __name__)
@@ -36,16 +37,18 @@ def get_event_registration(event_id):
 @require_apikey
 def make_new_event():
     if request.method == 'POST':
-      # POST
-      content_fields = ['id_network', 'id_host', \
+        # POST
+        content_fields = ['id_network', 'id_host', \
                 'event_date', 'title', \
                 'address_1', 'address_2', \
                 'country', 'city', \
                 'region', 'description']
-      return execute_post_by_table(request, content_fields, "events")
+        # We also need to "register" them attending their own event.
+        add_user_to_event(request.args["id_host"], request.args["id_network"], "host")
+        return execute_post_by_table(request, content_fields, "events")
     else:
-      # PUT
-      return execute_put_by_id(request, "events")
+        # PUT
+        return execute_put_by_id(request, "events")
 
 
 @events.route("/userEventsForNetwork/<network_id>", methods=["GET"])

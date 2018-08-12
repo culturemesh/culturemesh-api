@@ -55,4 +55,4 @@ def user_events_for_network():
     user_id = g.user.id
     return get_paginated("SELECT * \
                          FROM event_registration INNER JOIN events ON events.id = event_registration.id_event \
-                         WHERE id_guest=%s", user_id, user_id)
+                         WHERE id_guest=%s", user_id)

@@ -98,7 +98,6 @@ def add_user_to_event(user_id, event_id, role):
     """
     connection = mysql.get_db()
     event_registration_cursor = connection.cursor()
-    print("USER ID: " + str(user_id) +  " EVENT ID: " + str(event_id))
     event_registration_cursor.execute("INSERT INTO event_registration VALUES (%s,%s,CURRENT_TIMESTAMP, %s)",
                                       (user_id, event_id, role))
     connection.commit()

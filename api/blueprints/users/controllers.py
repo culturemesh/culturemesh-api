@@ -4,6 +4,7 @@ from hashlib import md5
 from pymysql.err import IntegrityError
 from api.blueprints.accounts.controllers import auth
 from api.blueprints.users.utils import *
+from api.blueprints.users.utils import _add_user_to_event, _remove_user_from_event
 
 users = Blueprint('user', __name__)
 
@@ -179,7 +180,7 @@ def add_user_to_event(event_id):
     user_id = g.user.id
     if "role" not in request.args or (request.args["role"] != "hosting" and request.args["role"] != "attending"):
         return make_response("Invalid role parameter.", HTTPStatus.METHOD_NOT_ALLOWED)
-    add_user_to_event(user_id, event_id, request.args["role"])
+    _add_user_to_event(user_id, event_id, request.args["role"])
     return make_response("OK", HTTPStatus.OK)
 
 
@@ -190,7 +191,7 @@ def remove_user_from_event(event_id):
     if not event_exists(event_id):
         return make_response("Invalid Event Id", HTTPStatus.BAD_REQUEST)
     user_id = g.user.id
-    remove_user_event(user_id, event_id)
+    _remove_user_from_event(user_id, event_id)
     return make_response("OK", HTTPStatus.OK)
 
 

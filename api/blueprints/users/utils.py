@@ -89,7 +89,7 @@ def generate_user_name():
     return make_response("OK", HTTPStatus.OK)
 
 
-def add_user_to_event(user_id, event_id, role):
+def _add_user_to_event(user_id, event_id, role):
     """
     Registers user to an event.
     :param user_id: id of user
@@ -103,7 +103,7 @@ def add_user_to_event(user_id, event_id, role):
     connection.commit()
 
 
-def remove_user_event(user_id, event_id):
+def _remove_user_from_event(user_id, event_id):
     """
     Removes a user-event pair from the event_registration table.
     :param user_id: id of user.

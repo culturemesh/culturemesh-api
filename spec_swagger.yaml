@@ -164,7 +164,7 @@ paths:
               $ref: '#/definitions/Event'
         '405':
           description: Invalid input
-  '/event/userEventsForNetwork/{networkId}':
+  '/event/currentUserEventsByNetwork/{networkId}':
     get:
       security:
           - basicAuth: []

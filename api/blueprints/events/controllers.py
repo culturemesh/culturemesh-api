@@ -2,7 +2,6 @@ from flask import Blueprint, request, g
 from api import require_apikey
 
 from api.blueprints.accounts.controllers import auth
-from api.blueprints.events.utils import get_event_id
 from api.blueprints.users.utils import add_user_to_event
 from api.apiutils import *
 
@@ -45,13 +44,18 @@ def make_new_event():
                 'country', 'city', \
                 'region', 'description']
         response = execute_post_by_table(request, content_fields, "events")
-        # We also need to "register" them attending their own event.
         # Unfortunately, we have to get the event id
         content = request.get_json()
         if not content:
             content = request.form
-        add_user_to_event(content["id_host"], get_event_id(content["id_host"], content["id_network"]),
-                          "host")
+        connection = mysql.get_db()
+        cursor = connection.cursor()
+        cursor.execute("SELECT id FROM events WHERE id_host=%s AND id_network=%s ORDER BY id DESC LIMIT 1",
+                       (content["id_host"], content["id_network"]))
+        obj = cursor.fetchone()
+        event_id = convert_objects([obj], cursor.description)[0]["id"]
+        # We also need to "register" them attending their own event.
+        add_user_to_event(content["id_host"], event_id)
         return response
     else:
         # PUT

@@ -170,14 +170,14 @@ def get_user_events(user_id):
                          order_arg="max_id")
 
 
-@users.route("/<user_id>/addToEvent/<event_id>", methods=["POST"])
+@users.route("/addToEvent/<event_id>", methods=["POST"])
+@auth.login_required
 @require_apikey
-def add_user_to_event(user_id, event_id):
+def add_user_to_event(event_id):
     # First, check that event and user are valid
     if not event_exists(event_id):
         return make_response("Invalid Event Id", HTTPStatus.METHOD_NOT_ALLOWED)
-    if not user_exists(user_id):
-        return make_response("Invalid User Id", HTTPStatus.METHOD_NOT_ALLOWED)
+    user_id = g.user.id
     if "role" not in request.args or (request.args["role"] != "hosting" and request.args["role"] != "attending"):
         return make_response("Invalid role parameter.", HTTPStatus.METHOD_NOT_ALLOWED)
     add_user_to_event(user_id, event_id, request.args["role"])

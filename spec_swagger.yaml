@@ -198,8 +198,10 @@ paths:
             type: array
             items:
                 $ref: "#/definitions/Event"
-  '/user/{userId}/addToEvent/{eventId}':
+  '/user/addToEvent/{eventId}':
     post:
+      security:
+            - basicAuth: []
       tags:
         - users
       summary: Add user to an event.
@@ -208,12 +210,6 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: userId
-          in: path
-          description: ID of user to add.
-          required: true
-          type: integer
-          format: int64
         - name: eventId
           in: path
           description: ID of event to add user to.

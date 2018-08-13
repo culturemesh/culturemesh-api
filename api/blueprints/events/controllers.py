@@ -2,7 +2,7 @@ from flask import Blueprint, request, g
 from api import require_apikey
 
 from api.blueprints.accounts.controllers import auth
-from api.blueprints.users.utils import add_user_to_event
+from api.blueprints.users.utils import _add_user_to_event
 from api.apiutils import *
 
 events = Blueprint('event', __name__)
@@ -55,7 +55,7 @@ def make_new_event():
         obj = cursor.fetchone()
         event_id = convert_objects([obj], cursor.description)[0]["id"]
         # We also need to "register" them attending their own event.
-        add_user_to_event(content["id_host"], event_id)
+        _add_user_to_event(content["id_host"], event_id)
         return response
     else:
         # PUT

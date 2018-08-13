@@ -45,12 +45,9 @@ def make_new_event():
                 'country', 'city', \
                 'region', 'description']
         response = execute_post_by_table(request, content_fields, "events")
-        print("RESPONSE STATUS")
-        print(response.status)
         # We also need to "register" them attending their own event.
         # Unfortunately, we have to get the event id
-
-        if response.status == 200:
+        if "id_host" in request.args and "id_network" in request.args:
             add_user_to_event(request.args["id_host"], get_event_id(request.args["id_host"], request.args["id_network"]),
                               "host")
         return response

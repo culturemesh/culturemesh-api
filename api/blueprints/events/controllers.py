@@ -2,6 +2,7 @@ from flask import Blueprint, request, g
 from api import require_apikey
 
 from api.blueprints.accounts.controllers import auth
+from api.blueprints.events.utils import get_event_id
 from api.blueprints.users.utils import add_user_to_event
 from api.apiutils import *
 
@@ -47,8 +48,11 @@ def make_new_event():
         print("RESPONSE STATUS")
         print(response.status)
         # We also need to "register" them attending their own event.
+        # Unfortunately, we have to get the event id
+
         if response.status == 200:
-            add_user_to_event(request.args["id_host"], response.get_json()["id"], "host")
+            add_user_to_event(request.args["id_host"], get_event_id(request.args["id_host"], request.args["id_network"]),
+                              "host")
         return response
     else:
         # PUT

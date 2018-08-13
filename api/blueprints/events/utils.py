@@ -14,6 +14,6 @@ def get_event_id(user_id, network_id):
     """
     connection = mysql.get_db()
     cursor = connection.cursor()
-    cursor.execute("SELECT id FROM events WHERE id_host=%s AND id_=%s ORDER BY id DESC LIMIT 1",
+    cursor.execute("SELECT id FROM events WHERE id_host=%s AND id=%s ORDER BY id DESC LIMIT 1",
                    (user_id, network_id))
     return convert_objects([cursor.fetchone()], cursor.description)[0]["id"]

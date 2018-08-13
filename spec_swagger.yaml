@@ -139,7 +139,7 @@ paths:
           format: int64
         - in: query
           name: role
-          description: 'Can be "hosting" or " attending"  '
+          description: 'Can be "host" or "guest"  '
           required: true
           type: string
           enum:

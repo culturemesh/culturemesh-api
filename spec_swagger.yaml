@@ -198,7 +198,7 @@ paths:
             type: array
             items:
                 $ref: "#/definitions/Event"
-  '/user/addToEvent/{eventId}':
+  '/user/joinEvent/{eventId}':
     post:
       security:
             - basicAuth: []
@@ -207,6 +207,32 @@ paths:
       summary: Add user to an event.
       description: ''
       operationId: addUserToEvent
+      produces:
+        - application/json
+      parameters:
+        - name: eventId
+          in: path
+          description: ID of event to add user to.
+          required: true
+          type: integer
+        - name: role
+          in: query
+          description: role of user. Either 'host' or 'guest'
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+        '405':
+          description: Invalid input
+  '/user/leaveEvent/{eventId}':
+    post:
+      security:
+            - basicAuth: []
+      tags:
+        - users
+      summary: Removes a user from an event.
+      description: ''
       produces:
         - application/json
       parameters:

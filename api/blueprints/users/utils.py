@@ -101,3 +101,15 @@ def add_user_to_event(user_id, event_id, role):
     event_registration_cursor.execute("INSERT INTO event_registration VALUES (%s,%s,CURRENT_TIMESTAMP, %s)",
                                       (user_id, event_id, role))
     connection.commit()
+
+
+def remove_user_event(user_id, event_id):
+    """
+    Removes a user-event pair from the event_registration table.
+    :param user_id: id of user.
+    :param event_id: id of event
+    """
+    connection = mysql.get_db()
+    cursor = connection.cursor()
+    cursor.execute("DELETE FROM event_registration WHERE id_event=%s AND id_guest=%s", (event_id, user_id))
+    connection.commit()

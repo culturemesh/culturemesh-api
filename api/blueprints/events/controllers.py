@@ -47,7 +47,8 @@ def make_new_event():
         response = execute_post_by_table(request, content_fields, "events")
         # We also need to "register" them attending their own event.
         # Unfortunately, we have to get the event id
-        add_user_to_event(request.args["id_host"], get_event_id(request.args["id_host"], request.args["id_network"]),
+        json = request.get_json()
+        add_user_to_event(json["id_host"], get_event_id(json["id_host"], json["id_network"]),
                           "host")
         return response
     else:

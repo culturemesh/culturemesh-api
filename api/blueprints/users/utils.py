@@ -1,5 +1,6 @@
 from api.apiutils import *
 from api.extensions import mysql
+import random
 """
 Utility module for querying users based on certain information.
 """
@@ -87,3 +88,28 @@ def generate_user_name():
         connection.commit()
     return make_response("OK", HTTPStatus.OK)
 
+
+def _add_user_to_event(user_id, event_id, role):
+    """
+    Registers user to an event.
+    :param user_id: id of user
+    :param event_id: id of event
+    :param role: either "host" or "guest"
+    """
+    connection = mysql.get_db()
+    event_registration_cursor = connection.cursor()
+    event_registration_cursor.execute("INSERT INTO event_registration VALUES (%s,%s,CURRENT_TIMESTAMP, %s)",
+                                      (user_id, event_id, role))
+    connection.commit()
+
+
+def _remove_user_from_event(user_id, event_id):
+    """
+    Removes a user-event pair from the event_registration table.
+    :param user_id: id of user.
+    :param event_id: id of event
+    """
+    connection = mysql.get_db()
+    cursor = connection.cursor()
+    cursor.execute("DELETE FROM event_registration WHERE id_event=%s AND id_guest=%s", (event_id, user_id))
+    connection.commit()

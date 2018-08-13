@@ -4,7 +4,7 @@ from hashlib import md5
 from pymysql.err import IntegrityError
 from api.blueprints.accounts.controllers import auth
 from api.blueprints.users.utils import *
-import random
+from api.blueprints.users.utils import _add_user_to_event, _remove_user_from_event
 
 users = Blueprint('user', __name__)
 
@@ -170,22 +170,28 @@ def get_user_events(user_id):
                          order_arg="max_id")
 
 
-@users.route("/<user_id>/addToEvent/<event_id>", methods=["POST"])
+@users.route("/joinEvent/<event_id>", methods=["POST"])
+@auth.login_required
 @require_apikey
-def add_user_to_event(user_id, event_id):
-    connection = mysql.get_db()
+def add_user_to_event(event_id):
     # First, check that event and user are valid
     if not event_exists(event_id):
         return make_response("Invalid Event Id", HTTPStatus.METHOD_NOT_ALLOWED)
-    if not user_exists(user_id):
-        return make_response("Invalid User Id", HTTPStatus.METHOD_NOT_ALLOWED)
+    user_id = g.user.id
     if "role" not in request.args or (request.args["role"] != "hosting" and request.args["role"] != "attending"):
         return make_response("Invalid role parameter.", HTTPStatus.METHOD_NOT_ALLOWED)
-    # Cool. Let's add that user.
-    event_registration_cursor = connection.cursor()
-    event_registration_cursor.execute("INSERT INTO event_registration VALUES (%s,%s,CURRENT_TIMESTAMP,host)",
-                                      (user_id, event_id, request.args["role"]))
-    connection.commit()
+    _add_user_to_event(user_id, event_id, request.args["role"])
+    return make_response("OK", HTTPStatus.OK)
+
+
+@users.route("/leaveEvent/<event_id>", methods=["POST"])
+@auth.login_required
+@require_apikey
+def remove_user_from_event(event_id):
+    if not event_exists(event_id):
+        return make_response("Invalid Event Id", HTTPStatus.BAD_REQUEST)
+    user_id = g.user.id
+    _remove_user_from_event(user_id, event_id)
     return make_response("OK", HTTPStatus.OK)
 
 

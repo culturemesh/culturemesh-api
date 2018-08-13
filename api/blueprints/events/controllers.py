@@ -55,7 +55,7 @@ def make_new_event():
         obj = cursor.fetchone()
         event_id = convert_objects([obj], cursor.description)[0]["id"]
         # We also need to "register" them attending their own event.
-        _add_user_to_event(content["id_host"], event_id)
+        _add_user_to_event(content["id_host"], event_id, "host")
         return response
     else:
         # PUT

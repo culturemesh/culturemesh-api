@@ -62,7 +62,7 @@ def make_new_event():
         return execute_put_by_id(request, "events")
 
 
-@events.route("/userEventsForNetwork/<network_id>", methods=["GET"])
+@events.route("/currentUserEventsByNetwork/<network_id>", methods=["GET"])
 @require_apikey
 @auth.login_required
 def user_events_for_network(network_id):

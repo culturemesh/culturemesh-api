@@ -1,6 +1,5 @@
 from api.apiutils import *
 from api.extensions import mysql
-import random
 """
 Utility module for querying events based on certain information.
 """

@@ -178,7 +178,7 @@ def add_user_to_event(event_id):
     if not event_exists(event_id):
         return make_response("Invalid Event Id", HTTPStatus.METHOD_NOT_ALLOWED)
     user_id = g.user.id
-    if "role" not in request.args or (request.args["role"] != "hosting" and request.args["role"] != "attending"):
+    if "role" not in request.args or (request.args["role"] != "host" and request.args["role"] != "guest"):
         return make_response("Invalid role parameter.", HTTPStatus.METHOD_NOT_ALLOWED)
     _add_user_to_event(user_id, event_id, request.args["role"])
     return make_response("OK", HTTPStatus.OK)

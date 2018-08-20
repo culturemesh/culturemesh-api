@@ -256,3 +256,18 @@ def make_new_network(internal_req=None):
 
     return execute_post_by_table(request, content_fields, "networks")
 
+
+@networks.route("/topTen", methods=["GET"])
+def get_top_ten():
+    connection = mysql.get_db()
+    # For some reason, distinct only works on individual columns, so we will have to first just get the ids.
+    id_cursor = connection.cursor()
+    id_cursor.execute("SELECT DISTINCT id_network FROM networks INNER JOIN network_registration ON id=id_network \
+    ORDER BY (SELECT COUNT(id_network) FROM network_registration WHERE id_network=id) DESC LIMIT 10;")
+    ids = convert_objects(id_cursor.fetchmany()[1], id_cursor.description)
+    ten_networks = []
+    for id in ids:
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM networks WHERE id=%s", (id['id_network'],))
+        ten_networks.append(convert_objects([cursor.fetchone()], cursor.description))
+    return make_response(jsonify(ten_networks), HTTPStatus.OK)

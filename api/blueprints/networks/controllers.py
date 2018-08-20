@@ -262,7 +262,7 @@ def get_top_ten():
     connection = mysql.get_db()
     # For some reason, distinct only works on individual columns, so we will have to first just get the ids.
     id_cursor = connection.cursor()
-    id_cursor.execute("SELECT DISTINCT id_network FROM networks INNER JOIN network_registration ON id=id_network \
+    id_cursor.execute("SELECT id_network FROM networks INNER JOIN network_registration ON id=id_network \
     ORDER BY (SELECT COUNT(id_network) FROM network_registration WHERE id_network=id) DESC LIMIT 10;")
     ids = id_cursor.fetchmany()
     """

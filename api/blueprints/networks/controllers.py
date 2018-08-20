@@ -263,7 +263,7 @@ def get_top_ten():
     # For some reason, distinct only works on individual columns, so we will have to first just get the ids.
     id_cursor = connection.cursor()
     id_cursor.execute("SELECT id_network FROM networks INNER JOIN network_registration ON id=id_network \
-    ORDER BY (SELECT COUNT(id_network) FROM network_registration WHERE id_network=id) DESC LIMIT 10;")
+    ORDER BY (SELECT COUNT(id_network) FROM network_registration WHERE id_network=id) DESC;")
     ids = id_cursor.fetchmany()
     """
     ten_networks = []

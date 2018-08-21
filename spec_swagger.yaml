@@ -139,7 +139,7 @@ paths:
           format: int64
         - in: query
           name: role
-          description: 'Can be "host" or "guest"  '
+          description: 'Can be "hosting" or " attending"  '
           required: true
           type: string
           enum:
@@ -164,7 +164,7 @@ paths:
               $ref: '#/definitions/Event'
         '405':
           description: Invalid input
-  '/event/currentUserEventsByNetwork/{networkId}':
+  '/event/userEventsForNetwork/{networkId}':
     get:
       security:
           - basicAuth: []
@@ -372,7 +372,21 @@ paths:
       responses:
         '200':
           description: OK
-
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Network"
+  /network/hotTen:
+    get:
+      tags:
+        - networks
+      summary: Get the top ten networks.
+      description: 'Get the ten most popular networks.'
+      produces:
+        - applicaton/json
+      responses:
+        '200':
+          description: OK
   /network/networks:
     get:
       tags:

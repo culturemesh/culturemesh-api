@@ -272,4 +272,4 @@ def get_top_ten():
         ten_networks.append(convert_objects([cursor.fetchone()], cursor.description))
     """
 
-    return make_response(jsonify(convert_objects(id_cursor.fetchmany(), id_cursor.description)), HTTPStatus.OK)
+    return make_response(jsonify(convert_objects(id_cursor.fetchall(), id_cursor.description)), HTTPStatus.OK)

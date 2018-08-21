@@ -264,7 +264,6 @@ def get_top_ten():
     id_cursor = connection.cursor()
     id_cursor.execute("SELECT id_network FROM networks INNER JOIN network_registration ON id=id_network \
     ORDER BY (SELECT COUNT(id_network) FROM network_registration WHERE id_network=id) DESC;")
-    ids = id_cursor.fetchmany()
     """
     ten_networks = []
     for id in ids:
@@ -273,4 +272,4 @@ def get_top_ten():
         ten_networks.append(convert_objects([cursor.fetchone()], cursor.description))
     """
 
-    return make_response(jsonify(ids), HTTPStatus.OK)
+    return make_response(jsonify(convert_objects(id_cursor.fetchmany(), id_cursor.description)), HTTPStatus.OK)

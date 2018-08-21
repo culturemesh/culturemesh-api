@@ -264,12 +264,8 @@ def get_top_ten():
     id_cursor = connection.cursor()
     id_cursor.execute("SELECT DISTINCT id_network FROM networks INNER JOIN network_registration ON id=id_network \
     ORDER BY (SELECT COUNT(id_network) FROM network_registration WHERE id_network=id) DESC LIMIT 10;")
-    """
-    ten_networks = []
-    for id in ids:
-        cursor = connection.cursor()
-        cursor.execute("SELECT * FROM networks WHERE id=%s", (id['id_network'],))
-        ten_networks.append(convert_objects([cursor.fetchone()], cursor.description))
-    """
-
-    return make_response(jsonify(convert_objects(id_cursor.fetchall(), id_cursor.description)), HTTPStatus.OK)
+    ten_network_ids = [item["id_network"] for item in convert_objects(id_cursor.fetchall(), id_cursor.description)]
+    networks_cursor = connection.cursor()
+    networks_cursor.execute("SELECT * FROM networks WHERE ID IN (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                            tuple(ten_network_ids))
+    return make_response(jsonify(convert_objects(networks_cursor.fetchall(), networks_cursor.description)), HTTPStatus.OK)

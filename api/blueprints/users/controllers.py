@@ -184,7 +184,7 @@ def add_user_to_event(event_id):
     return make_response("OK", HTTPStatus.OK)
 
 
-@users.route("/leaveEvent/<event_id>", methods=["POST"])
+@users.route("/leaveEvent/<event_id>", methods=["DELETE"])
 @auth.login_required
 @require_apikey
 def remove_user_from_event(event_id):

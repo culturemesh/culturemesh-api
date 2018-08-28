@@ -226,7 +226,7 @@ paths:
         '405':
           description: Invalid input
   '/user/leaveEvent/{eventId}':
-    post:
+    delete:
       security:
             - basicAuth: []
       tags:
@@ -376,12 +376,18 @@ paths:
             type: array
             items:
               $ref: "#/definitions/Network"
-  /network/hotTen:
+  /network/popular:
     get:
       tags:
         - networks
-      summary: Get the top ten networks.
-      description: 'Get the ten most popular networks.'
+      summary: Get the n most popular networks.
+      description: 'Get the n networks with the highest number of subscribed users. Used for naive network recommendations.'
+      parameters:
+        - in: query
+          name: count
+          description: The number of networks to return.
+          required: true
+          type: integer
       produces:
         - applicaton/json
       responses:

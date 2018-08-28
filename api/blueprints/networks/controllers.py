@@ -257,13 +257,16 @@ def make_new_network(internal_req=None):
     return execute_post_by_table(request, content_fields, "networks")
 
 
-@networks.route("/topTen", methods=["GET"])
-def get_top_ten():
+@networks.route("/popular", methods=["GET"])
+def popular():
     connection = mysql.get_db()
+    count = request.args["count"]
+    if not count or count > 30:
+        return make_response("Invalid count parameter", HTTPStatus.BAD_REQUEST)
     # For some reason, distinct only works on individual columns, so we will have to first just get the ids.
     id_cursor = connection.cursor()
-    id_cursor.execute("SELECT DISTINCT id_network FROM networks INNER JOIN network_registration ON id=id_network \
-    ORDER BY (SELECT COUNT(id_network) FROM network_registration WHERE id_network=id) DESC LIMIT 10;")
+    id_cursor.execute("select * from networks order by (select COUNT(*) from network_registration where id=id_network)\
+            desc limit %s", (count,))
     ten_network_ids = [item["id_network"] for item in convert_objects(id_cursor.fetchall(), id_cursor.description)]
     networks_cursor = connection.cursor()
     networks_cursor.execute("SELECT * FROM networks WHERE ID IN (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",

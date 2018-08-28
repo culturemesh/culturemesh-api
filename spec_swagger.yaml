@@ -741,6 +741,8 @@ paths:
 
   /post/new:
     post:
+      security:
+            - basicAuth: []
       tags:
         - posts
       summary: Create a post.

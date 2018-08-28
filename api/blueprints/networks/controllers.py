@@ -264,11 +264,7 @@ def popular():
     if not count or count > 30:
         return make_response("Invalid count parameter", HTTPStatus.BAD_REQUEST)
     # For some reason, distinct only works on individual columns, so we will have to first just get the ids.
-    id_cursor = connection.cursor()
-    id_cursor.execute("select * from networks order by (select COUNT(*) from network_registration where id=id_network)\
-            desc limit %s", (count,))
-    ten_network_ids = [item["id_network"] for item in convert_objects(id_cursor.fetchall(), id_cursor.description)]
     networks_cursor = connection.cursor()
-    networks_cursor.execute("SELECT * FROM networks WHERE ID IN (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                            tuple(ten_network_ids))
+    networks_cursor.execute("select * from networks order by (select COUNT(*) from network_registration where id=id_network)\
+            desc limit %s", (count,))
     return make_response(jsonify(convert_objects(networks_cursor.fetchall(), networks_cursor.description)), HTTPStatus.OK)

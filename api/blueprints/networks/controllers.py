@@ -267,7 +267,7 @@ def popular():
         # For some reason, distinct only works on individual columns, so we will have to first just get the ids.
         networks_cursor = connection.cursor()
         networks_cursor.execute("SELECT * FROM networks ORDER BY (SELECT COUNT(*) FROM network_registration WHERE id=id_network)\
-                DESC limit %d", (count,))
+                DESC LIMIT %s", (count,))
         return make_response(jsonify(convert_objects(networks_cursor.fetchall(), networks_cursor.description)),
                              HTTPStatus.OK)
     except ValueError:

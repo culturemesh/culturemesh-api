@@ -57,15 +57,16 @@ def make_new_post():
 
 
 @posts.route("/<post_id>/reply", methods=["POST", "PUT"])
+@auth.login_required
 def make_new_post_reply(post_id):
     if request.method == "POST":
         # POST
         content_fields = ['id_parent', 'id_user', 'id_network', 'reply_text']
         # First, we make a generic object so we can set attributes (via .form as opposed to ['form'])
-        """req_obj = type('', (), {})()
+        req_obj = type('', (), {})()
         req_obj.form = request.get_json()
         req_obj.form["id_user"] = g.user.id
-        req_obj.get_json = lambda: None"""
+        req_obj.get_json = lambda: None
         return execute_post_by_table(request, content_fields, "post_replies")
     else:
       # PUT

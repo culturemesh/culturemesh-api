@@ -260,7 +260,10 @@ def make_new_network(internal_req=None):
 @networks.route("/popular", methods=["GET"])
 def popular():
     connection = mysql.get_db()
-    count = request.args["count"]
+    try:
+        count = int(request.args["count"])
+    except ValueError:
+        return make_response("Invalid count parameter", HTTPStatus.BAD_REQUEST)
     if not count or count > 30:
         return make_response("Invalid count parameter", HTTPStatus.BAD_REQUEST)
     # For some reason, distinct only works on individual columns, so we will have to first just get the ids.

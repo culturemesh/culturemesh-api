@@ -42,15 +42,18 @@ def get_post_reply_count(post_id):
 
 
 @posts.route("/new", methods=["POST", "PUT"])
-@require_apikey
+@auth.login_required
 def make_new_post():
     if request.method == "POST":
-
       # POST
       content_fields = ['id_user', 'id_network', \
                         'post_text', 'vid_link', \
                         'img_link']
-      return execute_post_by_table(request, content_fields, "posts")
+      req_obj = type('', (), {})()
+      req_obj.form = request.get_json()
+      req_obj.form["id_user"] = g.user.id
+      req_obj.get_json = lambda: None
+      return execute_post_by_table(req_obj, content_fields, "posts")
     else:
       # PUT
       return execute_put_by_id(request, "posts")
@@ -67,7 +70,7 @@ def make_new_post_reply(post_id):
         req_obj.form = request.get_json()
         req_obj.form["id_user"] = g.user.id
         req_obj.get_json = lambda: None
-        return execute_post_by_table(request, content_fields, "post_replies")
+        return execute_post_by_table(req_obj, content_fields, "post_replies")
     else:
       # PUT
       return execute_put_by_id(request, "post_replies")

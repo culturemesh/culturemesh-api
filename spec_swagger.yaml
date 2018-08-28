@@ -784,6 +784,8 @@ paths:
 
   '/post/{postId}/reply':
     post:
+      security:
+          - basicAuth: []
       tags:
         - posts
       summary: Reply to a post.

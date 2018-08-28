@@ -262,12 +262,13 @@ def popular():
     connection = mysql.get_db()
     try:
         count = int(request.args["count"])
+        if not count or count > 30:
+            return make_response("Invalid count parameter", HTTPStatus.BAD_REQUEST)
+        # For some reason, distinct only works on individual columns, so we will have to first just get the ids.
+        networks_cursor = connection.cursor()
+        networks_cursor.execute("SELECT * FROM networks ORDER BY (SELECT COUNT(*) FROM network_registration WHERE id=id_network)\
+                DESC limit %d", (count,))
+        return make_response(jsonify(convert_objects(networks_cursor.fetchall(), networks_cursor.description)),
+                             HTTPStatus.OK)
     except ValueError:
         return make_response("Invalid count parameter", HTTPStatus.BAD_REQUEST)
-    if not count or count > 30:
-        return make_response("Invalid count parameter", HTTPStatus.BAD_REQUEST)
-    # For some reason, distinct only works on individual columns, so we will have to first just get the ids.
-    networks_cursor = connection.cursor()
-    networks_cursor.execute("SELECT * FROM networks ORDER BY (SELECT COUNT(*) FROM network_registration WHERE id=id_network)\
-            DESC limit %d", (count,))
-    return make_response(jsonify(convert_objects(networks_cursor.fetchall(), networks_cursor.description)), HTTPStatus.OK)

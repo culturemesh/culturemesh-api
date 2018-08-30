@@ -29,8 +29,7 @@ def make_new_network_request():
     # this makes req an arbitrary object so I can add attributes
     # (like form and get_json) to it.
     # See: https://stackoverflow.com/questions/2280334
-    req = type('', (), {})()
-    req.form = {}
+    req = make_fake_request_obj(request)
     conn = mysql.get_db()
 
     near_ids = request.args['near_location'].split(',')
@@ -75,10 +74,6 @@ def make_new_network_request():
     else:
         # This shouldn't happen: the route should handle the input params.
         abort(HTTPStatus.BAD_REQUEST)
-
-    def get_json():
-        return None
-    req.get_json = get_json
     return req
 
 

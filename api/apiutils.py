@@ -349,3 +349,20 @@ def generate_sql_query_with_is_null(ids, column_fields):
             condition += field + "=%s AND "
             remaining_ids.append(field_id)
     return {'condition': condition[:-5], 'ids': remaining_ids}  # cutoff last " AND "
+
+
+def make_fake_request_obj(request):
+    """
+    Some of the other apiutils functions require request objects. Sometimes, we want to modify the
+    request object fields, but the flask object's fields are immutable. Our workaround is to genearte
+    a fake request object that has a .form dictionary.
+    :param request: original request object.
+    :return: fake request object
+    """
+    # First, we make a generic object so we can set attributes (via .form as opposed to ['form'])
+    req_obj = type('', (), {})()
+    req_obj.form = request.get_json()
+    if not req_obj.form:
+        req_obj.form = {}
+    req_obj.get_json = lambda: None
+    return req_obj

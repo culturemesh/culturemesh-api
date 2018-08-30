@@ -17,5 +17,8 @@ MarkupSafe==1.0
 pycparser==2.18
 PyMySQL==0.8.0
 six==1.11.0
+Sphinx==1.7.6
+sphinx-rtd-theme==0.4.1
+sphinxcontrib-websupport==1.1.0
 virtualenv==15.2.0
 Werkzeug==0.14.1

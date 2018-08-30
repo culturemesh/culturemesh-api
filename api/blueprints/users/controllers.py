@@ -3,7 +3,6 @@ from api import require_apikey
 from hashlib import md5
 from pymysql.err import IntegrityError
 from api.blueprints.accounts.controllers import auth
-from api.apiutils import make_fake_request_obj
 from api.blueprints.users.utils import *
 from api.blueprints.users.utils import _add_user_to_event, _remove_user_from_event
 
@@ -97,15 +96,12 @@ def users_query():
                           'gender']
         # Make another pseudo request object (yeah, kinda hacksy)
         # First, we make a generic object so we can set attributes (via .form as opposed to ['form'])
-        req_obj = type('', (), {})()
-        req_obj.form = request.get_json()
+        req_obj = make_fake_request_obj(request)
         # validate that username/email doesn't already exist.
         if validate_new_user(req_obj.form, content_fields):
             # We now need to convert the user password into a hash.
             password = str(req_obj.form['password'])
             req_obj.form['password'] = md5(password.encode('utf-8')).hexdigest()
-            # We need to have get_json() return None so execute_post_by_table will use req_obj.form
-            req_obj.get_json = lambda: None
             return execute_post_by_table(req_obj, content_fields, "users")
         else:
             return make_response("Username already taken or invalid params", HTTPStatus.BAD_REQUEST)

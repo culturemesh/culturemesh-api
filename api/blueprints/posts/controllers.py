@@ -47,14 +47,16 @@ def make_new_post():
     req_obj = make_fake_request_obj(request)
     req_obj.form["id_user"] = g.user.id
     if request.method == "POST":
-      # POST
-      content_fields = ['id_user', 'id_network', \
-                        'post_text', 'vid_link', \
-                        'img_link']
-      return execute_post_by_table(req_obj, content_fields, "posts")
+        # POST
+        content_fields = ['id_user', 'id_network', \
+                          'post_text', 'vid_link', \
+                          'img_link']
+        return execute_post_by_table(req_obj, content_fields, "posts")
     else:
-      # PUT
-      return execute_put_by_id(req_obj, "posts")
+        # PUT
+        post = get_by_id("posts", req_obj.form["id"], [])
+        if post and "id_user" in post and post["id_user"] == g.user.id:
+            return execute_put_by_id(req_obj, "posts")
 
 
 @posts.route("/<post_id>/reply", methods=["POST", "PUT"])
@@ -68,6 +70,8 @@ def make_new_post_reply(post_id):
         content_fields = ['id_parent', 'id_user', 'id_network', 'reply_text']
         return execute_post_by_table(req_obj, content_fields, "post_replies")
     else:
-      # PUT
-      return execute_put_by_id(req_obj, "post_replies")
+        # PUT
+        reply = get_by_id("post_replies", req_obj["id"], [])
+        if reply and "id_user" in reply and reply["id_user"] == g.user.id:
+            return execute_put_by_id(req_obj, "post_replies")
 

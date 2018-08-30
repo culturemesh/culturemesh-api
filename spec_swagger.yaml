@@ -763,6 +763,8 @@ paths:
         '405':
           description: Invalid input
     put:
+      security:
+          - basicAuth: []
       tags:
         - posts
       summary: Update a post.
@@ -904,6 +906,8 @@ paths:
 
   /event/new:
     post:
+      security:
+            - basicAuth: []
       tags:
         - events
       summary: Create an event.
@@ -924,6 +928,8 @@ paths:
         '405':
           description: Invalid input
     put:
+      security:
+          - basicAuth: []
       tags:
         - events
       summary: Update an event.

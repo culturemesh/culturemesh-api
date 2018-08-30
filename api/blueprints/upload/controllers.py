@@ -1,4 +1,4 @@
-#enable imports from dir above ... we need to get credentials.
+# enable imports from dir above ... we need to get credentials.
 import os
 from api.credentials import host_path
 from flask import Blueprint, request, make_response
@@ -32,7 +32,8 @@ def upload_image():
     try:
         directory_name = hash_file(file)
     except MemoryError:
-        return make_response("Image too large. Upload files less than 2MB", HTTPStatus.REQUEST_ENTITY_TOO_LARGE)
+        return make_response("Image too large. Upload files should be less than 2MB",
+                             HTTPStatus.REQUEST_ENTITY_TOO_LARGE)
     # Cool! It looks like this file can be uploaded.
     if not os.path.exists(os.path.join(host_path['image_uploads'], directory_name)):
         # Make hash directory

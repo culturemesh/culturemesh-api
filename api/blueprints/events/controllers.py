@@ -61,8 +61,11 @@ def make_new_event():
         _add_user_to_event(content["id_host"], event_id, "host")
         return response
     else:
-        # PUT TODO: Check if user is hosting that event in the first place.
-        return execute_put_by_id(req_obj, "events")
+        # PUT
+        # Check if user is authorized to update this event
+        event = get_by_id("events", request.form["id"], [])
+        if event and "id_user" in event and event["id_user"] == g.user.id:
+            return execute_put_by_id(req_obj, "events")
 
 
 @events.route("/currentUserEventsByNetwork/<network_id>", methods=["GET"])

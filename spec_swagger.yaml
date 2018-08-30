@@ -139,7 +139,7 @@ paths:
           format: int64
         - in: query
           name: role
-          description: 'Can be "host" or "guest"  '
+          description: 'Can be "hosting" or " attending"  '
           required: true
           type: string
           enum:
@@ -164,7 +164,7 @@ paths:
               $ref: '#/definitions/Event'
         '405':
           description: Invalid input
-  '/event/currentUserEventsByNetwork/{networkId}':
+  '/event/userEventsForNetwork/{networkId}':
     get:
       security:
           - basicAuth: []
@@ -226,7 +226,7 @@ paths:
         '405':
           description: Invalid input
   '/user/leaveEvent/{eventId}':
-    post:
+    delete:
       security:
             - basicAuth: []
       tags:
@@ -372,7 +372,27 @@ paths:
       responses:
         '200':
           description: OK
-
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Network"
+  /network/popular:
+    get:
+      tags:
+        - networks
+      summary: Get the n most popular networks.
+      description: 'Get the n networks with the highest number of subscribed users. Used for naive network recommendations.'
+      parameters:
+        - in: query
+          name: count
+          description: The number of networks to return.
+          required: true
+          type: integer
+      produces:
+        - applicaton/json
+      responses:
+        '200':
+          description: OK
   /network/networks:
     get:
       tags:
@@ -721,6 +741,8 @@ paths:
 
   /post/new:
     post:
+      security:
+            - basicAuth: []
       tags:
         - posts
       summary: Create a post.
@@ -764,6 +786,8 @@ paths:
 
   '/post/{postId}/reply':
     post:
+      security:
+          - basicAuth: []
       tags:
         - posts
       summary: Reply to a post.

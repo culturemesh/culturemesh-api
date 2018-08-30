@@ -1,7 +1,6 @@
-from flask import Blueprint, jsonify, request, json, make_response
+from flask import Blueprint, request, g
 from api import require_apikey
-from http import HTTPStatus
-from api.extensions import mysql
+from api.blueprints.accounts.controllers import auth
 from api.apiutils import *
 
 posts = Blueprint('post', __name__)
@@ -43,32 +42,36 @@ def get_post_reply_count(post_id):
 
 
 @posts.route("/new", methods=["POST", "PUT"])
-@require_apikey
+@auth.login_required
 def make_new_post():
     if request.method == "POST":
-
       # POST
       content_fields = ['id_user', 'id_network', \
                         'post_text', 'vid_link', \
                         'img_link']
-
-      return execute_post_by_table(request, content_fields, "posts")
+      req_obj = type('', (), {})()
+      req_obj.form = request.get_json()
+      req_obj.form["id_user"] = g.user.id
+      req_obj.get_json = lambda: None
+      return execute_post_by_table(req_obj, content_fields, "posts")
     else:
       # PUT
       return execute_put_by_id(request, "posts")
 
 
 @posts.route("/<post_id>/reply", methods=["POST", "PUT"])
-@require_apikey
+@auth.login_required
 def make_new_post_reply(post_id):
     if request.method == "POST":
-      # POST
-      content_fields = ['id_parent', 'id_user', \
-                        'id_network', 'reply_text']
-
-      return execute_post_by_table(request, content_fields, "post_replies")
+        # POST
+        content_fields = ['id_parent', 'id_user', 'id_network', 'reply_text']
+        # First, we make a generic object so we can set attributes (via .form as opposed to ['form'])
+        req_obj = type('', (), {})()
+        req_obj.form = request.get_json()
+        req_obj.form["id_user"] = g.user.id
+        req_obj.get_json = lambda: None
+        return execute_post_by_table(req_obj, content_fields, "post_replies")
     else:
-
       # PUT
       return execute_put_by_id(request, "post_replies")
 

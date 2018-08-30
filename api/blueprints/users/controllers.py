@@ -112,12 +112,11 @@ def users_query():
 @auth.login_required
 def update_user():
     req_obj = make_fake_request_obj(request)
-    req_obj["id"] = g.user.id
+    req_obj.form["id"] = g.user.id
     if 'password' in req_obj.form:
         # We now need to convert the user password into a hash.
         password = str(req_obj.form['password'])
         req_obj.form['password'] = md5(password.encode('utf-8')).hexdigest()
-    # We need to have get_json() return None so execute_post_by_table will use req_obj.form
     return execute_put_by_id(request, "users")
 
 

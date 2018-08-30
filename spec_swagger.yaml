@@ -632,29 +632,6 @@ paths:
         '405':
           description: Invalid input
 
-  /network/new:
-    post:
-      tags:
-        - networks
-      summary: Create a new network.
-      description: 'Note: if an id is null, pass -1 instead.'
-      operationId: createNetwork
-      consumes:
-        - application/json
-      parameters:
-        - in: body
-          name: network
-          required: true
-          schema:
-            $ref: '#/definitions/NewNetwork'
-
-          description: Create a new network
-      responses:
-        '200':
-          description: OK
-        '405':
-          description: Invalid input
-
   '/post/{postId}':
     get:
       tags:

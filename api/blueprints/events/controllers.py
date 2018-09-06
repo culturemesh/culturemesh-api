@@ -13,7 +13,6 @@ events = Blueprint('event', __name__)
 def test():
     return "pong"
 
-
 @events.route("/<event_id>", methods=["GET"])
 @require_apikey
 def get_event(event_id):
@@ -75,3 +74,19 @@ def user_events_for_network(network_id):
                          order_clause="ORDER BY id DESC",
                          order_index_format="id <= %s",
                          order_arg="id")
+
+@users.route("/delete", methods=["DELETE"])
+@require_apikey
+@auth.login_required
+def delete_event():
+    event_id = request.args.get('id')
+    if not event_id.isdigit():
+      return make_response("Invalid Input", HTTPStatus.BAD_REQUEST)
+
+    connection = mysql.get_db()
+    cursor = connection.cursor()
+    cursor.execute("DELETE FROM network_registration WHERE id_event=%s", (event_id))
+    cursor.execute("DELETE FROM events WHERE id=%s", (event_id))
+    cursor.close()
+    connection.commit()
+    return make_response("OK", HTTPStatus.OK)

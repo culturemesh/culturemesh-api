@@ -224,7 +224,3 @@ def remove_user_from_network(network_id):
     cursor.close()
     connection.commit()
     return make_response("User " + str(user_id) + " left network " + str(network_id), HTTPStatus.OK)
-
-
-
-

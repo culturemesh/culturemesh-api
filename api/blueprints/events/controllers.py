@@ -75,7 +75,7 @@ def user_events_for_network(network_id):
                          order_index_format="id <= %s",
                          order_arg="id")
 
-@users.route("/delete", methods=["DELETE"])
+@events.route("/delete", methods=["DELETE"])
 @require_apikey
 @auth.login_required
 def delete_event():

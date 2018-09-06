@@ -904,6 +904,8 @@ paths:
 
   '/event/delete':
     delete:
+      security:
+            - basicAuth: []
       tags:
         - events
       summary: Deletes an event.
@@ -920,8 +922,8 @@ paths:
       responses:
         '200':
           description: Ok
-        '405':
-          description: Invalid input
+        '400':
+          description: Bad request.
 
   /event/new:
     post:

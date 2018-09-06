@@ -85,7 +85,7 @@ def delete_event():
 
     connection = mysql.get_db()
     cursor = connection.cursor()
-    cursor.execute("DELETE FROM network_registration WHERE id_event=%s", (event_id))
+    cursor.execute("DELETE FROM event_registration WHERE id_event=%s", (event_id))
     cursor.execute("DELETE FROM events WHERE id=%s", (event_id))
     cursor.close()
     connection.commit()

@@ -351,7 +351,10 @@ paths:
       responses:
         '200':
           description: OK
+  '/user/update_user':
     put:
+      security:
+        - basicAuth: []
       tags:
         - users
       summary: Update a user
@@ -629,29 +632,6 @@ paths:
         '405':
           description: Invalid input
 
-  /network/new:
-    post:
-      tags:
-        - networks
-      summary: Create a new network.
-      description: 'Note: if an id is null, pass -1 instead.'
-      operationId: createNetwork
-      consumes:
-        - application/json
-      parameters:
-        - in: body
-          name: network
-          required: true
-          schema:
-            $ref: '#/definitions/NewNetwork'
-
-          description: Create a new network
-      responses:
-        '200':
-          description: OK
-        '405':
-          description: Invalid input
-
   '/post/{postId}':
     get:
       tags:
@@ -763,6 +743,8 @@ paths:
         '405':
           description: Invalid input
     put:
+      security:
+          - basicAuth: []
       tags:
         - posts
       summary: Update a post.
@@ -904,6 +886,8 @@ paths:
 
   /event/new:
     post:
+      security:
+            - basicAuth: []
       tags:
         - events
       summary: Create an event.
@@ -924,6 +908,8 @@ paths:
         '405':
           description: Invalid input
     put:
+      security:
+          - basicAuth: []
       tags:
         - events
       summary: Update an event.

@@ -34,8 +34,11 @@ def get_event_registration(event_id):
 
 
 @events.route("/new", methods=["POST", "PUT"])
+@auth.login_required
 @require_apikey
 def make_new_event():
+    req_obj = make_fake_request_obj(request)
+    req_obj.form["id_host"] = g.user.id
     if request.method == 'POST':
         # POST
         content_fields = ['id_network', 'id_host', \
@@ -59,7 +62,10 @@ def make_new_event():
         return response
     else:
         # PUT
-        return execute_put_by_id(request, "events")
+        # Check if user is authorized to update this event
+        event = get_by_id("events", request.form["id"], [])
+        if event and "id_user" in event and event["id_user"] == g.user.id:
+            return execute_put_by_id(req_obj, "events")
 
 
 @events.route("/currentUserEventsByNetwork/<network_id>", methods=["GET"])

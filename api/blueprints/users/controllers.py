@@ -83,7 +83,7 @@ def validate_new_user(form, content_fields):
     return get_user_by_email(form['email']) is None and get_user_by_username(form['username']) is None
 
 
-@users.route("/users", methods=["GET", "POST", "PUT"])
+@users.route("/users", methods=["GET", "POST"])
 @require_apikey
 def users_query():
     if request.method == 'GET':
@@ -96,29 +96,28 @@ def users_query():
                           'gender']
         # Make another pseudo request object (yeah, kinda hacksy)
         # First, we make a generic object so we can set attributes (via .form as opposed to ['form'])
-        req_obj = type('', (), {})()
-        req_obj.form = request.get_json()
+        req_obj = make_fake_request_obj(request)
         # validate that username/email doesn't already exist.
         if validate_new_user(req_obj.form, content_fields):
             # We now need to convert the user password into a hash.
             password = str(req_obj.form['password'])
             req_obj.form['password'] = md5(password.encode('utf-8')).hexdigest()
-            # We need to have get_json() return None so execute_post_by_table will use req_obj.form
-            req_obj.get_json = lambda: None
             return execute_post_by_table(req_obj, content_fields, "users")
         else:
             return make_response("Username already taken or invalid params", HTTPStatus.BAD_REQUEST)
-    else:
-        # First, we make a generic object so we can set attributes (via .form as opposed to ['form'])
-        req_obj = type('', (), {})()
-        req_obj.form = request.get_json()
-        if 'password' in req_obj.form:
-            # We now need to convert the user password into a hash.
-            password = str(req_obj.form['password'])
-            req_obj.form['password'] = md5(password.encode('utf-8')).hexdigest()
-        # We need to have get_json() return None so execute_post_by_table will use req_obj.form
-        req_obj.get_json = lambda: None
-        return execute_put_by_id(request, "users")
+
+
+@users.route("/update_user", methods=["PUT"])
+@require_apikey
+@auth.login_required
+def update_user():
+    req_obj = make_fake_request_obj(request)
+    req_obj.form["id"] = g.user.id
+    if 'password' in req_obj.form:
+        # We now need to convert the user password into a hash.
+        password = str(req_obj.form['password'])
+        req_obj.form['password'] = md5(password.encode('utf-8')).hexdigest()
+    return execute_put_by_id(request, "users")
 
 
 @users.route("/<user_id>", methods=["GET"])

@@ -80,7 +80,7 @@ def user_events_for_network(network_id):
 @auth.login_required
 def delete_event():
     event_id = request.args.get('id')
-    if not event_id.isdigit():
+    if not event_id or not event_id.isdigit():
       return make_response("Invalid Input", HTTPStatus.BAD_REQUEST)
 
     connection = mysql.get_db()

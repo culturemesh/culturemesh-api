@@ -884,6 +884,28 @@ paths:
         '405':
           description: Invalid input
 
+  '/event/{event_id}/reg_count':
+    get:
+      tags:
+        - events
+      summary: Get the number of people registered for this event.
+      description: ''
+      operationId: getEventAttendanceCount
+      produces:
+        - application/json
+      parameters:
+        - name: event_id
+          in: path
+          description: ID of event to fetch registration count.
+          required: true
+          type: integer
+          format: int64.
+      responses:
+        '200':
+          description: Ok
+          schema:
+            type: integer
+
   '/event/delete':
     delete:
       security:

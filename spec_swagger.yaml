@@ -884,6 +884,29 @@ paths:
         '405':
           description: Invalid input
 
+  '/event/delete':
+    delete:
+      security:
+            - basicAuth: []
+      tags:
+        - events
+      summary: Deletes an event.
+      description: >
+        Unregisters everyone from an event and then deletes it.
+        If the event never existed, does not return an error.
+      operationId: deleteEvent
+      parameters:
+        - in: query
+          name: id
+          type: integer
+          required: true
+          description: The id of the event to delete.
+      responses:
+        '200':
+          description: Ok
+        '400':
+          description: Bad request.
+
   /event/new:
     post:
       security:

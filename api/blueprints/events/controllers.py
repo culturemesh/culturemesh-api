@@ -31,6 +31,15 @@ def get_event_registration(event_id):
                           order_index_format="date_registered <= %s",
                           order_arg="max_registration_date")
 
+@events.route("/<event_id>/reg_count", methods=["GET"])
+@require_apikey
+def get_event_registration_count(event_id):
+    query = "SELECT count(*) \
+             as reg_count \
+             from event_registration \
+             where id_event=%s"
+    return execute_single_tuple_query(query, (event_id,))
+
 
 @events.route("/new", methods=["POST", "PUT"])
 @auth.login_required

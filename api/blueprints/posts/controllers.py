@@ -3,6 +3,8 @@ from api import require_apikey
 from api.blueprints.accounts.controllers import auth
 from api.apiutils import *
 
+import json
+
 posts = Blueprint('post', __name__)
 
 @posts.route("/ping")
@@ -55,9 +57,16 @@ def make_new_post():
     else:
         # PUT
         post = get_by_id("posts", req_obj.form["id"], [])
+        if not post:
+            return
+
+        try:
+            post = json.loads(post.get_data(as_text=True))
+        except Exception:
+            return
+
         if post and "id_user" in post and post["id_user"] == g.user.id:
             return execute_put_by_id(req_obj, "posts")
-
 
 @posts.route("/<post_id>/reply", methods=["POST", "PUT"])
 @auth.login_required
@@ -72,6 +81,14 @@ def make_new_post_reply(post_id):
     else:
         # PUT
         reply = get_by_id("post_replies", req_obj["id"], [])
+        if not reply:
+            return
+        
+        try:
+            reply = json.loads(reply.get_data(as_text=True))
+        except Exception:
+            return
+
         if reply and "id_user" in reply and reply["id_user"] == g.user.id:
             return execute_put_by_id(req_obj, "post_replies")
 

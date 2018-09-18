@@ -78,7 +78,7 @@ def make_new_post_reply(post_id):
         return execute_post_by_table(req_obj, content_fields, "post_replies")
     else:
         # PUT
-        reply = get_by_id("post_replies", req_obj["id"], [])
+        reply = get_by_id("post_replies", req_obj.form["id"], [])
         reply = get_response_content_as_json(reply)
         if not reply:
             return

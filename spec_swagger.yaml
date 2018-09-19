@@ -164,7 +164,7 @@ paths:
               $ref: '#/definitions/Event'
         '405':
           description: Invalid input
-  '/event/userEventsForNetwork/{networkId}':
+  '/event/currentUserEventsByNetwork/{networkId}':
     get:
       security:
           - basicAuth: []
@@ -653,6 +653,30 @@ paths:
           description: The post object
           schema:
             $ref: '#/definitions/Post'
+        '405':
+          description: Invalid input
+
+  '/post/reply/{replyId}':
+    get:
+      tags:
+        - posts
+      summary: Get a post reply.
+      description: ''
+      operationId: getPostReply
+      produces:
+        - application/json
+      parameters:
+        - name: replyId
+          in: path
+          description: ID of post reply to return.
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: The post reply object
+          schema:
+            $ref: '#/definitions/PostReply'
         '405':
           description: Invalid input
 

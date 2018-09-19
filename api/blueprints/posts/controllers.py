@@ -3,6 +3,7 @@ from api import require_apikey
 from api.blueprints.accounts.controllers import auth
 from api.apiutils import *
 
+
 posts = Blueprint('post', __name__)
 
 @posts.route("/ping")
@@ -15,6 +16,10 @@ def test():
 def get_post(post_id):
     return get_by_id("posts", post_id)
 
+@posts.route("/reply/<reply_id>", methods=["GET"])
+@require_apikey
+def get_post_reply(reply_id):
+    return get_by_id("post_replies", reply_id)
 
 @posts.route("/<post_id>/replies", methods=["GET"])
 @require_apikey
@@ -55,9 +60,11 @@ def make_new_post():
     else:
         # PUT
         post = get_by_id("posts", req_obj.form["id"], [])
+        post = get_response_content_as_json(post)
+        if not post:
+            return
         if post and "id_user" in post and post["id_user"] == g.user.id:
             return execute_put_by_id(req_obj, "posts")
-
 
 @posts.route("/<post_id>/reply", methods=["POST", "PUT"])
 @auth.login_required
@@ -71,7 +78,10 @@ def make_new_post_reply(post_id):
         return execute_post_by_table(req_obj, content_fields, "post_replies")
     else:
         # PUT
-        reply = get_by_id("post_replies", req_obj["id"], [])
+        reply = get_by_id("post_replies", req_obj.form["id"], [])
+        reply = get_response_content_as_json(reply)
+        if not reply:
+            return
         if reply and "id_user" in reply and reply["id_user"] == g.user.id:
             return execute_put_by_id(req_obj, "post_replies")
 

@@ -1,7 +1,9 @@
 from flask import jsonify, make_response
 from api.extensions import mysql
 from http import HTTPStatus
+
 import hashlib
+import json
 
 """
 Contains utility routines for API controller logic. Mostly
@@ -366,3 +368,18 @@ def make_fake_request_obj(request):
         req_obj.form = {}
     req_obj.get_json = lambda: None
     return req_obj
+
+def get_response_content_as_json(response):
+    """
+    Returns the content of a Flask "Response" object
+    as a JSON (dictionary).
+    :param response: the Flask Response object.
+    :return: JSON dictionary of response content, or None if there is an error.
+    """
+    if not response:
+        return None
+    try:
+        json_dict = json.loads(response.get_data(as_text=True))
+    except Exception:
+        return None
+    return json_dict

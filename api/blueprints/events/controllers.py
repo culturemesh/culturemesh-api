@@ -71,8 +71,9 @@ def make_new_event():
     else:
         # PUT
         # Check if user is authorized to update this event
-        event = get_by_id("events", request.form["id"], [])
-        if event and "id_user" in event and event["id_user"] == g.user.id:
+        event = get_by_id("events", req_obj.form["id"], [])
+        event = get_response_content_as_json(event)
+        if event and "id_host" in event and event["id_host"] == g.user.id:
             return execute_put_by_id(req_obj, "events")
 
 

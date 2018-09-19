@@ -18,7 +18,7 @@ def get_post(post_id):
 
 @posts.route("/reply/<reply_id>", methods=["GET"])
 @require_apikey
-def get_post_rely(reply_id):
+def get_post_reply(reply_id):
     return get_by_id("post_replies", reply_id)
 
 @posts.route("/<post_id>/replies", methods=["GET"])

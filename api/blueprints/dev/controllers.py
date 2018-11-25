@@ -1,5 +1,6 @@
 from flask import Blueprint
 import os
+import flask
 
 dev = Blueprint('dev', __name__)
 
@@ -18,3 +19,8 @@ def print_out():
     line = "Printed from api/dev/controllers.py/print_out"
     print(line)
     return "The following line was printed: '{}'".format(line)
+
+
+@dev.route("/version/flask")
+def version_flask():
+    return flask.__version__

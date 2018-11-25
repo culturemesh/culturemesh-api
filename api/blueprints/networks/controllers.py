@@ -107,6 +107,7 @@ def get_column_value(db_connection,
 @require_apikey
 def get_networks(func_counter=0):
     print("DEBUG: Entered /networks endpoint function")
+    return "Hi"
     # Validate that we have valid input data (we need a near_location).
     if "near_location" not in request.args:
         return make_response(

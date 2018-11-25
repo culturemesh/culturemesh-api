@@ -3,6 +3,7 @@ import os
 
 dev = Blueprint('dev', __name__)
 
+
 @dev.route("/note")
 def get_note():
     path = os.path.abspath(__file__)
@@ -10,3 +11,8 @@ def get_note():
     note_path = os.path.join(dir, "note.txt")
     with open(note_path, 'r') as file:
         return file.read()
+
+
+@dev.route("/print")
+def print_out():
+    print("Printed from api/dev/controllers.py/print_out")

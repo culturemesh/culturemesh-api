@@ -15,4 +15,6 @@ def get_note():
 
 @dev.route("/print")
 def print_out():
-    print("Printed from api/dev/controllers.py/print_out")
+    line = "Printed from api/dev/controllers.py/print_out"
+    print(line)
+    return "The following line was printed: '{}'".format(line)

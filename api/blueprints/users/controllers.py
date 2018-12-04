@@ -1,5 +1,4 @@
 from flask import Blueprint, request, g
-from api import require_apikey
 from hashlib import md5
 from pymysql.err import IntegrityError
 from api.blueprints.accounts.controllers import auth
@@ -15,7 +14,6 @@ Controller for all user endpoints. Check the Swagger spec for more information o
 
 
 @users.route("/ping")
-@require_apikey
 def test():
     return "pong"
 
@@ -84,7 +82,6 @@ def validate_new_user(form, content_fields):
 
 
 @users.route("/users", methods=["GET", "POST"])
-@require_apikey
 def users_query():
     if request.method == 'GET':
         return handle_users_get(request)
@@ -108,7 +105,6 @@ def users_query():
 
 
 @users.route("/update_user", methods=["PUT"])
-@require_apikey
 @auth.login_required
 def update_user():
     req_obj = make_fake_request_obj(request)
@@ -121,13 +117,11 @@ def update_user():
 
 
 @users.route("/<user_id>", methods=["GET"])
-@require_apikey
 def get_user(user_id):
     return get_by_id("users", user_id, ["email", "password"])
 
 
 @users.route("/<user_id>/networks", methods=["GET"])
-@require_apikey
 def get_user_networks(user_id):
     return get_paginated("SELECT networks.*, join_date \
                           FROM network_registration \
@@ -142,7 +136,6 @@ def get_user_networks(user_id):
 
 
 @users.route("/<user_id>/posts", methods=["GET"])
-@require_apikey
 def get_user_posts(user_id):
     return get_paginated("SELECT * \
                           FROM posts \
@@ -155,7 +148,6 @@ def get_user_posts(user_id):
 
 
 @users.route("/<user_id>/events", methods=["GET"])
-@require_apikey
 def get_user_events(user_id):
     return get_paginated("SELECT events.* \
                           FROM event_registration \
@@ -171,7 +163,6 @@ def get_user_events(user_id):
 
 @users.route("/joinEvent/<event_id>", methods=["POST"])
 @auth.login_required
-@require_apikey
 def add_user_to_event(event_id):
     # First, check that event and user are valid
     if not event_exists(event_id):
@@ -185,7 +176,6 @@ def add_user_to_event(event_id):
 
 @users.route("/leaveEvent/<event_id>", methods=["DELETE"])
 @auth.login_required
-@require_apikey
 def remove_user_from_event(event_id):
     if not event_exists(event_id):
         return make_response("Invalid Event Id", HTTPStatus.BAD_REQUEST)

@@ -1,5 +1,4 @@
 from flask import Blueprint, request, g
-from api import require_apikey
 
 from api.blueprints.accounts.controllers import auth
 from api.blueprints.users.utils import _add_user_to_event
@@ -9,18 +8,15 @@ events = Blueprint('event', __name__)
 
 
 @events.route("/ping")
-@require_apikey
 def test():
     return "pong"
 
 @events.route("/<event_id>", methods=["GET"])
-@require_apikey
 def get_event(event_id):
     return get_by_id("events", event_id)
 
 
 @events.route("/<event_id>/reg", methods=["GET"])
-@require_apikey
 def get_event_registration(event_id):
     return get_paginated("SELECT * \
                           FROM event_registration \
@@ -32,7 +28,6 @@ def get_event_registration(event_id):
                           order_arg="max_registration_date")
 
 @events.route("/<event_id>/reg_count", methods=["GET"])
-@require_apikey
 def get_event_registration_count(event_id):
     query = "SELECT count(*) \
              as reg_count \
@@ -43,7 +38,6 @@ def get_event_registration_count(event_id):
 
 @events.route("/new", methods=["POST", "PUT"])
 @auth.login_required
-@require_apikey
 def make_new_event():
     req_obj = make_fake_request_obj(request)
     req_obj.form["id_host"] = g.user.id
@@ -78,7 +72,6 @@ def make_new_event():
 
 
 @events.route("/currentUserEventsByNetwork/<network_id>", methods=["GET"])
-@require_apikey
 @auth.login_required
 def user_events_for_network(network_id):
     user_id = g.user.id
@@ -92,7 +85,6 @@ def user_events_for_network(network_id):
                          order_arg="id")
 
 @events.route("/delete", methods=["DELETE"])
-@require_apikey
 @auth.login_required
 def delete_event():
     event_id = request.args.get('id')

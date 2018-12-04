@@ -1,5 +1,4 @@
 from flask import Blueprint, request, abort
-from api import require_apikey
 from api.apiutils import *
 from pymysql.err import IntegrityError
 
@@ -10,7 +9,6 @@ networks = Blueprint('network', __name__)
 
 
 @networks.route("/ping")
-@require_apikey
 def test():
     return "pong"
 
@@ -104,7 +102,6 @@ def get_column_value(db_connection,
 
 
 @networks.route("/networks", methods=["GET"])
-@require_apikey
 def get_networks(func_counter=0):
     # Validate that we have valid input data (we need a near_location).
     if "near_location" not in request.args:
@@ -169,13 +166,11 @@ def get_networks(func_counter=0):
 
 
 @networks.route("/<network_id>", methods=["GET"])
-@require_apikey
 def get_network(network_id):
     return get_by_id("networks", network_id)
 
 
 @networks.route("/<network_id>/posts", methods=["GET"])
-@require_apikey
 def get_network_posts(network_id):
     return get_paginated("SELECT * \
                          FROM posts \
@@ -188,7 +183,6 @@ def get_network_posts(network_id):
 
 
 @networks.route("/<network_id>/post_count", methods=["GET"])
-@require_apikey
 def get_network_post_count(network_id):
     query = "SELECT count(*) \
              as post_count \
@@ -198,7 +192,6 @@ def get_network_post_count(network_id):
 
 
 @networks.route("/<network_id>/events", methods=["GET"])
-@require_apikey
 def get_network_events(network_id):
     return get_paginated("SELECT * \
                           FROM events \
@@ -211,7 +204,6 @@ def get_network_events(network_id):
 
 
 @networks.route("/<network_id>/users", methods=["GET"])
-@require_apikey
 def get_network_users(network_id):
     return get_paginated("SELECT users.*, join_date \
                           FROM network_registration \
@@ -226,7 +218,6 @@ def get_network_users(network_id):
 
 
 @networks.route("/<network_id>/user_count", methods=["GET"])
-@require_apikey
 def get_network_user_count(network_id):
     query = "SELECT count(*) \
              as user_count \
@@ -236,7 +227,6 @@ def get_network_user_count(network_id):
 
 
 @networks.route("/new", methods=["POST"])
-@require_apikey
 def make_new_network(internal_req=None):
     content_fields = [
       'city_cur', 'id_city_cur', 'region_cur', 'id_region_cur', \

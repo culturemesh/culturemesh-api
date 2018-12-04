@@ -1,5 +1,4 @@
 from flask import Blueprint, request, g
-from api import require_apikey
 from api.blueprints.accounts.controllers import auth
 from api.apiutils import *
 
@@ -7,22 +6,18 @@ from api.apiutils import *
 posts = Blueprint('post', __name__)
 
 @posts.route("/ping")
-@require_apikey
 def test():
     return "pong"
 
 @posts.route("/<post_id>", methods=["GET"])
-@require_apikey
 def get_post(post_id):
     return get_by_id("posts", post_id)
 
 @posts.route("/reply/<reply_id>", methods=["GET"])
-@require_apikey
 def get_post_reply(reply_id):
     return get_by_id("post_replies", reply_id)
 
 @posts.route("/<post_id>/replies", methods=["GET"])
-@require_apikey
 def get_post_replies(post_id):
     return get_paginated("SELECT post_replies.* \
                           FROM posts \
@@ -37,7 +32,6 @@ def get_post_replies(post_id):
 
 
 @posts.route("/<post_id>/reply_count", methods=["GET"])
-@require_apikey
 def get_post_reply_count(post_id):
     query = "SELECT count(*) \
              as reply_count \

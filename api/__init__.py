@@ -1,6 +1,7 @@
 from flask import Flask
 from .credentials import sql
 from .extensions import mysql
+from api.decorators import require_apikey
 
 
 api = Flask(__name__)

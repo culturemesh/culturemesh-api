@@ -1,5 +1,4 @@
 from flask import Flask
-from .decorators import require_apikey
 from .credentials import sql
 from .extensions import mysql
 

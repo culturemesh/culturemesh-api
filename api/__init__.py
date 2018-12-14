@@ -1,11 +1,20 @@
 from flask import Flask
+import os
 from .decorators import require_apikey
 from .credentials import sql
 from .extensions import mysql
 
+"""Setup the app by setting configuration values and registering blueprints
+"""
 
 api = Flask(__name__)
-# Add MYSQL Database settings from super safe credentials file off of Version Control.
+
+# Configure path to notes file
+path = os.path.abspath(__file__)
+directory = os.path.dirname(path)
+note_path = os.path.join(directory, "blueprints", "dev", "note.txt")
+
+# Add MYSQL Database settings from credentials file off of version control
 for setting in sql:
     api.config[setting] = sql[setting]
 mysql.init_app(api)
@@ -33,6 +42,7 @@ api.register_blueprint(languages, url_prefix='/language')
 api.register_blueprint(accounts, url_prefix='/account')
 api.register_blueprint(upload, url_prefix='/upload')
 api.register_blueprint(dev, url_prefix='/dev')
+
 
 @api.after_request
 def add_custom_http_response_headers(response):

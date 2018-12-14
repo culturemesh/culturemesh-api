@@ -1,12 +1,23 @@
 from flask import Blueprint
-import os
+from api import api
 
 dev = Blueprint('dev', __name__)
 
+"""Developer tools for debugging
+
+These endpoints should be safe to expose publicly from a security standpoint,
+but they should also not be accessible from the user interface.
+
+"""
+
+
 @dev.route("/note")
 def get_note():
-    path = os.path.abspath(__file__)
-    dir = os.path.dirname(path)
-    note_path = os.path.join(dir, "note.txt")
-    with open(note_path, 'r') as file:
+    """Returns the contents of the note file for debugging
+
+    The note file is specified by the ``NOTE_PATH`` configuration option.
+
+    :return: Contents of note file as raw text
+    """
+    with open(api.config["NOTE_PATH"], 'r') as file:
         return file.read()

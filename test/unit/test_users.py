@@ -1,4 +1,4 @@
-from test import client
+from test.unit import client
 from api import credentials
 import json
 import mock

@@ -1,7 +1,7 @@
 from hypothesis import given
 from hypothesis.strategies import text
 from hypothesis import assume
-from test import client
+from test.unit import client
 
 """Tests for developer endpoints defined in :py:class:`api.controllers.dev`
 

@@ -16,6 +16,16 @@ MAX_SIZE = 2 << ((10 * 2) + 1)  # 2 MB
 ALLOWED_EXTENSIONS = {'gif', 'png', 'jpg'}
 
 
+def execute_get_one(sql_q_format, args):
+    connection = mysql.get_db()
+    cursor = connection.cursor()
+    cursor.execute(sql_q_format, args)
+    result = cursor.fetchone()
+    description = cursor.description
+    cursor.close()
+    return result, description
+
+
 def convert_objects(tuple_arr, description):
     """
     A DB cursor returns an array of tuples, without attribute names.
@@ -30,7 +40,8 @@ def convert_objects(tuple_arr, description):
     return obj_arr
 
 
-def make_response_from_single_tuple(cursor, fields_to_omit=["password", "email"]):
+def make_response_from_single_tuple(sql_fetched, cursor_description,
+                                    fields_to_omit=["password", "email"]):
     """
     Given a database cursor from which we expect only one result to be
     returned, extracts that tuple into an object and makes a response
@@ -41,13 +52,14 @@ def make_response_from_single_tuple(cursor, fields_to_omit=["password", "email"]
 
     NOTE: the cursor must be closed by the caller.
 
-    :param cursor: A 'loaded' cursor
+    :param sql_fetched: The object returned by the SQL cursor
+    :param cursor_description: The description from ``cursor.description``
     :param fields_to_omit: a list of fields to cut out.
     :return: A response object ready to return to the client
     """
-    obj = cursor.fetchone()
+    obj = sql_fetched
     if obj is not None:
-        obj = convert_objects([obj], cursor.description)[0]
+        obj = convert_objects([obj], cursor_description)[0]
         for field in fields_to_omit:
             obj.pop(field, None)
     status = HTTPStatus.METHOD_NOT_ALLOWED if obj is None else HTTPStatus.OK
@@ -63,11 +75,8 @@ def execute_single_tuple_query(sql_q_format, args):
     :param args: List of parameters to be substituted into the SQL query
     :return: A response object ready to return to the client
     """
-    connection = mysql.get_db()
-    cursor = connection.cursor()
-    cursor.execute(sql_q_format, args)
-    response = make_response_from_single_tuple(cursor)
-    cursor.close()
+    sql_object, description = execute_get_one(sql_q_format, args)
+    response = make_response_from_single_tuple(sql_object, description)
     return response
 
 
@@ -94,15 +103,13 @@ def get_by_id(table_name, id_, cut_out_fields=[]):
     :param cut_out_fields: a list of fields that should be removed for privacy reasons.
     :returns: A response object ready to return to the client.
     """
-    connection = mysql.get_db()
-    cursor = connection.cursor()
 
     # Note table_name is never supplied by a client, so we do not
     # need to escape it.
     query = "SELECT * FROM `%s` WHERE id=%%s" % (table_name,)
-    cursor.execute(query, (id_))
-    response = make_response_from_single_tuple(cursor, cut_out_fields)
-    cursor.close()
+    sql_object, description = execute_get_one(query, id_)
+    response = make_response_from_single_tuple(sql_object, description,
+                                               cut_out_fields)
     return response
 
 
@@ -368,6 +375,7 @@ def make_fake_request_obj(request):
         req_obj.form = {}
     req_obj.get_json = lambda: None
     return req_obj
+
 
 def get_response_content_as_json(response):
     """

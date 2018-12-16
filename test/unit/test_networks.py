@@ -77,3 +77,22 @@ def test_get_network_by_id(get_one, client):
            'twitter_query_level': 'A'}
     assert response.status_code == 200
     assert response.json == exp
+
+
+get_post_count_description = (('post_count', 8, None, 21, 21, 0, False),)
+
+
+@mock.patch("api.apiutils.execute_get_one",
+            return_value=((48,), get_post_count_description))
+def test_get_post_count(get_one, client):
+    response = client.get("/network/1/post_count",
+                          query_string={"key": credentials.api["key"]})
+
+    query = "SELECT count(*) \
+             as post_count \
+             from posts \
+             where id_network=%s"
+    get_one.assert_called_with(query, ('1',))
+    assert response.status_code == 200
+    exp = {'post_count': 48}
+    assert response.json == exp

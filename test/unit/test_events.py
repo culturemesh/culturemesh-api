@@ -1,8 +1,6 @@
 from test.unit import client
 from api import credentials
-import json
 import mock
-from hashlib import md5
 import datetime
 
 
@@ -38,3 +36,17 @@ def test_get_event_by_id(get_one, client):
            'id_host': 3, 'id_network': 251, 'region': 'CA',
            'title': 'Random Event'}
     assert response.json == exp
+
+
+@mock.patch("api.apiutils.execute_get_one",
+            return_value=((0,), (('reg_count', 8, None, 21, 21, 0, False),)))
+def test_get_reg_count(get_one, client):
+    response = client.get("/event/23/reg_count",
+                          query_string={"key": credentials.api["key"]})
+    query = "SELECT count(*) \
+             as reg_count \
+             from event_registration \
+             where id_event=%s"
+    get_one.assert_called_with(query, ('23',))
+    assert response.status_code == 200
+    assert response.json == {'reg_count': 0}

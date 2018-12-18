@@ -50,3 +50,43 @@ def test_get_reg_count(get_one, client):
     get_one.assert_called_with(query, ('23',))
     assert response.status_code == 200
     assert response.json == {'reg_count': 0}
+
+
+test_get_reg_des = (('id_guest', 8, None, 20, 20, 0, False),
+                    ('id_event', 8, None, 20, 20, 0, False),
+                    ('date_registered', 7, None, 19, 19, 0, False),
+                    ('job', 253, None, 50, 50, 0, True))
+test_get_reg_obj = (
+    (171, 125, datetime.datetime(2018, 9, 19, 11, 13, 43), 'guest'),
+    (172, 125, datetime.datetime(2018, 9, 7, 23, 48, 7), 'host'))
+
+
+@mock.patch('api.apiutils.execute_get_many',
+            return_value=(test_get_reg_obj, test_get_reg_des))
+def test_get_reg(get_many, client):
+    response = client.get("/event/125/reg",
+                          query_string={"key": credentials.api["key"]})
+    query = "SELECT *                           " \
+            "FROM event_registration                           " \
+            "WHERE id_event=%sORDER BY date_registered DESC"
+    get_many.assert_called_with(query, ('125',), 100)
+    assert response.status_code == 200
+    exp = [{'date_registered': 'Wed, 19 Sep 2018 11:13:43 GMT', 'id_event': 125,
+            'id_guest': 171, 'job': 'guest'},
+           {'date_registered': 'Fri, 07 Sep 2018 23:48:07 GMT', 'id_event': 125,
+            'id_guest': 172, 'job': 'host'}]
+    assert response.json == exp
+
+
+@mock.patch('api.apiutils.execute_get_many',
+            return_value=((), test_get_reg_des))
+def test_get_reg_empty(get_many, client):
+    response = client.get("/event/23/reg",
+                          query_string={"key": credentials.api["key"]})
+    query = "SELECT *                           " \
+            "FROM event_registration                           " \
+            "WHERE id_event=%sORDER BY date_registered DESC"
+    get_many.assert_called_with(query, ('23',), 100)
+    assert response.status_code == 200
+    exp = []
+    assert response.json == exp

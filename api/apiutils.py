@@ -197,7 +197,7 @@ def execute_post_by_table(request, content_fields, table_name):
 
 
 def get_paginated(sql_q_format, selection_fields, args,
-    order_clause, order_index_format, order_arg):
+                  order_clause, order_index_format, order_arg):
     """
     Utility function for getting paginated results from a
     database.
@@ -220,22 +220,28 @@ def get_paginated(sql_q_format, selection_fields, args,
     :param order_arg: The query param on which order is based for pagination
     :returns: A response object ready to return to the client
     """
-    conn = mysql.get_db()
     count = int(args.get("count", 100))
-    cursor = conn.cursor()
     if order_arg in args:
         order_arg_val = args[order_arg]
         sql_q_format += " AND " + order_index_format
-        cursor.execute(sql_q_format + order_clause, (*selection_fields, order_arg_val))
+        args = (*selection_fields, order_arg_val)
     else:
-        cursor.execute(sql_q_format + order_clause, (*selection_fields,))
-    items = cursor.fetchmany(count)
+        args = (*selection_fields,)
+    items, descr = execute_get_many(sql_q_format + order_clause, args, count)
     if len(items) == 0:
-        cursor.close()
         return make_response(jsonify([]), HTTPStatus.OK)
-    items = convert_objects(items, cursor.description)
-    cursor.close()
+    items = convert_objects(items, descr)
     return make_response(jsonify(items), HTTPStatus.OK)
+
+
+def execute_get_many(sql_q_format, args, count):
+    conn = mysql.get_db()
+    cursor = conn.cursor()
+    cursor.execute(sql_q_format, args)
+    items = cursor.fetchmany(count)
+    descr = cursor.description
+    cursor.close()
+    return items, descr
 
 
 def event_exists(event_id):

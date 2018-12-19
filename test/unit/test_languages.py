@@ -24,3 +24,34 @@ def test_get_event_by_id(get_one, client):
            'num_speakers': 935, 'tweet_terms': None,
            'tweet_terms_override': None}
     assert response.json == exp
+
+
+autocomplete_obj = ((3, 'English', 365, 0, None, '0'),
+                    (7, 'Bengali', 202, 0, None, None),
+                    (18, 'French', 74, 0, None, None))
+autocomplete_des = (('id', 8, None, 20, 20, 0, False),
+                    ('name', 253, None, 50, 50, 0, False),
+                    ('num_speakers', 3, None, 4, 4, 0, False),
+                    ('added', 2, None, 1, 1, 0, False),
+                    ('tweet_terms', 253, None, 200, 200, 0, True),
+                    ('tweet_terms_override', 253, None, 200, 200, 0, True))
+
+
+@mock.patch('api.blueprints.languages.controllers.execute_get_many',
+            return_value=(autocomplete_obj, autocomplete_des))
+def test_autocomplete(get_many, client):
+    search_text = 'en'
+    response = client.get('/language/autocomplete',
+                          query_string={'key': credentials.api['key'],
+                                        'input_text': search_text})
+    query = "SELECT * FROM languages WHERE languages.name REGEXP %s " \
+            "ORDER BY num_speakers DESC;"
+    get_many.assert_called_with(query, ('en',), 20)
+    assert response.status_code == 200
+    exp = [{'added': 0, 'id': 3, 'name': 'English', 'num_speakers': 365,
+            'tweet_terms': None, 'tweet_terms_override': '0'},
+           {'added': 0, 'id': 7, 'name': 'Bengali', 'num_speakers': 202,
+            'tweet_terms': None, 'tweet_terms_override': None},
+           {'added': 0, 'id': 18, 'name': 'French', 'num_speakers': 74,
+            'tweet_terms': None, 'tweet_terms_override': None}]
+    assert response.json == exp

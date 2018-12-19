@@ -25,7 +25,6 @@ user_obj = user_def.copy()
 user_obj['id'] = 1
 user_obj['password'] = \
     md5(str(user_obj["password"]).encode('utf-8')).hexdigest()
-user_obj['username'] = 'HumanBeing2!'
 
 
 @mock.patch("api.apiutils.execute_insert")
@@ -221,3 +220,24 @@ def test_get_networks(get_many, client):
             'region_cur': 'California', 'region_origin': 'Michigan',
             'twitter_query_level': 'A'}]
     assert response.json == exp
+
+
+@mock.patch('api.blueprints.users.controllers.get_curr_user_id', return_value=1)
+@mock.patch('api.blueprints.accounts.controllers.auth.authenticate',
+            return_value=True)
+@mock.patch('api.apiutils.execute_insert')
+def test_update_user(execute_insert, auth, get_id, client):
+    user_def_json = json.dumps(user_def)
+    response = client.put("/user/update_user", data=user_def_json,
+                          content_type="application/json",
+                          query_string={"key": credentials.api["key"]})
+    query = 'UPDATE users SET username=%s, first_name=%s, last_name=%s, ' \
+            'email=%s, password=%s, role=%s, about_me=%s, gender=%s WHERE id=%s'
+    args = (user_obj['username'], user_obj['first_name'], user_obj['last_name'],
+            user_obj['email'], user_obj['password'], user_obj['role'], '', '',
+            user_obj['id'])
+    execute_insert.assert_called_with(query, args)
+    get_id.assert_called_with()
+    auth.assert_called_with(None, None)
+    assert response.status_code == 200
+    assert response.data.decode() == "OK"

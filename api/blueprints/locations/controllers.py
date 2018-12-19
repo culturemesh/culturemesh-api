@@ -34,29 +34,31 @@ def get_city(city_id):
 def autocomplete():
     # TODO: Have fancier queries. For now, we will just take advantage of regex, which functions as a "contains"
     # a direct format. This is a SQL injection vulnerability.
-    # First, get relevant cities.
-    conn = mysql.get_db()
     location_objects = []
-    city_cur = conn.cursor()
-    city_cur.execute("SELECT cities.name, id AS city_id, region_id, country_id FROM cities  \
-                      WHERE cities.name REGEXP %s LIMIT 100", (request.args["input_text"],))
-    location_objects.extend(convert_objects(city_cur.fetchall(), city_cur.description))
-    city_cur.close()
-    if len(location_objects) == 100:  # If we already have 100 results, which is plenty, let's just return those.
-        return make_response(jsonify(location_objects), HTTPStatus.OK)
-    region_cur = conn.cursor()
-    region_cur.execute("SELECT regions.name, 'null' AS city_id, id AS region_id, country_id FROM regions \
-                        WHERE regions.name REGEXP %s LIMIT 100", (request.args["input_text"],))
-    location_objects.extend(convert_objects(region_cur.fetchall(), region_cur.description))
-    region_cur.close()
+
+    sql_q_format = "SELECT cities.name, id AS city_id, region_id, country_id " \
+                   "FROM cities WHERE cities.name REGEXP %s"
+    items, descr = execute_get_many(sql_q_format,
+                                    (request.args["input_text"],), 100)
+
+    location_objects.extend(convert_objects(items, descr))
     if len(location_objects) == 100:
         return make_response(jsonify(location_objects), HTTPStatus.OK)
-    country_cur = conn.cursor()
-    country_cur.execute("SELECT countries.name, 'null' AS city_id, 'null' AS region_id, id AS country_id FROM countries \
-                        WHERE countries.name REGEXP %s LIMIT 100", (request.args["input_text"],))
-    location_objects.extend(convert_objects(country_cur.fetchall(), country_cur.description))
-    country_cur.close()
+
+    sql_q_format = "SELECT regions.name, 'null' AS city_id, id AS region_id, " \
+                   "country_id FROM regions WHERE regions.name REGEXP %s"
+    items, descr = execute_get_many(sql_q_format,
+                                    (request.args["input_text"],), 100)
+
+    location_objects.extend(convert_objects(items, descr))
+    if len(location_objects) == 100:
+        return make_response(jsonify(location_objects), HTTPStatus.OK)
+
+    sql_q_format = "SELECT countries.name, 'null' AS city_id, 'null' AS " \
+                   "region_id, id AS country_id FROM countries WHERE " \
+                   "countries.name REGEXP %s"
+    items, descr = execute_get_many(sql_q_format,
+                                    (request.args["input_text"],), 100)
+
+    location_objects.extend(convert_objects(items, descr))
     return make_response(jsonify(location_objects), HTTPStatus.OK)
-
-
-

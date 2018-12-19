@@ -32,8 +32,6 @@ def get_language_autocomplete():
     query = "SELECT * FROM languages WHERE languages.name REGEXP %s " \
             "ORDER BY num_speakers DESC;"
     items, descr = execute_get_many(query, (input_text,), 20)
-    print(items)
-    print(descr)
     if len(items) == 0:
         return make_response(jsonify([]), HTTPStatus.OK)
 

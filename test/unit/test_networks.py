@@ -4,6 +4,12 @@ import mock
 import datetime
 
 
+def test_ping(client):
+    response = client.get('/network/ping',
+                          query_string={"key": credentials.api["key"]})
+    assert response.data.decode() == 'pong'
+
+
 get_user_count_description = (('user_count', 8, None, 21, 21, 0, False),)
 
 

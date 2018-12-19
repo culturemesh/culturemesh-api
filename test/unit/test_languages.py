@@ -3,6 +3,12 @@ from api import credentials
 import mock
 
 
+def test_ping(client):
+    response = client.get('/language/ping',
+                          query_string={"key": credentials.api["key"]})
+    assert response.data.decode() == 'pong'
+
+
 language_by_id_obj = (1, 'Mandarin Chinese/Putonghua', 935, 0, None, None)
 language_by_id_desc = (('id', 8, None, 20, 20, 0, False),
                        ('name', 253, None, 50, 50, 0, False),

@@ -4,6 +4,12 @@ import mock
 from mock import call
 
 
+def test_ping(client):
+    response = client.get('/location/ping',
+                          query_string={"key": credentials.api["key"]})
+    assert response.data.decode() == 'pong'
+
+
 country_by_id_obj = (47228, None, 'United States', '-129.3214', '61.660733', 1,
                      None, 'USA, United States', 1)
 country_by_id_des = (('id', 8, None, 20, 20, 0, False),

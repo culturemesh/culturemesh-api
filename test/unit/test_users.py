@@ -6,6 +6,12 @@ from hashlib import md5
 import datetime
 
 
+def test_ping(client):
+    response = client.get('/user/ping',
+                          query_string={"key": credentials.api["key"]})
+    assert response.data.decode() == 'pong'
+
+
 user_def = {"username": "MyUserName3!",
             "first_name": "Human2!",
             "last_name": "Being4!",

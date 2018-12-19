@@ -4,6 +4,12 @@ import mock
 import datetime
 
 
+def test_ping(client):
+    response = client.get('/post/ping',
+                          query_string={"key": credentials.api["key"]})
+    assert response.data.decode() == 'pong'
+
+
 post_by_id_obj = (88, 3, 1, datetime.datetime(2014, 7, 27, 12, 15, 2),
                   'Hey Michiganders in Palo Alto!', 'o', None, '', '')
 post_by_id_des = (('id', 8, None, 20, 20, 0, False),

@@ -4,6 +4,12 @@ import mock
 import datetime
 
 
+def test_ping(client):
+    response = client.get('/event/ping',
+                          query_string={"key": credentials.api["key"]})
+    assert response.data.decode() == 'pong'
+
+
 event_by_id_descrip = (('id', 8, None, 20, 20, 0, False),
                        ('id_network', 8, None, 20, 20, 0, False),
                        ('id_host', 8, None, 20, 20, 0, False),

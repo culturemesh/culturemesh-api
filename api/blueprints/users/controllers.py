@@ -1,4 +1,4 @@
-from flask import Blueprint, request, g
+from flask import Blueprint, request
 from api import require_apikey
 from hashlib import md5
 from pymysql.err import IntegrityError
@@ -112,7 +112,7 @@ def users_query():
 @auth.login_required
 def update_user():
     req_obj = make_fake_request_obj(request)
-    req_obj.form["id"] = g.user.id
+    req_obj.form["id"] = get_curr_user_id()
     if 'password' in req_obj.form:
         # We now need to convert the user password into a hash.
         password = str(req_obj.form['password'])
@@ -176,7 +176,7 @@ def add_user_to_event(event_id):
     # First, check that event and user are valid
     if not event_exists(event_id):
         return make_response("Invalid Event Id", HTTPStatus.METHOD_NOT_ALLOWED)
-    user_id = g.user.id
+    user_id = get_curr_user_id()
     if "role" not in request.args or (request.args["role"] != "host" and request.args["role"] != "guest"):
         return make_response("Invalid role parameter.", HTTPStatus.METHOD_NOT_ALLOWED)
     _add_user_to_event(user_id, event_id, request.args["role"])
@@ -189,7 +189,7 @@ def add_user_to_event(event_id):
 def remove_user_from_event(event_id):
     if not event_exists(event_id):
         return make_response("Invalid Event Id", HTTPStatus.BAD_REQUEST)
-    user_id = g.user.id
+    user_id = get_curr_user_id()
     _remove_user_from_event(user_id, event_id)
     return make_response("OK", HTTPStatus.OK)
 
@@ -197,7 +197,7 @@ def remove_user_from_event(event_id):
 @users.route("/joinNetwork/<network_id>", methods=["POST"])
 @auth.login_required
 def add_user_to_network(network_id):
-    user_id = g.user.id
+    user_id = get_curr_user_id()
     if not network_exists(network_id):
         return make_response("Invalid Network Id", HTTPStatus.METHOD_NOT_ALLOWED)
     connection = mysql.get_db()
@@ -216,7 +216,7 @@ def add_user_to_network(network_id):
 @auth.login_required
 def remove_user_from_network(network_id):
     # Get user given token.
-    user_id = g.user.id
+    user_id = get_curr_user_id()
     connection = mysql.get_db()
     cursor = connection.cursor()
     cursor.execute("DELETE FROM network_registration WHERE id_user=%s AND id_network=%s", (user_id, network_id))

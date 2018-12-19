@@ -1,6 +1,7 @@
 from api.apiutils import *
 from api.extensions import mysql
 import random
+from flask import g
 """
 Utility module for querying users based on certain information.
 """
@@ -113,3 +114,7 @@ def _remove_user_from_event(user_id, event_id):
     cursor = connection.cursor()
     cursor.execute("DELETE FROM event_registration WHERE id_event=%s AND id_guest=%s", (event_id, user_id))
     connection.commit()
+
+
+def get_curr_user_id():
+    return g.user.id

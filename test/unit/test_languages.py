@@ -55,3 +55,38 @@ def test_autocomplete(get_many, client):
            {'added': 0, 'id': 18, 'name': 'French', 'num_speakers': 74,
             'tweet_terms': None, 'tweet_terms_override': None}]
     assert response.json == exp
+
+
+@mock.patch('api.blueprints.languages.controllers.execute_get_many',
+            return_value=((), ()))
+def test_autocomplete_no_query(get_many, client):
+    response = client.get('/language/autocomplete',
+                          query_string={'key': credentials.api['key']})
+    get_many.assert_not_called()
+    assert response.status_code == 400
+
+
+@mock.patch('api.blueprints.languages.controllers.execute_get_many',
+            return_value=((), ()))
+def test_autocomplete_query_none(get_many, client):
+    response = client.get('/language/autocomplete',
+                          query_string={'key': credentials.api['key'],
+                                        'input_text': None})
+    get_many.assert_not_called()
+    assert response.status_code == 400
+    # TODO: This behavior makes the `if input_text is None` check useless
+    assert "Must have valid input_text field" not in response.data.decode()
+
+
+@mock.patch('api.blueprints.languages.controllers.execute_get_many',
+            return_value=((), ()))
+def test_autocomplete_query_none(get_many, client):
+    search_text = 'nonexistentLocationQuery'
+    response = client.get('/language/autocomplete',
+                          query_string={'key': credentials.api['key'],
+                                        'input_text': search_text})
+    query = "SELECT * FROM languages WHERE languages.name REGEXP %s " \
+            "ORDER BY num_speakers DESC;"
+    get_many.assert_called_with(query, ('nonexistentLocationQuery',), 20)
+    assert response.status_code == 200
+    assert response.json == []

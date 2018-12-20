@@ -17,6 +17,15 @@ ALLOWED_EXTENSIONS = {'gif', 'png', 'jpg'}
 
 
 def execute_get_one(sql_q_format, args):
+    """
+    Get one item from the database.
+
+    :param sql_q_format: SQL command to execute, with ``%s`` to fill ``args``
+    :param args: Arguments used to replace ``%s`` in ``sql_q_format``
+    :return: Tuple of the form ``(item, description)`` where ``item`` is the
+    object retrieved from the database and ``description`` is the cursor
+    description that names the attributes in the object.
+    """
     connection = mysql.get_db()
     cursor = connection.cursor()
     cursor.execute(sql_q_format, args)
@@ -250,10 +259,39 @@ def get_paginated(sql_q_format, selection_fields, args,
 
 
 def execute_get_many(sql_q_format, args, count):
+    """
+    Get many items from the database.
+
+    :param sql_q_format: SQL command to execute, with ``%s`` to fill ``args``
+    :param args: Arguments used to replace ``%s`` in ``sql_q_format``
+    :param count: The maximum number of items to return
+    :return: Tuple of the form ``(items, description)`` where ``items`` is a
+    tuple of objects retrieved from the database and ``description`` is the
+    cursor description that names the attributes in the objects.
+    """
     conn = mysql.get_db()
     cursor = conn.cursor()
     cursor.execute(sql_q_format, args)
     items = cursor.fetchmany(count)
+    descr = cursor.description
+    cursor.close()
+    return items, descr
+
+
+def execute_get_all(sql_q_format, args):
+    """
+    Get all available items from the database that match a query.
+
+    :param sql_q_format: SQL command to execute, with ``%s`` to fill ``args``
+    :param args: Arguments used to replace ``%s`` in ``sql_q_format``
+    :return: Tuple of the form ``(items, description)`` where ``items`` is a
+    tuple of objects retrieved from the database and ``description`` is the
+    cursor description that names the attributes in the objects.
+    """
+    conn = mysql.get_db()
+    cursor = conn.cursor()
+    cursor.execute(sql_q_format, args)
+    items = cursor.fetchall()
     descr = cursor.description
     cursor.close()
     return items, descr

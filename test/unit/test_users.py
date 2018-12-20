@@ -4,6 +4,7 @@ import json
 import mock
 from hashlib import md5
 import datetime
+from pymysql.err import IntegrityError
 
 
 def test_ping(client):
@@ -347,3 +348,74 @@ def test_leave_missing_event(execute_mod, event_exists, auth, get_id, client):
     auth.assert_called_with(None, None)
     assert response.status_code == 400
     assert response.data.decode() == 'Invalid Event Id'
+
+
+@mock.patch('api.blueprints.users.controllers.get_curr_user_id', return_value=1)
+@mock.patch('api.blueprints.accounts.controllers.auth.authenticate',
+            return_value=True)
+@mock.patch('api.blueprints.users.controllers.network_exists',
+            return_value=True)
+@mock.patch('api.blueprints.users.controllers.execute_mod')
+def test_join_network(execute_mod, net_exists, auth, get_id, client):
+    response = client.post('/user/joinNetwork/2')
+    auth.assert_called_with(None, None)
+    get_id.assert_called_with()
+    net_exists.assert_called_with('2')
+    query = "INSERT INTO network_registration VALUES " \
+            "(%s, %s, CURRENT_TIMESTAMP)"
+    args = ('1', '2')
+    execute_mod.assert_called_with(query, args)
+    assert response.status_code == 200
+    assert response.data.decode() == 'OK'
+
+
+@mock.patch('api.blueprints.users.controllers.get_curr_user_id', return_value=1)
+@mock.patch('api.blueprints.accounts.controllers.auth.authenticate',
+            return_value=True)
+@mock.patch('api.blueprints.users.controllers.network_exists',
+            return_value=False)
+@mock.patch('api.blueprints.users.controllers.execute_mod')
+def test_join_missing_network(execute_mod, net_exists, auth, get_id, client):
+    response = client.post('/user/joinNetwork/2')
+    auth.assert_called_with(None, None)
+    get_id.assert_called_with()
+    net_exists.assert_called_with('2')
+    execute_mod.assert_not_called()
+    assert response.status_code == 405
+    assert response.data.decode() == 'Invalid Network Id'
+
+
+@mock.patch('api.blueprints.users.controllers.get_curr_user_id', return_value=1)
+@mock.patch('api.blueprints.accounts.controllers.auth.authenticate',
+            return_value=True)
+@mock.patch('api.blueprints.users.controllers.network_exists',
+            return_value=True)
+@mock.patch('api.blueprints.users.controllers.execute_mod',
+            side_effect=IntegrityError)
+def test_join_subscribed_network(execute_mod, net_exists, auth, get_id, client):
+    response = client.post('/user/joinNetwork/2')
+    auth.assert_called_with(None, None)
+    get_id.assert_called_with()
+    net_exists.assert_called_with('2')
+    query = "INSERT INTO network_registration VALUES " \
+            "(%s, %s, CURRENT_TIMESTAMP)"
+    args = ('1', '2')
+    execute_mod.assert_called_with(query, args)
+    assert response.status_code == 405
+    assert response.data.decode() == 'User already subscribed'
+
+
+@mock.patch('api.blueprints.users.controllers.get_curr_user_id', return_value=1)
+@mock.patch('api.blueprints.accounts.controllers.auth.authenticate',
+            return_value=True)
+@mock.patch('api.blueprints.users.controllers.execute_mod')
+def test_leave_network(execute_mod, auth, get_id, client):
+    response = client.delete('/user/leaveNetwork/2')
+    auth.assert_called_with(None, None)
+    get_id.assert_called_with()
+    query = "DELETE FROM network_registration WHERE id_user=%s AND " \
+            "id_network=%s"
+    args = (1, '2')
+    execute_mod.assert_called_with(query, args)
+    assert response.status_code == 200
+    assert response.data.decode() == 'User 1 left network 2'

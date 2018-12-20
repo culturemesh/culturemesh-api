@@ -109,10 +109,9 @@ def _remove_user_from_event(user_id, event_id):
     :param user_id: id of user.
     :param event_id: id of event
     """
-    connection = mysql.get_db()
-    cursor = connection.cursor()
-    cursor.execute("DELETE FROM event_registration WHERE id_event=%s AND id_guest=%s", (event_id, user_id))
-    connection.commit()
+    query = "DELETE FROM event_registration WHERE id_event=%s AND id_guest=%s"
+    args = (event_id, user_id)
+    execute_mod(query, args)
 
 
 def get_curr_user_id():

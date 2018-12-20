@@ -82,7 +82,18 @@ def execute_single_tuple_query(sql_q_format, args):
 
 def execute_insert(sql_q_format, args):
     """
-    Executes an insert statement.
+    Executes an insert statement. This simply calls :py:func:`execute_mod` with
+    the same parameters as it is provided with.
+
+    :param sql_q_format: A complete SQL query with zero or more %s
+    :param args: List of parameters to be substituted into the SQL query
+    """
+    execute_mod(sql_q_format, args)
+
+
+def execute_mod(sql_q_format, args):
+    """
+    Executes a SQL statement that modifies the database without getting data.
 
     :param sql_q_format: A complete SQL query with zero or more %s
     :param args: List of parameters to be substituted into the SQL query

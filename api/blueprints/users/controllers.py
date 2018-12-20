@@ -199,27 +199,26 @@ def remove_user_from_event(event_id):
 def add_user_to_network(network_id):
     user_id = get_curr_user_id()
     if not network_exists(network_id):
-        return make_response("Invalid Network Id", HTTPStatus.METHOD_NOT_ALLOWED)
-    connection = mysql.get_db()
-    network_registration_cursor = connection.cursor()
+        return make_response("Invalid Network Id",
+                             HTTPStatus.METHOD_NOT_ALLOWED)
+    query = "INSERT INTO network_registration VALUES " \
+            "(%s, %s, CURRENT_TIMESTAMP)"
+    args = (str(user_id), str(network_id))
     try:
-        network_registration_cursor.execute("INSERT INTO network_registration VALUES (%s, %s, CURRENT_TIMESTAMP)",
-                                            (str(user_id), str(network_id)))
+        execute_mod(query, args)
     except IntegrityError:
-        connection.commit()
-        return make_response("User already subscribed", HTTPStatus.METHOD_NOT_ALLOWED)
-    connection.commit()
+        return make_response("User already subscribed",
+                             HTTPStatus.METHOD_NOT_ALLOWED)
     return make_response("OK", HTTPStatus.OK)
 
 
 @users.route("/leaveNetwork/<network_id>", methods=["DELETE"])
 @auth.login_required
 def remove_user_from_network(network_id):
-    # Get user given token.
     user_id = get_curr_user_id()
-    connection = mysql.get_db()
-    cursor = connection.cursor()
-    cursor.execute("DELETE FROM network_registration WHERE id_user=%s AND id_network=%s", (user_id, network_id))
-    cursor.close()
-    connection.commit()
-    return make_response("User " + str(user_id) + " left network " + str(network_id), HTTPStatus.OK)
+    query = "DELETE FROM network_registration WHERE id_user=%s AND " \
+            "id_network=%s"
+    args = (user_id, network_id)
+    execute_mod(query, args)
+    return make_response("User " + str(user_id) + " left network " +
+                         str(network_id), HTTPStatus.OK)

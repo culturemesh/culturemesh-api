@@ -1,7 +1,5 @@
 from flask import Flask
-import os
-from .decorators import require_apikey
-from .credentials import sql
+import os, sys
 from .extensions import mysql
 
 """Setup the app by setting configuration values and registering blueprints
@@ -14,10 +12,20 @@ path = os.path.abspath(__file__)
 directory = os.path.dirname(path)
 note_path = os.path.join(directory, "blueprints", "dev", "note.txt")
 
-# Add MYSQL Database settings from credentials file off of version control
-for setting in sql:
-    api.config[setting] = sql[setting]
-mysql.init_app(api)
+if 'CM_API_TESTING' in os.environ and os.environ['CM_API_TESTING']:
+    class credentials:
+        secret_key = 'a'
+        host_path = {'image_uploads': 'user_images'}
+
+    sys.modules['api.credentials'] = credentials
+    api.credentials = credentials
+else:
+    from .credentials import sql
+    # Add MYSQL Database settings from credentials file off of version control
+    for setting in sql:
+        api.config[setting] = sql[setting]
+    mysql.init_app(api)
+
 
 
 # Register API submodules (aka blueprints)

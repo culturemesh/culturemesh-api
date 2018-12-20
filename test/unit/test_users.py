@@ -261,3 +261,89 @@ def test_join_event(execute_insert, event_exists, auth, get_id, client):
     auth.assert_called_with(None, None)
     assert response.status_code == 200
     assert response.data.decode() == 'OK'
+
+
+@mock.patch('api.blueprints.users.controllers.get_curr_user_id', return_value=1)
+@mock.patch('api.blueprints.accounts.controllers.auth.authenticate',
+            return_value=True)
+@mock.patch('api.blueprints.users.controllers.event_exists', return_value=False)
+@mock.patch('api.blueprints.users.utils.execute_insert')
+def test_join_missing_event(execute_insert, event_exists, auth, get_id, client):
+    response = client.post('/user/joinEvent/23',
+                           query_string={'key': credentials.api['key'],
+                                         'role': 'guest'})
+    execute_insert.assert_not_called()
+    event_exists.assert_called_with('23')
+    get_id.assert_not_called()
+    auth.assert_called_with(None, None)
+    assert response.status_code == 405
+    assert response.data.decode() == "Invalid Event Id"
+
+
+@mock.patch('api.blueprints.users.controllers.get_curr_user_id', return_value=1)
+@mock.patch('api.blueprints.accounts.controllers.auth.authenticate',
+            return_value=True)
+@mock.patch('api.blueprints.users.controllers.event_exists', return_value=True)
+@mock.patch('api.blueprints.users.utils.execute_insert')
+def test_join_event_invalid_role(execute_insert, event_exists, auth, get_id,
+                                 client):
+    response = client.post('/user/joinEvent/23',
+                           query_string={'key': credentials.api['key'],
+                                         'role': 'hi'})
+    auth.assert_called_with(None, None)
+    event_exists.assert_called_with('23')
+    get_id.assert_called_with()
+    execute_insert.assert_not_called()
+    assert response.status_code == 405
+    assert response.data.decode() == 'Invalid role parameter.'
+
+
+@mock.patch('api.blueprints.users.controllers.get_curr_user_id', return_value=1)
+@mock.patch('api.blueprints.accounts.controllers.auth.authenticate',
+            return_value=True)
+@mock.patch('api.blueprints.users.controllers.event_exists', return_value=True)
+@mock.patch('api.blueprints.users.utils.execute_insert')
+def test_join_event_missing_role(execute_insert, event_exists, auth, get_id,
+                                 client):
+    response = client.post('/user/joinEvent/23',
+                           query_string={'key': credentials.api['key']})
+    auth.assert_called_with(None, None)
+    event_exists.assert_called_with('23')
+    get_id.assert_called_with()
+    execute_insert.assert_not_called()
+    assert response.status_code == 405
+    assert response.data.decode() == 'Invalid role parameter.'
+
+
+@mock.patch('api.blueprints.users.controllers.get_curr_user_id', return_value=1)
+@mock.patch('api.blueprints.accounts.controllers.auth.authenticate',
+            return_value=True)
+@mock.patch('api.blueprints.users.controllers.event_exists', return_value=True)
+@mock.patch('api.blueprints.users.utils.execute_mod')
+def test_leave_event(execute_mod, event_exists, auth, get_id, client):
+    response = client.delete('/user/leaveEvent/23',
+                             query_string={'key': credentials.api['key']})
+    query = "DELETE FROM event_registration WHERE id_event=%s AND id_guest=%s"
+    args = ('23', 1)
+    execute_mod.assert_called_with(query, args)
+    event_exists.assert_called_with('23')
+    get_id.assert_called_with()
+    auth.assert_called_with(None, None)
+    assert response.status_code == 200
+    assert response.data.decode() == 'OK'
+
+
+@mock.patch('api.blueprints.users.controllers.get_curr_user_id', return_value=1)
+@mock.patch('api.blueprints.accounts.controllers.auth.authenticate',
+            return_value=True)
+@mock.patch('api.blueprints.users.controllers.event_exists', return_value=False)
+@mock.patch('api.blueprints.users.utils.execute_mod')
+def test_leave_missing_event(execute_mod, event_exists, auth, get_id, client):
+    response = client.delete('/user/leaveEvent/23',
+                             query_string={'key': credentials.api['key']})
+    execute_mod.assert_not_called()
+    event_exists.assert_called_with('23')
+    get_id.assert_not_called()
+    auth.assert_called_with(None, None)
+    assert response.status_code == 400
+    assert response.data.decode() == 'Invalid Event Id'

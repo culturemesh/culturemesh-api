@@ -1,12 +1,10 @@
 from test.unit import client
-from api import credentials
 import mock
 import datetime
 
 
 def test_ping(client):
-    response = client.get('/post/ping',
-                          query_string={"key": credentials.api["key"]})
+    response = client.get('/post/ping')
     assert response.data.decode() == 'pong'
 
 
@@ -26,8 +24,7 @@ post_by_id_des = (('id', 8, None, 20, 20, 0, False),
 @mock.patch('api.apiutils.execute_get_one',
             return_value=(post_by_id_obj, post_by_id_des))
 def test_get_post_by_id(get_one, client):
-    response = client.get('/post/88',
-                          query_string={"key": credentials.api["key"]})
+    response = client.get('/post/88')
     query = "SELECT * FROM `posts` WHERE id=%s"
     get_one.assert_called_with(query, '88')
     assert response.status_code == 200
@@ -51,8 +48,7 @@ reply_by_id_des = (('id', 8, None, 20, 20, 0, False),
 @mock.patch('api.apiutils.execute_get_one',
             return_value=(reply_by_id_obj, reply_by_id_des))
 def test_get_reply_by_id(get_one, client):
-    response = client.get('/post/reply/207',
-                          query_string={"key": credentials.api["key"]})
+    response = client.get('/post/reply/207')
     query = "SELECT * FROM `post_replies` WHERE id=%s"
     get_one.assert_called_with(query, '207')
     assert response.status_code == 200
@@ -65,8 +61,7 @@ def test_get_reply_by_id(get_one, client):
 @mock.patch('api.apiutils.execute_get_one',
             return_value=((5,), (('reply_count', 8, None, 21, 21, 0, False),)))
 def test_get_reply_count(get_one, client):
-    response = client.get('post/88/reply_count',
-                          query_string={'key': credentials.api['key']})
+    response = client.get('post/88/reply_count')
     query = "SELECT count(*) \
              as reply_count \
              from post_replies \
@@ -106,8 +101,7 @@ get_replies_des = (('id', 8, None, 20, 20, 0, False),
 @mock.patch('api.apiutils.execute_get_many',
             return_value=(get_replies_obj, get_replies_des))
 def test_get_replies(get_many, client):
-    response = client.get('/post/88/replies',
-                          query_string={'key': credentials.api['key']})
+    response = client.get('/post/88/replies')
     query = "SELECT post_replies.*                           " \
             "FROM posts                           " \
             "INNER JOIN post_replies                           " \

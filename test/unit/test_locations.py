@@ -1,12 +1,10 @@
 from test.unit import client
-from api import credentials
 import mock
 from mock import call
 
 
 def test_ping(client):
-    response = client.get('/location/ping',
-                          query_string={"key": credentials.api["key"]})
+    response = client.get('/location/ping')
     assert response.data.decode() == 'pong'
 
 
@@ -26,8 +24,7 @@ country_by_id_des = (('id', 8, None, 20, 20, 0, False),
 @mock.patch("api.apiutils.execute_get_one",
             return_value=(country_by_id_obj, country_by_id_des))
 def test_get_country_by_id(get_one, client):
-    response = client.get("/location/countries/47228",
-                          query_string={"key": credentials.api["key"]})
+    response = client.get("/location/countries/47228")
     query = "SELECT * FROM `countries` WHERE id=%s"
     get_one.assert_called_with(query, '47228')
     assert response.status_code == 200
@@ -57,8 +54,7 @@ region_by_id_des = (('id', 8, None, 20, 20, 0, False),
 @mock.patch("api.apiutils.execute_get_one",
             return_value=(region_by_id_obj, region_by_id_des))
 def test_get_region_by_id(get_one, client):
-    response = client.get("/location/regions/56130",
-                          query_string={"key": credentials.api["key"]})
+    response = client.get("/location/regions/56130")
     query = "SELECT * FROM `regions` WHERE id=%s"
     get_one.assert_called_with(query, '56130')
     assert response.status_code == 200
@@ -95,8 +91,7 @@ city_by_id_des = (('id', 8, None, 20, 20, 0, False),
 @mock.patch("api.apiutils.execute_get_one",
             return_value=(city_by_id_obj, city_by_id_des))
 def test_get_city_by_id(get_one, client):
-    response = client.get("/location/cities/327181",
-                          query_string={"key": credentials.api["key"]})
+    response = client.get("/location/cities/327181")
     query = "SELECT * FROM `cities` WHERE id=%s"
     get_one.assert_called_with(query, '327181')
     assert response.status_code == 200
@@ -151,8 +146,7 @@ def mock_autocomplete_get_many(sql_q_format, args, count):
 def test_autocomplete(get_many, client):
     search_text = 'york'
     response = client.get('/location/autocomplete',
-                          query_string={'key': credentials.api['key'],
-                                        'input_text': search_text})
+                          query_string={'input_text': search_text})
     cit_format = "SELECT cities.name, id AS city_id, region_id, country_id " \
                  "FROM cities WHERE cities.name REGEXP %s"
     reg_format = "SELECT regions.name, 'null' AS city_id, id AS region_id, " \

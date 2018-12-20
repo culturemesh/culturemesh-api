@@ -1,5 +1,4 @@
 from test.unit import client
-from api import credentials
 import json
 import mock
 from hashlib import md5
@@ -9,8 +8,7 @@ from mock import call
 
 
 def test_ping(client):
-    response = client.get('/user/ping',
-                          query_string={"key": credentials.api["key"]})
+    response = client.get('/user/ping')
     assert response.data.decode() == 'pong'
 
 
@@ -37,8 +35,7 @@ user_obj['password'] = \
 def test_create_user(user_by_email, user_by_username, execute_insert, client):
     user_def_json = json.dumps(user_def)
     response = client.post("/user/users", data=user_def_json,
-                           content_type="application/json",
-                           query_string={"key": credentials.api["key"]})
+                           content_type="application/json")
 
     user_by_email.assert_called_with("humanbeing@example.com")
     user_by_username.assert_called_with("MyUserName3!")
@@ -62,8 +59,7 @@ def test_create_user_username_taken_fail(user_by_email, user_by_username,
                                          execute_insert, client):
     user_def_json = json.dumps(user_def)
     response = client.post("/user/users", data=user_def_json,
-                           content_type="application/json",
-                           query_string={"key": credentials.api["key"]})
+                           content_type="application/json")
 
     user_by_username.assert_called_with("MyUserName3!")
     execute_insert.assert_not_called()
@@ -80,8 +76,7 @@ def test_create_user_email_taken_fail(user_by_email, user_by_username,
                                       execute_insert, client):
     user_def_json = json.dumps(user_def)
     response = client.post("/user/users", data=user_def_json,
-                           content_type="application/json",
-                           query_string={"key": credentials.api["key"]})
+                           content_type="application/json")
 
     user_by_email.assert_called_with("humanbeing@example.com")
     execute_insert.assert_not_called()
@@ -98,8 +93,7 @@ def test_create_user_bad_description_fail(user_by_email, user_by_username,
                                           execute_insert, client):
     user_def_json = json.dumps({})
     response = client.post("/user/users", data=user_def_json,
-                           content_type="application/json",
-                           query_string={"key": credentials.api["key"]})
+                           content_type="application/json")
     user_by_email.assert_not_called()
     user_by_username.assert_not_called()
     execute_insert.assert_not_called()
@@ -139,8 +133,7 @@ sql_object = (2, 'CYoum23', 'Chris', 'Youm', 'upperbrain@gmail.com',
 @mock.patch("api.apiutils.execute_get_one",
             return_value=(sql_object, description))
 def test_get_user_by_id(get_one, client):
-    response = client.get("/user/2",
-                          query_string={"key": credentials.api["key"]})
+    response = client.get("/user/2")
     query = "SELECT * FROM `users` WHERE id=%s"
     get_one.assert_called_with(query, '2')
     assert response.status_code == 200
@@ -173,8 +166,7 @@ get_posts_des = (('id', 8, None, 20, 20, 0, False),
 @mock.patch('api.apiutils.execute_get_many',
             return_value=(get_posts_obj, get_posts_des))
 def test_get_posts(get_many, client):
-    response = client.get('/user/2/posts',
-                          query_string={"key": credentials.api["key"]})
+    response = client.get('/user/2/posts')
     query = "SELECT *                           " \
             "FROM posts                           " \
             "WHERE id_user=%sORDER BY id DESC"
@@ -218,8 +210,7 @@ get_net_des = (('id', 8, None, 20, 20, 0, False),
 @mock.patch('api.apiutils.execute_get_many',
             return_value=(get_net_obj, get_net_des))
 def test_get_networks(get_many, client):
-    response = client.get('/user/2/networks',
-                          query_string={"key": credentials.api["key"]})
+    response = client.get('/user/2/networks')
     query = "SELECT networks.*, join_date                           " \
             "FROM network_registration                           " \
             "INNER JOIN networks                           " \
@@ -249,8 +240,7 @@ def test_get_networks(get_many, client):
 def test_update_user(execute_insert, auth, get_id, client):
     user_def_json = json.dumps(user_def)
     response = client.put("/user/update_user", data=user_def_json,
-                          content_type="application/json",
-                          query_string={"key": credentials.api["key"]})
+                          content_type="application/json")
     query = 'UPDATE users SET username=%s, first_name=%s, last_name=%s, ' \
             'email=%s, password=%s, role=%s, about_me=%s, gender=%s WHERE id=%s'
     args = (user_obj['username'], user_obj['first_name'], user_obj['last_name'],
@@ -270,8 +260,7 @@ def test_update_user(execute_insert, auth, get_id, client):
 @mock.patch('api.blueprints.users.utils.execute_insert')
 def test_join_event(execute_insert, event_exists, auth, get_id, client):
     response = client.post('/user/joinEvent/23',
-                           query_string={'key': credentials.api['key'],
-                                         'role': 'guest'})
+                           query_string={'role': 'guest'})
     query = "INSERT INTO event_registration VALUES " \
             "(%s,%s,CURRENT_TIMESTAMP, %s)"
     args = (1, '23', 'guest')
@@ -290,8 +279,7 @@ def test_join_event(execute_insert, event_exists, auth, get_id, client):
 @mock.patch('api.blueprints.users.utils.execute_insert')
 def test_join_missing_event(execute_insert, event_exists, auth, get_id, client):
     response = client.post('/user/joinEvent/23',
-                           query_string={'key': credentials.api['key'],
-                                         'role': 'guest'})
+                           query_string={'role': 'guest'})
     execute_insert.assert_not_called()
     event_exists.assert_called_with('23')
     get_id.assert_not_called()
@@ -308,8 +296,7 @@ def test_join_missing_event(execute_insert, event_exists, auth, get_id, client):
 def test_join_event_invalid_role(execute_insert, event_exists, auth, get_id,
                                  client):
     response = client.post('/user/joinEvent/23',
-                           query_string={'key': credentials.api['key'],
-                                         'role': 'hi'})
+                           query_string={'role': 'hi'})
     auth.assert_called_with(None, None)
     event_exists.assert_called_with('23')
     get_id.assert_called_with()
@@ -325,8 +312,7 @@ def test_join_event_invalid_role(execute_insert, event_exists, auth, get_id,
 @mock.patch('api.blueprints.users.utils.execute_insert')
 def test_join_event_missing_role(execute_insert, event_exists, auth, get_id,
                                  client):
-    response = client.post('/user/joinEvent/23',
-                           query_string={'key': credentials.api['key']})
+    response = client.post('/user/joinEvent/23')
     auth.assert_called_with(None, None)
     event_exists.assert_called_with('23')
     get_id.assert_called_with()
@@ -341,8 +327,7 @@ def test_join_event_missing_role(execute_insert, event_exists, auth, get_id,
 @mock.patch('api.blueprints.users.controllers.event_exists', return_value=True)
 @mock.patch('api.blueprints.users.utils.execute_mod')
 def test_leave_event(execute_mod, event_exists, auth, get_id, client):
-    response = client.delete('/user/leaveEvent/23',
-                             query_string={'key': credentials.api['key']})
+    response = client.delete('/user/leaveEvent/23')
     query = "DELETE FROM event_registration WHERE id_event=%s AND id_guest=%s"
     args = ('23', 1)
     execute_mod.assert_called_with(query, args)
@@ -359,8 +344,7 @@ def test_leave_event(execute_mod, event_exists, auth, get_id, client):
 @mock.patch('api.blueprints.users.controllers.event_exists', return_value=False)
 @mock.patch('api.blueprints.users.utils.execute_mod')
 def test_leave_missing_event(execute_mod, event_exists, auth, get_id, client):
-    response = client.delete('/user/leaveEvent/23',
-                             query_string={'key': credentials.api['key']})
+    response = client.delete('/user/leaveEvent/23')
     execute_mod.assert_not_called()
     event_exists.assert_called_with('23')
     get_id.assert_not_called()
@@ -502,8 +486,7 @@ def test_get_net_users(get_all, get_many, client):
                str(city_origin)
 
     response = client.get('/user/users',
-                          query_string={'key': credentials.api['key'],
-                                        'near_location': near_loc,
+                          query_string={'near_location': near_loc,
                                         'from_location': from_loc})
 
     net_query = 'SELECT id FROM networks WHERE id_country_cur=%s AND ' \

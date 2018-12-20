@@ -1,12 +1,10 @@
 from test.unit import client
-from api import credentials
 import mock
 import datetime
 
 
 def test_ping(client):
-    response = client.get('/event/ping',
-                          query_string={"key": credentials.api["key"]})
+    response = client.get('/event/ping')
     assert response.data.decode() == 'pong'
 
 
@@ -30,8 +28,7 @@ event_by_id_obj = (23, 251, 3, datetime.datetime(2014, 8, 19, 0, 10, 54),
 @mock.patch("api.apiutils.execute_get_one",
             return_value=(event_by_id_obj, event_by_id_descrip))
 def test_get_event_by_id(get_one, client):
-    response = client.get("/event/23",
-                          query_string={"key": credentials.api["key"]})
+    response = client.get("/event/23")
     query = "SELECT * FROM `events` WHERE id=%s"
     get_one.assert_called_with(query, '23')
     assert response.status_code == 200
@@ -47,8 +44,7 @@ def test_get_event_by_id(get_one, client):
 @mock.patch("api.apiutils.execute_get_one",
             return_value=((0,), (('reg_count', 8, None, 21, 21, 0, False),)))
 def test_get_reg_count(get_one, client):
-    response = client.get("/event/23/reg_count",
-                          query_string={"key": credentials.api["key"]})
+    response = client.get("/event/23/reg_count")
     query = "SELECT count(*) \
              as reg_count \
              from event_registration \
@@ -70,8 +66,7 @@ test_get_reg_obj = (
 @mock.patch('api.apiutils.execute_get_many',
             return_value=(test_get_reg_obj, test_get_reg_des))
 def test_get_reg(get_many, client):
-    response = client.get("/event/125/reg",
-                          query_string={"key": credentials.api["key"]})
+    response = client.get("/event/125/reg")
     query = "SELECT *                           " \
             "FROM event_registration                           " \
             "WHERE id_event=%sORDER BY date_registered DESC"
@@ -87,8 +82,7 @@ def test_get_reg(get_many, client):
 @mock.patch('api.apiutils.execute_get_many',
             return_value=((), test_get_reg_des))
 def test_get_reg_empty(get_many, client):
-    response = client.get("/event/23/reg",
-                          query_string={"key": credentials.api["key"]})
+    response = client.get("/event/23/reg")
     query = "SELECT *                           " \
             "FROM event_registration                           " \
             "WHERE id_event=%sORDER BY date_registered DESC"

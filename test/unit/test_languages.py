@@ -1,11 +1,9 @@
 from test.unit import client
-from api import credentials
 import mock
 
 
 def test_ping(client):
-    response = client.get('/language/ping',
-                          query_string={"key": credentials.api["key"]})
+    response = client.get('/language/ping')
     assert response.data.decode() == 'pong'
 
 
@@ -21,8 +19,7 @@ language_by_id_desc = (('id', 8, None, 20, 20, 0, False),
 @mock.patch("api.apiutils.execute_get_one",
             return_value=(language_by_id_obj, language_by_id_desc))
 def test_get_event_by_id(get_one, client):
-    response = client.get("/language/1",
-                          query_string={"key": credentials.api["key"]})
+    response = client.get("/language/1")
     query = "SELECT * FROM `languages` WHERE id=%s"
     get_one.assert_called_with(query, '1')
     assert response.status_code == 200
@@ -48,8 +45,7 @@ autocomplete_des = (('id', 8, None, 20, 20, 0, False),
 def test_autocomplete(get_many, client):
     search_text = 'en'
     response = client.get('/language/autocomplete',
-                          query_string={'key': credentials.api['key'],
-                                        'input_text': search_text})
+                          query_string={'input_text': search_text})
     query = "SELECT * FROM languages WHERE languages.name REGEXP %s " \
             "ORDER BY num_speakers DESC;"
     get_many.assert_called_with(query, ('en',), 20)
@@ -66,8 +62,7 @@ def test_autocomplete(get_many, client):
 @mock.patch('api.blueprints.languages.controllers.execute_get_many',
             return_value=((), ()))
 def test_autocomplete_no_query(get_many, client):
-    response = client.get('/language/autocomplete',
-                          query_string={'key': credentials.api['key']})
+    response = client.get('/language/autocomplete')
     get_many.assert_not_called()
     assert response.status_code == 400
 
@@ -76,8 +71,7 @@ def test_autocomplete_no_query(get_many, client):
             return_value=((), ()))
 def test_autocomplete_query_none(get_many, client):
     response = client.get('/language/autocomplete',
-                          query_string={'key': credentials.api['key'],
-                                        'input_text': None})
+                          query_string={'input_text': None})
     get_many.assert_not_called()
     assert response.status_code == 400
     # TODO: This behavior makes the `if input_text is None` check useless
@@ -89,8 +83,7 @@ def test_autocomplete_query_none(get_many, client):
 def test_autocomplete_query_none(get_many, client):
     search_text = 'nonexistentLocationQuery'
     response = client.get('/language/autocomplete',
-                          query_string={'key': credentials.api['key'],
-                                        'input_text': search_text})
+                          query_string={'input_text': search_text})
     query = "SELECT * FROM languages WHERE languages.name REGEXP %s " \
             "ORDER BY num_speakers DESC;"
     get_many.assert_called_with(query, ('nonexistentLocationQuery',), 20)

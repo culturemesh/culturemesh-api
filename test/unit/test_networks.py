@@ -1,12 +1,10 @@
 from test.unit import client
-from api import credentials
 import mock
 import datetime
 
 
 def test_ping(client):
-    response = client.get('/network/ping',
-                          query_string={"key": credentials.api["key"]})
+    response = client.get('/network/ping')
     assert response.data.decode() == 'pong'
 
 
@@ -16,8 +14,7 @@ get_user_count_description = (('user_count', 8, None, 21, 21, 0, False),)
 @mock.patch("api.apiutils.execute_get_one",
             return_value=((16,), get_user_count_description))
 def test_get_user_count(get_one, client):
-    response = client.get("/network/1/user_count",
-                          query_string={"key": credentials.api["key"]})
+    response = client.get("/network/1/user_count")
 
     query = "SELECT count(*) \
              as user_count \
@@ -57,8 +54,7 @@ get_net_by_id_sql_obj = (1, 'Palo Alto', 332851, 'California', 55833,
 @mock.patch("api.apiutils.execute_get_one",
             return_value=(get_net_by_id_sql_obj, get_net_by_id_descrip))
 def test_get_network_by_id(get_one, client):
-    response = client.get("/network/1",
-                          query_string={"key": credentials.api["key"]})
+    response = client.get("/network/1")
 
     query = "SELECT * FROM `networks` WHERE id=%s"
     get_one.assert_called_with(query, '1')
@@ -91,8 +87,7 @@ get_post_count_description = (('post_count', 8, None, 21, 21, 0, False),)
 @mock.patch("api.apiutils.execute_get_one",
             return_value=((48,), get_post_count_description))
 def test_get_post_count(get_one, client):
-    response = client.get("/network/1/post_count",
-                          query_string={"key": credentials.api["key"]})
+    response = client.get("/network/1/post_count")
 
     query = "SELECT count(*) \
              as post_count \
@@ -131,8 +126,7 @@ get_events_des = (('id', 8, None, 20, 20, 0, False),
 @mock.patch('api.apiutils.execute_get_many',
             return_value=(get_events_obj, get_events_des))
 def test_get_events(get_many, client):
-    response = client.get("/network/547/events",
-                          query_string={"key": credentials.api["key"]})
+    response = client.get("/network/547/events")
     query = "SELECT *                           " \
             "FROM events                           " \
             "WHERE id_network=%sORDER BY id DESC"
@@ -173,8 +167,7 @@ get_posts_des = (('id', 8, None, 20, 20, 0, False),
 @mock.patch('api.apiutils.execute_get_many',
             return_value=(get_posts_obj, get_posts_des))
 def test_get_posts(get_many, client):
-    response = client.get("/network/545/posts",
-                          query_string={"key": credentials.api["key"]})
+    response = client.get("/network/545/posts")
     query = "SELECT *                          " \
             "FROM posts                          " \
             "WHERE id_network=%sORDER BY id DESC"
@@ -217,8 +210,7 @@ get_users_obj = ((178, 'sbdbb', 'dndn', 'dbdn', 'snsj',
 @mock.patch('api.apiutils.execute_get_many',
             return_value=(get_users_obj, get_users_des))
 def test_get_users(get_many, client):
-    response = client.get("/network/3161/users",
-                          query_string={"key": credentials.api["key"]})
+    response = client.get("/network/3161/users")
     query = "SELECT users.*, join_date                           " \
             "FROM network_registration                           " \
             "INNER JOIN users                           " \

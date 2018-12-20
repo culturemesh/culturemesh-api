@@ -88,6 +88,24 @@ def test_create_user_email_taken_fail(user_by_email, user_by_username,
     assert response.data.decode() == "Username already taken or invalid params"
 
 
+@mock.patch("api.apiutils.execute_insert")
+@mock.patch("api.blueprints.users.controllers.get_user_by_username",
+            return_value=None)
+@mock.patch("api.blueprints.users.controllers.get_user_by_email",
+            return_value=user_obj)
+def test_create_user_bad_description_fail(user_by_email, user_by_username,
+                                          execute_insert, client):
+    user_def_json = json.dumps({})
+    response = client.post("/user/users", data=user_def_json,
+                           content_type="application/json",
+                           query_string={"key": credentials.api["key"]})
+    user_by_email.assert_not_called()
+    user_by_username.assert_not_called()
+    execute_insert.assert_not_called()
+    assert response.status_code == 400
+    assert response.data.decode() == "Username already taken or invalid params"
+
+
 description = (('id', 8, None, 20, 20, 0, False),
                ('username', 253, None, 30, 30, 0, True),
                ('first_name', 253, None, 30, 30, 0, True),

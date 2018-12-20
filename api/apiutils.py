@@ -100,7 +100,11 @@ def execute_mod(sql_q_format, args):
     """
     connection = mysql.get_db()
     cursor = connection.cursor()
-    cursor.execute(sql_q_format, args)
+    try:
+        cursor.execute(sql_q_format, args)
+    except Exception as e:
+        connection.commit()
+        raise e
     connection.commit()
 
 

@@ -34,8 +34,8 @@ a form of documentation, as they define the expected inputs and outputs of many
 functions. Tests are a great place to look for detailed specifications of
 expected function use and behavior.
 
-Mocking Single-Item Database Retrieval
---------------------------------------
+Mocking Database Retrieval
+--------------------------
 
 When only a single piece of data needs to be retrieved from the database, the
 ``execute_get_one`` function is generally used. It accepts a MySQL query with
@@ -51,8 +51,7 @@ mocked for testing like so:
            ('name', 253, None, 50, 50, 0, True))
 
 
-    @mock.patch("api.apiutils.execute_get_one",
-                return_value=(obj, des))
+    @mock.patch("api.apiutils.execute_get_one", return_value=(obj, des))
     def test_get_by_id(get_one, client):
         response = client.get("/47228",
                               query_string={"key": credentials.api["key"]})
@@ -69,3 +68,6 @@ the endpoint is tested using ``client.get(...)``, the tuple specified in the
 mocking is returned without using the database. We can then use assert
 statements to check that the mocked method was called as expected and that the
 returned data was processed correctly into the final JSON.
+
+The same strategy is used to mock retrieval of multiple items
+(``execute_get_many``) and of all items (``execute_get_all``).

@@ -27,18 +27,50 @@ user_obj['password'] = \
     md5(str(user_obj["password"]).encode('utf-8')).hexdigest()
 
 
+get_user_by_des = (('id', 8, None, 20, 20, 0, False),
+                   ('username', 253, None, 30, 30, 0, True),
+                   ('first_name', 253, None, 30, 30, 0, True),
+                   ('last_name', 253, None, 30, 30, 0, True),
+                   ('email', 253, None, 50, 50, 0, False),
+                   ('password', 253, None, 32, 32, 0, True),
+                   ('role', 2, None, 1, 1, 0, True),
+                   ('register_date', 7, None, 19, 19, 0, False),
+                   ('last_login', 7, None, 19, 19, 0, False),
+                   ('gender', 253, None, 1, 1, 0, True),
+                   ('about_me', 253, None, 500, 500, 0, True),
+                   ('events_upcoming', 2, None, 1, 1, 0, True),
+                   ('events_interested_in', 2, None, 1, 1, 0, True),
+                   ('company_news', 2, None, 1, 1, 0, True),
+                   ('network_activity', 2, None, 1, 1, 0, True),
+                   ('confirmed', 1, None, 1, 1, 0, False),
+                   ('act_code', 253, None, 32, 32, 0, False),
+                   ('img_link', 253, None, 50, 50, 0, True),
+                   ('fp_code', 254, None, 96, 96, 0, True))
+get_user_by_obj = (user_obj['id'], user_obj['username'],
+                   user_obj['first_name'], user_obj['last_name'],
+                   user_obj['email'],
+                   user_obj['password'], 0,
+                   datetime.datetime(2018, 7, 29, 10, 51, 51),
+                   '0000-00-00 00:00:00', 'n', '', None, None, None,
+                   None, 0, '764efa883dda1e11db47671c4a3bbd9e',
+                   'https://www.culturemesh.com/user_images/null',
+                   None)
+
+
 @mock.patch("api.apiutils.execute_insert")
-@mock.patch("api.blueprints.users.controllers.get_user_by_username",
-            return_value=None)
-@mock.patch("api.blueprints.users.controllers.get_user_by_email",
-            return_value=None)
-def test_create_user(user_by_email, user_by_username, execute_insert, client):
+@mock.patch("api.blueprints.users.utils.execute_get_one",
+            return_value=(None, get_user_by_des))
+def test_create_user(get_one, execute_insert, client):
     user_def_json = json.dumps(user_def)
     response = client.post("/user/users", data=user_def_json,
                            content_type="application/json")
 
-    user_by_email.assert_called_with("humanbeing@example.com")
-    user_by_username.assert_called_with("MyUserName3!")
+    by_email_query = "SELECT * FROM users WHERE email=%s"
+    call_email = call(by_email_query, (user_obj['email'],))
+    by_username_query = "SELECT * FROM users WHERE username=%s"
+    call_username = call(by_username_query, (user_obj['username'],))
+
+    get_one.assert_has_calls([call_email, call_username], any_order=False)
 
     form = 'INSERT INTO users (username,first_name,last_name,email,password)' \
            '  values (%s, %s, %s, %s, %s);'
@@ -50,52 +82,65 @@ def test_create_user(user_by_email, user_by_username, execute_insert, client):
     assert response.data.decode() == "OK"
 
 
+def mock_execute_get_one_create_user_username_taken(sql_q_format, args):
+    if 'WHERE email=' in sql_q_format:
+        return None, get_user_by_des
+    elif 'WHERE username=' in sql_q_format:
+        return get_user_by_obj, get_user_by_des
+    else:
+        raise ValueError('execute_get_one for username creation should include'
+                         'either `WHERE email=` or `WHERE username=` in the'
+                         'query.')
+
+
 @mock.patch("api.apiutils.execute_insert")
-@mock.patch("api.blueprints.users.controllers.get_user_by_username",
-            return_value=user_obj)
-@mock.patch("api.blueprints.users.controllers.get_user_by_email",
-            return_value=None)
-def test_create_user_username_taken_fail(user_by_email, user_by_username,
-                                         execute_insert, client):
+@mock.patch("api.blueprints.users.utils.execute_get_one",
+            side_effect=mock_execute_get_one_create_user_username_taken)
+def test_create_user_username_taken_fail(get_one, execute_insert, client):
     user_def_json = json.dumps(user_def)
     response = client.post("/user/users", data=user_def_json,
                            content_type="application/json")
 
-    user_by_username.assert_called_with("MyUserName3!")
+    get_one.assert_called_with("SELECT * FROM users WHERE username=%s",
+                               (user_obj['username'],))
+    execute_insert.assert_not_called()
+    assert response.status_code == 400
+    assert response.data.decode() == "Username already taken or invalid params"
+
+
+def mock_execute_get_one_create_user_email_taken(sql_q_format, args):
+    if 'WHERE email=' in sql_q_format:
+        return get_user_by_obj, get_user_by_des
+    elif 'WHERE username=' in sql_q_format:
+        return None, get_user_by_des
+    else:
+        raise ValueError('execute_get_one for username creation should include'
+                         'either `WHERE email=` or `WHERE username=` in the'
+                         'query.')
+
+
+@mock.patch("api.apiutils.execute_insert")
+@mock.patch("api.blueprints.users.utils.execute_get_one",
+            side_effect=mock_execute_get_one_create_user_email_taken)
+def test_create_user_email_taken_fail(get_one, execute_insert, client):
+    user_def_json = json.dumps(user_def)
+    response = client.post("/user/users", data=user_def_json,
+                           content_type="application/json")
+
+    get_one.assert_called_with("SELECT * FROM users WHERE email=%s",
+                               (user_obj['email'],))
     execute_insert.assert_not_called()
     assert response.status_code == 400
     assert response.data.decode() == "Username already taken or invalid params"
 
 
 @mock.patch("api.apiutils.execute_insert")
-@mock.patch("api.blueprints.users.controllers.get_user_by_username",
-            return_value=None)
-@mock.patch("api.blueprints.users.controllers.get_user_by_email",
-            return_value=user_obj)
-def test_create_user_email_taken_fail(user_by_email, user_by_username,
-                                      execute_insert, client):
-    user_def_json = json.dumps(user_def)
-    response = client.post("/user/users", data=user_def_json,
-                           content_type="application/json")
-
-    user_by_email.assert_called_with("humanbeing@example.com")
-    execute_insert.assert_not_called()
-    assert response.status_code == 400
-    assert response.data.decode() == "Username already taken or invalid params"
-
-
-@mock.patch("api.apiutils.execute_insert")
-@mock.patch("api.blueprints.users.controllers.get_user_by_username",
-            return_value=None)
-@mock.patch("api.blueprints.users.controllers.get_user_by_email",
-            return_value=user_obj)
-def test_create_user_bad_description_fail(user_by_email, user_by_username,
-                                          execute_insert, client):
+@mock.patch("api.blueprints.users.utils.execute_get_one")
+def test_create_user_bad_description_fail(get_one, execute_insert, client):
     user_def_json = json.dumps({})
     response = client.post("/user/users", data=user_def_json,
                            content_type="application/json")
-    user_by_email.assert_not_called()
-    user_by_username.assert_not_called()
+    get_one.assert_not_called()
     execute_insert.assert_not_called()
     assert response.status_code == 400
     assert response.data.decode() == "Username already taken or invalid params"

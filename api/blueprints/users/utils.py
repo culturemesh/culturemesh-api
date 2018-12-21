@@ -13,15 +13,11 @@ def get_user_by_email(email):
     :param email: email of CultureMesh account (string)
     :return: user_obj from db or None if no corresponding found.
     """
-    connection = mysql.get_db()
-    cursor = connection.cursor()
     query = "SELECT * FROM users WHERE email=%s"
-    cursor.execute(query, (email,))
-    user_db_tuple = cursor.fetchone()
-    if user_db_tuple is None:
+    item, desc = execute_get_one(query, (email,))
+    if item is None:
         return None
-    user = convert_objects([user_db_tuple], cursor.description)[0]
-    cursor.close()
+    user = convert_objects([item], desc)[0]
     return user
 
 
@@ -51,15 +47,11 @@ def get_user_by_username(username):
     :param username: id of CultureMesh account (string)
     :return: user_obj from db or None if no corresponding found.
     """
-    connection = mysql.get_db()
-    cursor = connection.cursor()
     query = "SELECT * FROM users WHERE username=%s"
-    cursor.execute(query, (username,))
-    user_db_tuple = cursor.fetchone()
-    if user_db_tuple is None:
+    item, desc = execute_get_one(query, (username,))
+    if item is None:
         return None
-    user = convert_objects([user_db_tuple], cursor.description)[0]
-    cursor.close()
+    user = convert_objects([item], desc)[0]
     return user
 
 

@@ -1,6 +1,7 @@
 from test.unit import client
 import mock
 import datetime
+import json
 
 
 def test_ping(client):
@@ -90,3 +91,59 @@ def test_get_reg_empty(get_many, client):
     assert response.status_code == 200
     exp = []
     assert response.json == exp
+
+
+new_event_def = {"id_network": 1,
+                 "id_host": 2,
+                 "event_date": "2018-12-24T22:17:30.900Z",
+                 "title": "Title!",
+                 "address_1": "Address1",
+                 "address_2": "Address2",
+                 "country": "Country",
+                 "city": "City",
+                 "region": "Region",
+                 "description": "The Event Description!"}
+new_event_json = json.dumps(new_event_def)
+
+
+new_event_obj = (65,)
+new_event_def = (('id', 8, None, 20, 20, 0, False),)
+
+
+@mock.patch('api.apiutils.execute_insert')
+@mock.patch('api.blueprints.users.utils.execute_insert')
+@mock.patch('api.blueprints.events.controllers.execute_get_one',
+            return_value=(new_event_obj, new_event_def))
+@mock.patch('api.blueprints.events.controllers.get_curr_user_id',
+            return_value=2)
+@mock.patch('api.blueprints.accounts.controllers.auth.authenticate',
+            return_value=True)
+def test_new_event(auth, get_user_id, get_one, execute_insert_events,
+                   execute_insert_apiutils, client):
+    response = client.post('/event/new', data=new_event_json,
+                           content_type='application/json')
+    auth.assert_called_with(None, None)
+    get_user_id.assert_called_with()
+
+    insert_query = 'INSERT INTO events (id_network,id_host,event_date,' \
+                   'title,address_1,address_2,country,city,region,' \
+                   'description)  values ' \
+                   '(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);'
+    insert_args = (1, 2, '2018-12-24T22:17:30.900Z', 'Title!', 'Address1',
+                   'Address2', 'Country', 'City', 'Region',
+                   'The Event Description!')
+
+    execute_insert_apiutils.assert_called_with(insert_query, insert_args)
+
+    join_event_query = "INSERT INTO event_registration VALUES " \
+                       "(%s,%s,CURRENT_TIMESTAMP, %s)"
+    join_event_args = (2, 65, 'host')
+
+    execute_insert_events.assert_called_with(join_event_query, join_event_args)
+
+    get_event_id_query = "SELECT id FROM events WHERE id_host=%s AND id_" \
+                         "network=%s ORDER BY id DESC LIMIT 1"
+    get_event_id_args = (2, 1)
+    get_one.assert_called_with(get_event_id_query, get_event_id_args)
+    assert response.status_code == 200
+    assert response.data.decode() == 'OK'

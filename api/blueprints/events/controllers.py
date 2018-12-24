@@ -70,6 +70,7 @@ def make_new_event():
         if event and "id_host" in event and event["id_host"] == \
                 get_curr_user_id():
             return execute_put_by_id(req_obj, "events")
+        # TODO: Should return an error if these conditions are not met
 
 
 @events.route("/currentUserEventsByNetwork/<network_id>", methods=["GET"])

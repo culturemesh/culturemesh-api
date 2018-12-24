@@ -136,7 +136,7 @@ def test_get_replies(get_many, client):
     assert response.json == exp
 
 
-new_post_def = {'id_network': 1,
+new_post_def = {'id_network': 2,
                 'post_text': 'New Post',
                 'vid_link': 'videoLink',
                 'img_link': 'imageLink'}
@@ -155,7 +155,7 @@ def test_create_post(auth, get_user_id, execute_insert, client):
     query = 'INSERT INTO posts ' \
             '(id_user,id_network,post_text,vid_link,img_link)  values ' \
             '(%s, %s, %s, %s, %s);'
-    args = (1, 1, 'New Post', 'videoLink', 'imageLink')
+    args = (1, 2, 'New Post', 'videoLink', 'imageLink')
     execute_insert.assert_called_with(query, args)
 
     assert response.status_code == 200

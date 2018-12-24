@@ -93,11 +93,6 @@ def delete_event():
     event_id = request.args.get('id')
     if not event_id or not event_id.isdigit():
         return make_response("Invalid Input", HTTPStatus.BAD_REQUEST)
-
-    connection = mysql.get_db()
-    cursor = connection.cursor()
-    cursor.execute("DELETE FROM event_registration WHERE id_event=%s", (event_id))
-    cursor.execute("DELETE FROM events WHERE id=%s", (event_id))
-    cursor.close()
-    connection.commit()
+    execute_mod('DELETE FROM event_registration WHERE id_event=%s', event_id)
+    execute_mod('DELETE FROM events WHERE id=%s', event_id)
     return make_response("OK", HTTPStatus.OK)

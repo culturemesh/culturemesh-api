@@ -163,7 +163,6 @@ def test_create_post(auth, get_user_id, execute_insert, client):
 
 
 reply_def = {'id_parent': 2,
-             'id_user': 1,
              'id_network': 3,
              'reply_text': 'Some post reply!'}
 reply_json = json.dumps(reply_def)

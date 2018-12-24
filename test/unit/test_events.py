@@ -93,17 +93,16 @@ def test_get_reg_empty(get_many, client):
     assert response.json == exp
 
 
-new_event_def = {"id_network": 1,
-                 "id_host": 2,
-                 "event_date": "2018-12-24T22:17:30.900Z",
-                 "title": "Title!",
-                 "address_1": "Address1",
-                 "address_2": "Address2",
-                 "country": "Country",
-                 "city": "City",
-                 "region": "Region",
-                 "description": "The Event Description!"}
-new_event_json = json.dumps(new_event_def)
+new_event_spec = {"id_network": 1,
+                  "id_host": 2,
+                  "event_date": "2018-12-24T22:17:30.900Z",
+                  "title": "Title!",
+                  "address_1": "Address1",
+                  "address_2": "Address2",
+                  "country": "Country",
+                  "city": "City",
+                  "region": "Region",
+                  "description": "The Event Description!"}
 
 
 new_event_obj = (65,)
@@ -120,6 +119,7 @@ new_event_def = (('id', 8, None, 20, 20, 0, False),)
             return_value=True)
 def test_new_event(auth, get_user_id, get_one, execute_insert_events,
                    execute_insert_apiutils, client):
+    new_event_json = json.dumps(new_event_spec)
     response = client.post('/event/new', data=new_event_json,
                            content_type='application/json')
     auth.assert_called_with(None, None)
@@ -145,5 +145,53 @@ def test_new_event(auth, get_user_id, get_one, execute_insert_events,
                          "network=%s ORDER BY id DESC LIMIT 1"
     get_event_id_args = (2, 1)
     get_one.assert_called_with(get_event_id_query, get_event_id_args)
+    assert response.status_code == 200
+    assert response.data.decode() == 'OK'
+
+
+new_event_spec['id'] = 64
+update_event_obj = (64, 1, 157, datetime.datetime(2018, 7, 24, 19, 36, 2),
+                    datetime.datetime(2018, 7, 24, 7, 5), 'Test Event 2',
+                    'Address1', '', 'City', 'Country',
+                    "let;I'll;ajsdfila;sgr", 'Region')
+update_event_des = (('id', 8, None, 20, 20, 0, False),
+                    ('id_network', 8, None, 20, 20, 0, False),
+                    ('id_host', 8, None, 20, 20, 0, False),
+                    ('date_created', 7, None, 19, 19, 0, False),
+                    ('event_date', 12, None, 19, 19, 0, False),
+                    ('title', 253, None, 50, 50, 0, False),
+                    ('address_1', 253, None, 40, 40, 0, False),
+                    ('address_2', 253, None, 30, 30, 0, True),
+                    ('city', 253, None, 100, 100, 0, True),
+                    ('country', 253, None, 50, 50, 0, True),
+                    ('description', 253, None, 500, 500, 0, False),
+                    ('region', 253, None, 50, 50, 0, True))
+
+
+@mock.patch('api.apiutils.execute_insert')
+@mock.patch('api.apiutils.execute_get_one',
+            return_value=(update_event_obj, update_event_des))
+@mock.patch('api.blueprints.events.controllers.get_curr_user_id',
+            return_value=157)
+@mock.patch('api.blueprints.accounts.controllers.auth.authenticate',
+            return_value=True)
+def test_update_event(auth, get_id, get_one, insert, client):
+    new_event_json = json.dumps(new_event_spec)
+    response = client.put('/event/new', data=new_event_json,
+                          content_type='application/json')
+    auth.assert_called_with(None, None)
+    get_id.assert_called_with()
+
+    get_one_format = 'SELECT * FROM `events` WHERE id=%s'
+    get_one.assert_called_with(get_one_format, 64)
+
+    insert_format = 'UPDATE events SET id_network=%s, id_host=%s, ' \
+                    'event_date=%s, title=%s, address_1=%s, address_2=%s, ' \
+                    'country=%s, city=%s, region=%s, description=%s WHERE id=%s'
+    insert_args = (1, 157, '2018-12-24T22:17:30.900Z', 'Title!', 'Address1',
+                   'Address2', 'Country', 'City', 'Region',
+                   'The Event Description!', 64)
+    insert.assert_called_with(insert_format, insert_args)
+
     assert response.status_code == 200
     assert response.data.decode() == 'OK'

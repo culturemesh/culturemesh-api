@@ -2,6 +2,7 @@ from test.unit import client
 import mock
 import datetime
 import json
+from mock import call
 
 
 def test_ping(client):
@@ -193,5 +194,20 @@ def test_update_event(auth, get_id, get_one, insert, client):
                    'The Event Description!', 64)
     insert.assert_called_with(insert_format, insert_args)
 
+    assert response.status_code == 200
+    assert response.data.decode() == 'OK'
+
+
+@mock.patch('api.blueprints.events.controllers.execute_mod')
+@mock.patch('api.blueprints.accounts.controllers.auth.authenticate',
+            return_value=True)
+def test_delete_event(auth, mod, client):
+    event_id = 1
+    response = client.delete('/event/delete', query_string={'id': event_id})
+    auth.assert_called_with(None, None)
+    calls = [call('DELETE FROM event_registration WHERE id_event=%s',
+                  str(event_id)),
+             call('DELETE FROM events WHERE id=%s', str(event_id))]
+    mod.assert_has_calls(calls, any_order=False)
     assert response.status_code == 200
     assert response.data.decode() == 'OK'

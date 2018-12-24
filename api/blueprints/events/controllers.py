@@ -90,6 +90,7 @@ def user_events_for_network(network_id):
 @events.route("/delete", methods=["DELETE"])
 @auth.login_required
 def delete_event():
+    # TODO: Only an event's host or creator should be able to delete it
     event_id = request.args.get('id')
     if not event_id or not event_id.isdigit():
         return make_response("Invalid Input", HTTPStatus.BAD_REQUEST)

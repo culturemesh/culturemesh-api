@@ -211,3 +211,96 @@ def test_delete_event(auth, mod, client):
     mod.assert_has_calls(calls, any_order=False)
     assert response.status_code == 200
     assert response.data.decode() == 'OK'
+
+
+get_by_net_usr_obj = ((157, 122, datetime.datetime(2018, 8, 26, 21, 26, 37),
+                       'host', 122, 1, 157,
+                       datetime.datetime(2018, 8, 26, 21, 26, 37),
+                       datetime.datetime(2018, 8, 26, 18, 52, 36),
+                       'New Arrival Information Session', '123 West Street',
+                       None, 'SomeCity', 'ThisCountry',
+                       'Are you new to the area? Come to ask questions and get '
+                       'advice from our panel of residents.', 'MyRegion'),
+                      (157, 121, datetime.datetime(2018, 10, 21, 16, 25, 13),
+                       'guest', 121, 1, 157,
+                       datetime.datetime(2018, 8, 26, 21, 23, 32),
+                       datetime.datetime(2018, 8, 26, 16, 11, 31),
+                       'Live Music at the Park', '123 North Street', None,
+                       'AnyCity', 'ThisCountry',
+                       'Come enjoy an afternoon at the park listening to the '
+                       'songs of our shared history.', 'SomeRegion'),
+                      (157, 120, datetime.datetime(2018, 8, 26, 21, 21, 49),
+                       'host', 120, 1, 157,
+                       datetime.datetime(2018, 8, 26, 21, 21, 49),
+                       datetime.datetime(2018, 8, 26, 21, 19, 47),
+                       'Community Picnic', '123 Main Street', None, 'AnyTown',
+                       'ThisCountry',
+                       'Come for a celebration with food from home and new '
+                       'friends!', 'MyState'))
+get_by_net_usr_def = (('id_guest', 8, None, 20, 20, 0, False),
+                      ('id_event', 8, None, 20, 20, 0, False),
+                      ('date_registered', 7, None, 19, 19, 0, False),
+                      ('job', 253, None, 50, 50, 0, True),
+                      ('id', 8, None, 20, 20, 0, False),
+                      ('id_network', 8, None, 20, 20, 0, False),
+                      ('id_host', 8, None, 20, 20, 0, False),
+                      ('date_created', 7, None, 19, 19, 0, False),
+                      ('event_date', 12, None, 19, 19, 0, False),
+                      ('title', 253, None, 50, 50, 0, False),
+                      ('address_1', 253, None, 40, 40, 0, False),
+                      ('address_2', 253, None, 30, 30, 0, True),
+                      ('city', 253, None, 100, 100, 0, True),
+                      ('country', 253, None, 50, 50, 0, True),
+                      ('description', 253, None, 500, 500, 0, False),
+                      ('region', 253, None, 50, 50, 0, True))
+
+
+@mock.patch('api.apiutils.execute_get_many',
+            return_value=(get_by_net_usr_obj, get_by_net_usr_def))
+@mock.patch('api.blueprints.events.controllers.get_curr_user_id',
+            return_value=157)
+@mock.patch('api.blueprints.accounts.controllers.auth.authenticate',
+            return_value=True)
+def test_get_events_by_network_user(auth, get_user_id, get_many, client):
+    response = client.get('/event/currentUserEventsByNetwork/1')
+    auth.assert_called_with(None, None)
+    get_user_id.assert_called_with()
+
+    query = 'SELECT *                          ' \
+            'FROM event_registration INNER JOIN events ON events.id = ' \
+            'event_registration.id_event                          ' \
+            'WHERE (id_guest=%s OR id_host=%s) AND id_network=%sORDER BY ' \
+            'id DESC'
+    args = (157, 157, '1')
+    get_many.assert_called_with(query, args, 100)
+    assert response.status_code == 200
+    exp = [{'address_1': '123 West Street', 'address_2': None,
+            'city': 'SomeCity', 'country': 'ThisCountry',
+            'date_created': 'Sun, 26 Aug 2018 21:26:37 GMT',
+            'date_registered': 'Sun, 26 Aug 2018 21:26:37 GMT',
+            'description': 'Are you new to the area? Come to ask questions '
+                           'and get advice from our panel of residents.',
+            'event_date': 'Sun, 26 Aug 2018 18:52:36 GMT', 'id': 122,
+            'id_event': 122, 'id_guest': 157, 'id_host': 157, 'id_network': 1,
+            'job': 'host', 'region': 'MyRegion',
+            'title': 'New Arrival Information Session'},
+           {'address_1': '123 North Street', 'address_2': None,
+            'city': 'AnyCity', 'country': 'ThisCountry',
+            'date_created': 'Sun, 26 Aug 2018 21:23:32 GMT',
+            'date_registered': 'Sun, 21 Oct 2018 16:25:13 GMT',
+            'description': 'Come enjoy an afternoon at the park listening to '
+                           'the songs of our shared history.',
+            'event_date': 'Sun, 26 Aug 2018 16:11:31 GMT', 'id': 121,
+            'id_event': 121, 'id_guest': 157, 'id_host': 157, 'id_network': 1,
+            'job': 'guest', 'region': 'SomeRegion',
+            'title': 'Live Music at the Park'},
+           {'address_1': '123 Main Street', 'address_2': None,
+            'city': 'AnyTown', 'country': 'ThisCountry',
+            'date_created': 'Sun, 26 Aug 2018 21:21:49 GMT',
+            'date_registered': 'Sun, 26 Aug 2018 21:21:49 GMT',
+            'description': 'Come for a celebration with food from home and new '
+                           'friends!',
+            'event_date': 'Sun, 26 Aug 2018 21:19:47 GMT', 'id': 120,
+            'id_event': 120, 'id_guest': 157, 'id_host': 157, 'id_network': 1,
+            'job': 'host', 'region': 'MyState', 'title': 'Community Picnic'}]
+    assert response.json == exp

@@ -160,3 +160,29 @@ def test_create_post(auth, get_user_id, execute_insert, client):
 
     assert response.status_code == 200
     assert response.data.decode() == 'OK'
+
+
+reply_def = {'id_parent': 2,
+             'id_user': 1,
+             'id_network': 3,
+             'reply_text': 'Some post reply!'}
+reply_json = json.dumps(reply_def)
+
+
+@mock.patch('api.apiutils.execute_insert')
+@mock.patch('api.blueprints.posts.controllers.get_curr_user_id', return_value=1)
+@mock.patch('api.blueprints.accounts.controllers.auth.authenticate',
+            return_value=True)
+def test_create_reply(auth, get_user_id, execute_insert, client):
+    response = client.post('/post/2/reply', data=reply_json,
+                           content_type='application/json')
+    auth.assert_called_with(None, None)
+    get_user_id.assert_called_with()
+    query = 'INSERT INTO post_replies ' \
+            '(id_parent,id_user,id_network,reply_text)  ' \
+            'values (%s, %s, %s, %s);'
+    args = (2, 1, 3, 'Some post reply!')
+    execute_insert.assert_called_with(query, args)
+
+    assert response.status_code == 200
+    assert response.data.decode() == 'OK'

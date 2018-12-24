@@ -54,13 +54,11 @@ def make_new_event():
         content = request.get_json()
         if not content:
             content = request.form
-        connection = mysql.get_db()
-        cursor = connection.cursor()
-        cursor.execute("SELECT id FROM events WHERE id_host=%s AND id_"
-                       "network=%s ORDER BY id DESC LIMIT 1",
-                       (content["id_host"], content["id_network"]))
-        obj = cursor.fetchone()
-        event_id = convert_objects([obj], cursor.description)[0]["id"]
+        query = "SELECT id FROM events WHERE id_host=%s AND id_" \
+                "network=%s ORDER BY id DESC LIMIT 1"
+        args = (content["id_host"], content["id_network"])
+        item, desc = execute_get_one(query, args)
+        event_id = convert_objects([item], desc)[0]["id"]
         # We also need to "register" them attending their own event.
         _add_user_to_event(content["id_host"], event_id, "host")
         return response

@@ -26,6 +26,111 @@ API methods and objects.
   without relying on a live (even if rehearsal) site is a
   great idea for future work.
 
+Running Locally
+---------------
+
+#. Clone the repository
+
+    .. code-block:: console
+
+        $ git clone https://github.com/Code-the-Change/culturemesh-api.git
+
+#. Install python from https://python.org or via your favorite package manager
+
+#. Install ``virtualenv``
+
+    .. code-block:: console
+
+      $ pip3 install virtualenv
+
+#. If you get a note from ``pip`` about ``virtualenv`` not being in your
+   ``PATH``, you need to perform this step. ``PATH`` is a variable accessible
+   from any bash terminal you run, and it tells bash where to look for the
+   commands you enter. It is a list of directories separated by ``:``. You can
+   see yours by running ``echo $PATH``. To run ``virtualenv`` commands, you need
+   to add python's packages to your ``PATH`` by editing or creating the file
+   ``~/.bash_profile`` on MacOS. To that file add the following lines:
+
+    .. code-block:: console
+
+      PATH="<Path from pip message>:$PATH"
+      export PATH
+
+#. Then you can install dependencies into a virtual environment
+
+    .. code-block:: console
+
+      $ cd culturemesh-api
+      $ virtualenv .env
+      $ source .env/bin/activate
+      $ pip install -r requirements.txt
+
+#. Create a local testing database. If you have access to the rehearsal database
+   on the server, download it through the web interface instead of creating a
+   new one.
+
+#. Install ``mysql`` and start the local server. For example, you can use
+   homebrew like so:
+
+    .. code-block:: console
+
+        $ brew install mysql
+
+#. The server by default has no root password, does not start automatically, and
+   is only accessible over localhost. Start it, login, and create a new
+   database.
+
+    .. code-block:: console
+
+        $ mysql.server start
+        $ mysql -uroot
+
+   This will get you into a SQL command prompt, where you should run the
+   following to create the database:
+
+    .. code-block:: mysql
+
+        mysql> CREATE DATABASE <database_name>
+
+    .. note:: It would be great to simulate a mysql user with limited privileges,
+        but unfortunately this is more difficult to get working locally. See the
+        following links for information on how to do so.
+
+        https://www.digitalocean.com/community/tutorials/how-to-create-a-new-user-and-grant-permissions-in-mysql
+
+        https://stackoverflow.com/questions/22267114/python-mysqldb-error-1045-access-denied-for-user
+
+        https://stackoverflow.com/questions/6885164/pymysql-cant-connect-to-mysql-on-localhost
+
+        https://stackoverflow.com/questions/6562691/python-3-2-script-to-connect-to-local-mysql-database#6562701
+
+    Now you can load the downloaded file into the database.
+
+    .. code-block:: mysql
+
+        mysql> USE <database_name>;
+        mysql> SOURCE <path_to_database_file>;
+        mysql> SHOW TABLES;
+
+    After the ``SHOW TABLES;`` command, you should see a bunch of tables listed.
+
+#. Follow the instructions in :ref:`secrets` to create the credentials file.
+   Fill in the database information for the root user as follows (if you left
+   the root user without a password):
+
+    .. code-block:: python
+
+    sql = {
+      'MYSQL_DATABASE_USER': 'root',
+      'MYSQL_DATABASE_PASSWORD': None,
+      'MYSQL_DATABASE_DB': '<database_name>',
+      'MYSQL_DATABASE_HOST': 'localhost'
+    }
+
+#. Now, you can run the API locally by executing ``python run.py``. Then,
+   send API requests (e.g. via Postman) to http://127.0.0.1:5000 as displayed
+   in the output from running the python file.
+
 Contributing
 ------------
 

@@ -4,6 +4,7 @@ __pycache__/
 api-env/
 .env/
 docs/build
+venv/
 
 # Do not remove
 api/credentials.py

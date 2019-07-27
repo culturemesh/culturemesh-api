@@ -1,28 +1,28 @@
-from flask import Blueprint, request, g
-from api import require_apikey
+from flask import Blueprint, request
 from api.blueprints.accounts.controllers import auth
 from api.apiutils import *
+from api.blueprints.users.utils import get_curr_user_id
 
 
 posts = Blueprint('post', __name__)
 
+
 @posts.route("/ping")
-@require_apikey
 def test():
     return "pong"
 
+
 @posts.route("/<post_id>", methods=["GET"])
-@require_apikey
 def get_post(post_id):
     return get_by_id("posts", post_id)
 
+
 @posts.route("/reply/<reply_id>", methods=["GET"])
-@require_apikey
 def get_post_reply(reply_id):
     return get_by_id("post_replies", reply_id)
 
+
 @posts.route("/<post_id>/replies", methods=["GET"])
-@require_apikey
 def get_post_replies(post_id):
     return get_paginated("SELECT post_replies.* \
                           FROM posts \
@@ -37,7 +37,6 @@ def get_post_replies(post_id):
 
 
 @posts.route("/<post_id>/reply_count", methods=["GET"])
-@require_apikey
 def get_post_reply_count(post_id):
     query = "SELECT count(*) \
              as reply_count \
@@ -50,11 +49,11 @@ def get_post_reply_count(post_id):
 @auth.login_required
 def make_new_post():
     req_obj = make_fake_request_obj(request)
-    req_obj.form["id_user"] = g.user.id
+    req_obj.form["id_user"] = get_curr_user_id()
     if request.method == "POST":
         # POST
-        content_fields = ['id_user', 'id_network', \
-                          'post_text', 'vid_link', \
+        content_fields = ['id_user', 'id_network',
+                          'post_text', 'vid_link',
                           'img_link']
         return execute_post_by_table(req_obj, content_fields, "posts")
     else:
@@ -63,15 +62,16 @@ def make_new_post():
         post = get_response_content_as_json(post)
         if not post:
             return
-        if post and "id_user" in post and post["id_user"] == g.user.id:
+        if post and "id_user" in post and post["id_user"] == get_curr_user_id():
             return execute_put_by_id(req_obj, "posts")
+
 
 @posts.route("/<post_id>/reply", methods=["POST", "PUT"])
 @auth.login_required
 def make_new_post_reply(post_id):
     # First, we make a generic object so we can set attributes (via .form as opposed to ['form'])
     req_obj = make_fake_request_obj(request)
-    req_obj.form["id_user"] = g.user.id
+    req_obj.form["id_user"] = get_curr_user_id()
     if request.method == "POST":
         # POST
         content_fields = ['id_parent', 'id_user', 'id_network', 'reply_text']
@@ -82,6 +82,7 @@ def make_new_post_reply(post_id):
         reply = get_response_content_as_json(reply)
         if not reply:
             return
-        if reply and "id_user" in reply and reply["id_user"] == g.user.id:
+        if reply and "id_user" in reply and reply["id_user"] == \
+                get_curr_user_id():
             return execute_put_by_id(req_obj, "post_replies")
 

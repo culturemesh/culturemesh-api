@@ -21,3 +21,5 @@ AddHandler fcgid-script .fcgi
 #
 RewriteCond %{REQUEST_FILENAME} !=/home1/culturp7/public_html/api-dev/v1/api.fcgi
 RewriteRule ^(.*)$ api.fcgi/$1 [QSA,L]
+# Pass the Authorization header, which Apache2 does not by default
+SetEnvIf Authorization "(.+)" HTTP_AUTHORIZATION=$1

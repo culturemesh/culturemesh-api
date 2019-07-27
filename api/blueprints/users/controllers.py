@@ -1,5 +1,4 @@
-from flask import Blueprint, request, g
-from api import require_apikey
+from flask import Blueprint, request
 from hashlib import md5
 from pymysql.err import IntegrityError
 from api.blueprints.accounts.controllers import auth
@@ -15,7 +14,6 @@ Controller for all user endpoints. Check the Swagger spec for more information o
 
 
 @users.route("/ping")
-@require_apikey
 def test():
     return "pong"
 
@@ -24,46 +22,46 @@ def handle_users_get(request):
     if "near_location" not in request.args:
         return make_response("No near location", HTTPStatus.METHOD_NOT_ALLOWED)
     count = int(request.args.get("count", 100))
-    connection = mysql.get_db()
     # Parse id's into collection
     near_ids = request.args["near_location"].split(",")
-    network_cursor = connection.cursor()
     near_loc_query = "id_country_cur=%s AND id_region_cur=%s AND id_city_cur=%s"
     if "language" in request.args:
         near_ids.extend([str(request.args["language"])])
-        network_cursor.execute("SELECT id FROM networks WHERE " + near_loc_query + " AND id_language_origin=%s",
-                               tuple(near_ids))
+        query = "SELECT id FROM networks WHERE " + near_loc_query + \
+                " AND id_language_origin=%s"
     elif "from_location" in request.args:
         near_ids.extend(request.args["from_location"].split(","))
-        network_cursor.execute("SELECT id FROM networks WHERE " + near_loc_query + " AND " +
-                               near_loc_query.replace("cur", "origin"),
-                               tuple(near_ids))
+        query = "SELECT id FROM networks WHERE " + near_loc_query + " AND " \
+                + near_loc_query.replace("cur", "origin")
     else:
-        return make_response("No language/from location", HTTPStatus.METHOD_NOT_ALLOWED)
-    network_ids = network_cursor.fetchall()
-    network_cursor.close()
+        return make_response("No language/from location",
+                             HTTPStatus.METHOD_NOT_ALLOWED)
+    network_ids, network_des = execute_get_all(query, tuple(near_ids))
+
     if len(network_ids) == 0:
         return make_response(jsonify([]), HTTPStatus.OK)
     # Now we need to get all the users subscribed to these networks.
-    user_id_cursor = connection.cursor()
-    sql_query_string = "SELECT id_user FROM network_registration WHERE id_network IN %s"
+    sql_query_string = "SELECT id_user FROM network_registration " \
+                       "WHERE id_network IN %s"
     sql_order_string = "ORDER BY id_user DESC"
     if "max_id" in request.args:
         sql_query_string += " AND id_user<=%s"
-        user_id_cursor.execute(sql_query_string + sql_order_string, (network_ids, request.args["max_id"]))
+        args = (network_ids, request.args["max_id"])
     else:
-        user_id_cursor.execute(sql_query_string + sql_order_string, (network_ids,))
-    user_ids = user_id_cursor.fetchmany(count)
-    user_id_cursor.close()
+        args = (network_ids,)
+    user_ids, user_id_des = \
+        execute_get_many(sql_query_string + sql_order_string, args, count)
+
     if len(user_ids) == 0:
         return make_response(jsonify([]), HTTPStatus.OK)
-    users_cursor = connection.cursor()
-    users_cursor.execute("SELECT * FROM users WHERE id IN %s", (tuple(user_ids),))
-    users_obj = convert_objects(users_cursor.fetchall(), users_cursor.description)
-    # remove password field
-    users_obj.pop('password', None)
-    users_obj.pop('email', None)
-    users_cursor.close()
+    user_query = "SELECT * FROM users WHERE id IN %s"
+    user_arg = (tuple(user_ids),)
+    user_items, user_descr = execute_get_all(user_query, user_arg)
+
+    users_obj = convert_objects(user_items, user_descr)
+    for user_obj in users_obj:
+        user_obj.pop('password', None)
+        user_obj.pop('email', None)
 
     return make_response(jsonify(users_obj), HTTPStatus.OK)
 
@@ -84,7 +82,6 @@ def validate_new_user(form, content_fields):
 
 
 @users.route("/users", methods=["GET", "POST"])
-@require_apikey
 def users_query():
     if request.method == 'GET':
         return handle_users_get(request)
@@ -108,11 +105,10 @@ def users_query():
 
 
 @users.route("/update_user", methods=["PUT"])
-@require_apikey
 @auth.login_required
 def update_user():
     req_obj = make_fake_request_obj(request)
-    req_obj.form["id"] = g.user.id
+    req_obj.form["id"] = get_curr_user_id()
     if 'password' in req_obj.form:
         # We now need to convert the user password into a hash.
         password = str(req_obj.form['password'])
@@ -121,13 +117,11 @@ def update_user():
 
 
 @users.route("/<user_id>", methods=["GET"])
-@require_apikey
 def get_user(user_id):
     return get_by_id("users", user_id, ["email", "password"])
 
 
 @users.route("/<user_id>/networks", methods=["GET"])
-@require_apikey
 def get_user_networks(user_id):
     return get_paginated("SELECT networks.*, join_date \
                           FROM network_registration \
@@ -142,7 +136,6 @@ def get_user_networks(user_id):
 
 
 @users.route("/<user_id>/posts", methods=["GET"])
-@require_apikey
 def get_user_posts(user_id):
     return get_paginated("SELECT * \
                           FROM posts \
@@ -155,7 +148,6 @@ def get_user_posts(user_id):
 
 
 @users.route("/<user_id>/events", methods=["GET"])
-@require_apikey
 def get_user_events(user_id):
     return get_paginated("SELECT events.* \
                           FROM event_registration \
@@ -171,12 +163,11 @@ def get_user_events(user_id):
 
 @users.route("/joinEvent/<event_id>", methods=["POST"])
 @auth.login_required
-@require_apikey
 def add_user_to_event(event_id):
     # First, check that event and user are valid
     if not event_exists(event_id):
         return make_response("Invalid Event Id", HTTPStatus.METHOD_NOT_ALLOWED)
-    user_id = g.user.id
+    user_id = get_curr_user_id()
     if "role" not in request.args or (request.args["role"] != "host" and request.args["role"] != "guest"):
         return make_response("Invalid role parameter.", HTTPStatus.METHOD_NOT_ALLOWED)
     _add_user_to_event(user_id, event_id, request.args["role"])
@@ -185,11 +176,10 @@ def add_user_to_event(event_id):
 
 @users.route("/leaveEvent/<event_id>", methods=["DELETE"])
 @auth.login_required
-@require_apikey
 def remove_user_from_event(event_id):
     if not event_exists(event_id):
         return make_response("Invalid Event Id", HTTPStatus.BAD_REQUEST)
-    user_id = g.user.id
+    user_id = get_curr_user_id()
     _remove_user_from_event(user_id, event_id)
     return make_response("OK", HTTPStatus.OK)
 
@@ -197,29 +187,28 @@ def remove_user_from_event(event_id):
 @users.route("/joinNetwork/<network_id>", methods=["POST"])
 @auth.login_required
 def add_user_to_network(network_id):
-    user_id = g.user.id
+    user_id = get_curr_user_id()
     if not network_exists(network_id):
-        return make_response("Invalid Network Id", HTTPStatus.METHOD_NOT_ALLOWED)
-    connection = mysql.get_db()
-    network_registration_cursor = connection.cursor()
+        return make_response("Invalid Network Id",
+                             HTTPStatus.METHOD_NOT_ALLOWED)
+    query = "INSERT INTO network_registration VALUES " \
+            "(%s, %s, CURRENT_TIMESTAMP)"
+    args = (str(user_id), str(network_id))
     try:
-        network_registration_cursor.execute("INSERT INTO network_registration VALUES (%s, %s, CURRENT_TIMESTAMP)",
-                                            (str(user_id), str(network_id)))
+        execute_mod(query, args)
     except IntegrityError:
-        connection.commit()
-        return make_response("User already subscribed", HTTPStatus.METHOD_NOT_ALLOWED)
-    connection.commit()
+        return make_response("User already subscribed",
+                             HTTPStatus.METHOD_NOT_ALLOWED)
     return make_response("OK", HTTPStatus.OK)
 
 
 @users.route("/leaveNetwork/<network_id>", methods=["DELETE"])
 @auth.login_required
 def remove_user_from_network(network_id):
-    # Get user given token.
-    user_id = g.user.id
-    connection = mysql.get_db()
-    cursor = connection.cursor()
-    cursor.execute("DELETE FROM network_registration WHERE id_user=%s AND id_network=%s", (user_id, network_id))
-    cursor.close()
-    connection.commit()
-    return make_response("User " + str(user_id) + " left network " + str(network_id), HTTPStatus.OK)
+    user_id = get_curr_user_id()
+    query = "DELETE FROM network_registration WHERE id_user=%s AND " \
+            "id_network=%s"
+    args = (user_id, network_id)
+    execute_mod(query, args)
+    return make_response("User " + str(user_id) + " left network " +
+                         str(network_id), HTTPStatus.OK)

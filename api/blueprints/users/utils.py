@@ -1,6 +1,7 @@
 from api.apiutils import *
 from api.extensions import mysql
 import random
+from flask import g
 """
 Utility module for querying users based on certain information.
 """
@@ -96,11 +97,10 @@ def _add_user_to_event(user_id, event_id, role):
     :param event_id: id of event
     :param role: either "host" or "guest"
     """
-    connection = mysql.get_db()
-    event_registration_cursor = connection.cursor()
-    event_registration_cursor.execute("INSERT INTO event_registration VALUES (%s,%s,CURRENT_TIMESTAMP, %s)",
-                                      (user_id, event_id, role))
-    connection.commit()
+    args = (user_id, event_id, role)
+    query = "INSERT INTO event_registration VALUES " \
+            "(%s,%s,CURRENT_TIMESTAMP, %s)"
+    execute_insert(query, args)
 
 
 def _remove_user_from_event(user_id, event_id):
@@ -109,7 +109,10 @@ def _remove_user_from_event(user_id, event_id):
     :param user_id: id of user.
     :param event_id: id of event
     """
-    connection = mysql.get_db()
-    cursor = connection.cursor()
-    cursor.execute("DELETE FROM event_registration WHERE id_event=%s AND id_guest=%s", (event_id, user_id))
-    connection.commit()
+    query = "DELETE FROM event_registration WHERE id_event=%s AND id_guest=%s"
+    args = (event_id, user_id)
+    execute_mod(query, args)
+
+
+def get_curr_user_id():
+    return g.user.id

@@ -1,13 +1,31 @@
 from flask import Flask
-from .credentials import sql
+import os, sys
 from .extensions import mysql
 
+"""Setup the app by setting configuration values and registering blueprints
+"""
 
 api = Flask(__name__)
-# Add MYSQL Database settings from super safe credentials file off of Version Control.
-for setting in sql:
-    api.config[setting] = sql[setting]
-mysql.init_app(api)
+
+# Configure path to notes file
+path = os.path.abspath(__file__)
+directory = os.path.dirname(path)
+note_path = os.path.join(directory, "blueprints", "dev", "note.txt")
+
+if 'CM_API_TESTING' in os.environ and os.environ['CM_API_TESTING']:
+    class credentials:
+        secret_key = 'a'
+        host_path = {'image_uploads': 'user_images'}
+
+    sys.modules['api.credentials'] = credentials
+    api.credentials = credentials
+else:
+    from .credentials import sql
+    # Add MYSQL Database settings from credentials file off of version control
+    for setting in sql:
+        api.config[setting] = sql[setting]
+    mysql.init_app(api)
+
 
 
 # Register API submodules (aka blueprints)
@@ -32,6 +50,7 @@ api.register_blueprint(languages, url_prefix='/language')
 api.register_blueprint(accounts, url_prefix='/account')
 api.register_blueprint(upload, url_prefix='/upload')
 api.register_blueprint(dev, url_prefix='/dev')
+
 
 @api.after_request
 def add_custom_http_response_headers(response):

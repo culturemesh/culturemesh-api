@@ -23,7 +23,7 @@ hypothesis==3.83.1
 idna==2.7
 imagesize==1.1.0
 itsdangerous==0.24
-Jinja2==2.10
+Jinja2==2.10.1
 MarkupSafe==1.0
 mock==2.0.0
 more-itertools==4.3.0
@@ -39,12 +39,12 @@ pytest==4.0.1
 pytest-cov==2.6.0
 pytest-mock==1.10.0
 pytz==2018.6
-requests==2.20.0
+requests==2.22.0
 six==1.11.0
 snowballstemmer==1.2.1
 Sphinx==1.7.6
 sphinx-rtd-theme==0.4.1
 sphinxcontrib-websupport==1.1.0
-urllib3==1.24
+urllib3==1.25.3
 virtualenv==15.2.0
-Werkzeug==0.14.1
+Werkzeug==0.15.5
